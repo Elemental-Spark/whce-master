@@ -1,0 +1,6 @@
+{
+  "folder": "UserWeaponPacks",
+  "name": "Player Pack",
+  "note": "The browser preview saves live packs in local storage and shows exportable JSON from the Weapon Editor.",
+  "weapons": []
+}

@@ -1,0 +1,29 @@
+[
+  {
+    "id": "example-10-stage-combo",
+    "name": "Meteor Loom",
+    "type": "staged",
+    "color": "#ffcf5a",
+    "stages": [
+      { "delay": 0, "action": "explode", "radius": 18, "damage": 8, "count": 1 },
+      { "delay": 120, "action": "burst", "radius": 16, "damage": 6, "count": 3 },
+      { "delay": 240, "action": "explode", "radius": 22, "damage": 10, "count": 1 },
+      { "delay": 360, "action": "burst", "radius": 18, "damage": 8, "count": 4 },
+      { "delay": 480, "action": "dig", "radius": 20, "damage": 8, "count": 1 },
+      { "delay": 600, "action": "burst", "radius": 20, "damage": 9, "count": 5 },
+      { "delay": 760, "action": "explode", "radius": 26, "damage": 12, "count": 1 },
+      { "delay": 940, "action": "burst", "radius": 22, "damage": 8, "count": 6 },
+      { "delay": 1120, "action": "dig", "radius": 28, "damage": 14, "count": 1 },
+      { "delay": 1320, "action": "explode", "radius": 46, "damage": 28, "count": 1 }
+    ]
+  },
+  {
+    "id": "example-sniper",
+    "name": "Needleline",
+    "type": "sniper",
+    "color": "#a8ffcf",
+    "stages": [
+      { "delay": 0, "action": "laser", "radius": 14, "damage": 52, "count": 1 }
+    ]
+  }
+]
