@@ -131,7 +131,7 @@
     @media (max-width:760px){ .advancedPage { grid-template-columns:1fr; max-height:54vh; } .advancedTabs { grid-template-columns:repeat(2,1fr); } .folderList { grid-template-columns:1fr; } }
 
 
-    /* v0.7.33 Weapon Editor Modding UX */
+    /* v0.7.40 Weapon Editor Modding UX */
     .lab.modWeaponEditor { grid-template-rows:auto 1fr auto; }
     .labHeaderTitle { display:grid; gap:2px; }
     .labSub { color:var(--muted); font-size:11px; font-weight:800; }
@@ -159,7 +159,7 @@
 
   
 
-    /* v0.7.33 clean-menu / simple-deep-editor recovery */
+    /* v0.7.40 clean-menu / simple-deep-editor recovery */
     :root { --ui-accent:#35c8ff; --ui-panel:rgba(0,18,28,.92); --ui-line:#35c8ff; --ui-glow:rgba(53,200,255,.28); }
     body.theme-classic-green { --ui-accent:#39ff14; --ui-panel:rgba(0,12,6,.92); --ui-line:#39ff14; --ui-glow:rgba(57,255,20,.26); }
     body.theme-deep-blue { --ui-accent:#35c8ff; --ui-panel:rgba(0,18,36,.93); --ui-line:#35c8ff; --ui-glow:rgba(53,200,255,.28); }
@@ -214,7 +214,7 @@
 
   
 
-/* v0.7.33 ship library / LAN assignment cleanup */
+/* v0.7.40 ship library / LAN assignment cleanup */
 .shipManagerPanel{display:grid;gap:8px;border:1px dashed var(--line);background:rgba(0,18,8,.55);padding:9px;margin:6px 0;}
 .shipManagerPanel .shipManagerRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
 .shipManagerPanel select,.shipManagerPanel button{min-height:42px;}
@@ -224,7 +224,7 @@
 
 
 
-/* v0.7.33 sci-fi holo visual pass */
+/* v0.7.40 sci-fi holo visual pass */
 body.theme-holo-blue{
   --ui-accent:#28f7ff; --ui-panel:rgba(3,24,40,.88); --ui-line:#2af2ff; --ui-glow:rgba(40,247,255,.36);
   --panel:rgba(3,18,33,.88); --line:#2af2ff; --text:#e9fbff; --muted:#8de8ff; --gold:#72ecff; --good:#8effd4;
@@ -274,7 +274,7 @@ body.theme-holo-blue .gameCredit a{color:#ffffff;text-shadow:0 0 8px #28f7ff;}
 
 
 
-/* v0.7.33 release-candidate UI fix: Holo select/highlight consistency */
+/* v0.7.40 release-candidate UI fix: Holo select/highlight consistency */
 :root{ color-scheme:dark; }
 button, select, input, textarea { transition: border-color .14s ease, box-shadow .14s ease, background .14s ease, color .14s ease, transform .08s ease; }
 button:hover:not(:disabled), select:hover, input:hover, textarea:hover { filter: brightness(1.08); }
@@ -311,7 +311,7 @@ body.theme-holo-blue .panelX, body.theme-holo-blue .alwaysClose { min-width:46px
 body.theme-holo-blue .menuPanel .menuActions button[disabled], body.theme-holo-blue button:disabled { opacity:.45; filter:grayscale(.45); }
 
 
-/* v0.7.33 overlay stacking hotfix: Bot Config must appear above menu/game */
+/* v0.7.40 overlay stacking hotfix: Bot Config must appear above menu/game */
 #botPackLab {
   position: fixed !important;
   inset: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)) !important;
@@ -347,6 +347,16 @@ body.theme-holo-blue #botPackLab .row b {
   text-shadow:0 0 8px rgba(40,247,255,.9),0 0 26px rgba(40,247,255,.42) !important;
 }
 
+
+/* v0.7.40 premium UI theme expansion */
+body.theme-holo-horror{--panel:rgba(18,0,12,.92);--panel2:rgba(48,0,34,.74);--line:#ff477f;--good:#ff89b0;--accent:#ff174e;--muted:#d18aa2;background:radial-gradient(circle at 50% 18%,#240012,#030006 62%,#000)}
+body.theme-holo-film{--panel:rgba(12,12,16,.92);--panel2:rgba(42,42,52,.72);--line:#f2f2f2;--good:#ffffff;--accent:#b6b6b6;--muted:#b9c0c8;background:linear-gradient(180deg,#10131a,#010204)}
+body.theme-holo-pretty{--panel:rgba(5,14,34,.9);--panel2:rgba(30,6,70,.62);--line:#a7f7ff;--good:#ffd9ff;--accent:#ff9dff;--muted:#b8d7ff;background:radial-gradient(circle at 30% 12%,#1a3d6a,#080527 58%,#010107)}
+body.theme-holo-clean{--panel:rgba(5,20,32,.94);--panel2:rgba(11,45,64,.76);--line:#7cecff;--good:#f4feff;--accent:#33d9ff;--muted:#aacbd7;background:radial-gradient(circle at 50% -10%,#184d64,#07131a 55%,#000)}
+body.theme-holo-horror .menuPanel,body.theme-holo-film .menuPanel,body.theme-holo-pretty .menuPanel,body.theme-holo-clean .menuPanel,
+body.theme-holo-horror .lab,body.theme-holo-film .lab,body.theme-holo-pretty .lab,body.theme-holo-clean .lab,
+body.theme-holo-horror .advancedPanel,body.theme-holo-film .advancedPanel,body.theme-holo-pretty .advancedPanel,body.theme-holo-clean .advancedPanel{box-shadow:0 0 34px color-mix(in srgb,var(--line) 35%,transparent),0 22px 90px rgba(0,0,0,.65);backdrop-filter:blur(8px)}
+
 </style>
 </head>
 <body>
@@ -365,7 +375,7 @@ body.theme-holo-blue #botPackLab .row b {
         <div class="team right"><span>Enemy</span><div class="bar"><span id="eHealth"></span></div></div>
       </div>
       <div class="damage"><div id="pDmg">Damage dealt 0</div><div style="text-align:right" id="eDmg">Damage taken 0</div></div>
-      <div class="version" id="versionText">v0.7.33</div>
+      <div class="version" id="versionText">v0.7.40</div>
     </div>
     <div><div class="toast" id="toast"></div><div class="centerBanner" id="centerBanner"><div class="centerTitle" id="centerTitle"></div><div class="centerSub" id="centerSub"></div><button id="centerButton">MAIN MENU</button></div></div>
     <div class="bottom">
@@ -559,7 +569,7 @@ body.theme-holo-blue #botPackLab .row b {
         <button class="primary panelWide" id="localStart">START LOCAL MATCH</button>
         <button class="panelWide" id="localBack">Main Menu</button>
       </div>
-      <div class="menuNote gameCredit">WarHeads Classic Enhanced v0.7.33 &nbsp;|&nbsp; Developed By: Elemental Spark &nbsp;|&nbsp; <a href="https://www.elementalspark.com" target="_blank" rel="noopener">www.elementalspark.com</a></div>
+      <div class="menuNote gameCredit">WarHeads Classic Enhanced v0.7.40 &nbsp;|&nbsp; Developed By: Elemental Spark &nbsp;|&nbsp; <a href="https://www.elementalspark.com" target="_blank" rel="noopener">www.elementalspark.com</a></div>
     </div>
   </section>
 </div>
@@ -1121,8 +1131,8 @@ const advFieldMap={
 function fillAdvancedOptions(){Object.entries(advFieldMap).forEach(([id,key])=>{let el=$(id);if(el&&modSettings[key]!=null)el.value=modSettings[key]});let asset=$('advAssetStatus');if(asset)asset.value=localStorage.getItem('warheads.assetManifest')||''}
 function readAdvancedOptions(){Object.entries(advFieldMap).forEach(([id,key])=>{let el=$(id);if(el){let v=+el.value;modSettings[key]=Number.isFinite(v)?v:DEFAULT_MOD_SETTINGS[key]}});applyModSettings();saveModSettings();if(ships.length){ships.forEach(s=>{s.maxHp=Math.max(s.maxHp||MAX_HEALTH,MAX_HEALTH);s.hp=clamp(s.hp,0,s.maxHp)});syncUI()}return modSettings}
 function showAdvancedPage(name){document.querySelectorAll('.advancedPage').forEach(p=>p.classList.toggle('open',p.id==='advPage_'+name));document.querySelectorAll('[data-advtab]').forEach(b=>b.classList.toggle('active',b.dataset.advtab===name))}
-function exportAdvancedSettings(){let data={version:'v0.7.33',name:'WarHeads Classic Enhanced Mod Settings',settings:readAdvancedOptions()};downloadJsonFile('WarHeads-MOD_SETTINGS-v0.7.33.json',data)}
-function downloadFolderGuide(){let guide=`WarHeads Classic Enhanced v0.7.33 Mod Folders\n\nMUSIC/ - playlist.json and custom music files\nSOUNDS/ - custom launch/impact/UI sounds\nTEXTURES/ - planet, ship, UI and border art\nPARTICLES/ - particle and VFX presets\nSCRIPTS/ - local experimental scripts/presets\nOTHER/ - notes or uncategorized mod assets\n\nExport Advanced Settings from Options > Advanced and place shared presets beside these folders.`;try{let blob=new Blob([guide],{type:'text/plain'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='WarHeads_Mod_Folder_Guide_v0.7.33.txt';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},800)}catch(e){}}
+function exportAdvancedSettings(){let data={version:'v0.7.40',name:'WarHeads Classic Enhanced Mod Settings',settings:readAdvancedOptions()};downloadJsonFile('WarHeads-MOD_SETTINGS-v0.7.40.json',data)}
+function downloadFolderGuide(){let guide=`WarHeads Classic Enhanced v0.7.40 Mod Folders\n\nMUSIC/ - playlist.json and custom music files\nSOUNDS/ - custom launch/impact/UI sounds\nTEXTURES/ - planet, ship, UI and border art\nPARTICLES/ - particle and VFX presets\nSCRIPTS/ - local experimental scripts/presets\nOTHER/ - notes or uncategorized mod assets\n\nExport Advanced Settings from Options > Advanced and place shared presets beside these folders.`;try{let blob=new Blob([guide],{type:'text/plain'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='WarHeads_Mod_Folder_Guide_v0.7.40.txt';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},800)}catch(e){}}
 function importAdvancedSettingsFile(file){if(!file)return;let r=new FileReader();r.onload=()=>{try{let data=JSON.parse(r.result),incoming=data.settings||data;modSettings={...DEFAULT_MOD_SETTINGS,...incoming};applyModSettings();saveModSettings();fillAdvancedOptions();toast('Advanced mod settings imported.',1400)}catch(e){toast('Invalid mod settings JSON.',1600)}};r.readAsText(file)}
 function registerAssetFiles(files){let names=[...files].map(f=>f.name);let text='Registered local assets for notes only:\n'+names.join('\n');localStorage.setItem('warheads.assetManifest',text);if($('advAssetStatus'))$('advAssetStatus').value=text;toast(`${names.length} asset file name${names.length===1?'':'s'} registered.`,1200)}
 if($('optionsAdvanced'))$('optionsAdvanced').onclick=()=>{fillAdvancedOptions();showMenuPanel('advancedPanel')};
@@ -1140,9 +1150,9 @@ fillAdvancedOptions();
 addEventListener('beforeunload',e=>{if(isWeaponEditorDirty()||isShipEditorDirty()){e.preventDefault();e.returnValue=''}});
 
 
-/* v0.7.33 Weapon Editor / Pack Modding Overhaul */
-const WCE_VERSION='v0.7.33';
-if($('versionText'))$('versionText').textContent='v0.7.33';
+/* v0.7.40 Weapon Editor / Pack Modding Overhaul */
+const WCE_VERSION='v0.7.40';
+if($('versionText'))$('versionText').textContent='v0.7.40';
 const SHOT_ACTIONS={
   Impact:[['explode','Explode / Crater'],['dig','DIG - Direct Tunneling Line'],['laser','Laser Beam'],['napalm','Napalm Carve'],['magnet','Magnet / Vortex']],
   Splitters:[['splitter','Tunneling Splitter'],['split','Simple Split'],['burst','Burst Ring'],['cluster','Cluster'],['warburst','Warburst']],
@@ -1238,12 +1248,12 @@ setTimeout(installEditorModEvents,0);
 
 
 
-/* v0.7.33 clean UI / simple weapon editor / pack + LAN pack recovery */
+/* v0.7.40 clean UI / simple weapon editor / pack + LAN pack recovery */
 function WCE716_installCleanRecovery(){
   try{
     document.body.classList.add(localStorage.getItem('warheads.uiTheme')||'theme-deep-blue');
     document.documentElement.style.setProperty('--custom-menu-color', localStorage.getItem('warheads.uiColor')||'#35c8ff');
-    if($('versionText')) $('versionText').textContent='v0.7.33';
+    if($('versionText')) $('versionText').textContent='v0.7.40';
     ui.lab.classList.add('cleanWeaponEditor');
     let title=document.querySelector('#lab .labHeaderTitle');
     if(title){ title.innerHTML='<b>Weapon Editor</b><span class="labSub">Quick weapon building first. Deep stage JSON, pack editing, and mod controls live behind buttons.</span>'; }
@@ -1330,7 +1340,7 @@ function WCE716_installCleanRecovery(){
     if($('menuEditor')) $('menuEditor').onclick=()=>{clearGameSession();setGameLoaded(false);showMenuPanel(null);ui.menu.classList.add('hidden');openLab();};
     if($('menuOptions')) $('menuOptions').onclick=()=>{let opening=ui.optionsPanel.classList.contains('hidden');showMenuPanel(opening?'optionsPanel':null);startMusic();};
     if($('menuLan')) $('menuLan').onclick=()=>{openLocalLanSetup(); WCE716_populateLocalPackDropdowns(); WCE716_syncLocalPacks();};
-  }catch(e){console.warn('v0.7.33 clean recovery install failed',e)}
+  }catch(e){console.warn('v0.7.40 clean recovery install failed',e)}
 }
 function WCE716_populateLocalPackDropdowns(){
   try{
@@ -1373,9 +1383,9 @@ function openLab(){let load=(inGame&&ships.length?currentLoadout():(playerWeapon
 function makeHumanLoadoutForSlot(slot=0){let id=($('localHumanPack'+(slot+1))?.value)||($('humanDefaultPack')?.value)||settings.playerPackChoice||'gold';return String(id).startsWith('pack:')?loadoutFromPackId(id):(id==='all'?[...allWeaponMap().values()]:makeSelectedPlayerLoadout())}
 
 
-/* v0.7.33 startup-safe overrides + ship library / LAN ship assignment */
+/* v0.7.40 startup-safe overrides + ship library / LAN ship assignment */
 (function(){
-  const VERSION_0719='v0.7.33';
+  const VERSION_0719='v0.7.40';
   function safeNum(v,d){v=+v;return Number.isFinite(v)?v:d}
   function safeUniqueWeapons(list){return uniqueWeapons(list||[])}
 
@@ -1455,7 +1465,7 @@ function makeHumanLoadoutForSlot(slot=0){let id=($('localHumanPack'+(slot+1))?.v
   readShipEditor = function(id=null){let existing=null;try{existing=JSON.parse($('shipJson').value||'null')}catch(e){}let botMade=!!existing?.botMade||String(existing?.id||id||'').startsWith('botship-');return normShipSprite({id:id||existing?.id||((botMade?'botship-edit-':'ship-')+Date.now()),name:$('shipName').value||(botMade?'Bot Ship':'My Ship'),w:16,h:16,userMade:!botMade,botMade,custom:true,cells:shipEditorCells,created:existing?.created||Date.now(),genIndex:existing?.genIndex||0})}
   syncShipJson = function(id=null){let existing=null;try{existing=JSON.parse($('shipJson').value||'null')}catch(e){}let sp=readShipEditor(id||existing?.id||null);$('shipJson').value=JSON.stringify(sp,null,2);$('shipStatus').textContent=''}
   saveShipFromEditor = function(){let raw=null;try{raw=JSON.parse($('shipJson').value)}catch(e){}let sp=normShipSprite({...readShipEditor(raw?.id||null),...(raw||{}),cells:shipEditorCells});if(!sp.botMade){sp.userMade=true;sp.botMade=false}let idx=shipDefs.findIndex(x=>x.id===sp.id);if(idx>=0)shipDefs[idx]=sp;else shipDefs.push(sp);if(!sp.botMade){playerShipId=sp.id;localStorage.setItem('warheads.playerShip',sp.id)}saveShips();renderShipLibraryList();if(ships[0]&&!sp.botMade)ships[0].sprite=cloneShipSprite(sp);markShipEditorClean();shipPainting=false;$('shipStatus').textContent=`Saved "${sp.name}" ${sp.botMade?'as BOT ship':'and assigned it to PLAYER'}.`;toast(sp.botMade?'Bot ship saved.':'Ship saved and assigned to PLAYER.',1500)}
-  exportShipsFromEditor = function(){let current=null;try{current=readShipEditor(JSON.parse($('shipJson').value||'null')?.id||null)}catch(e){current=readShipEditor()}if(current&&current.cells&&current.cells.length){let idx=shipDefs.findIndex(s=>s.id===current.id);if(idx>=0)shipDefs[idx]=current;else shipDefs.push(current);saveShips()}let pack={version:VERSION_0719,folder:'SHIPS',playerShips:playerShipSprites().map(cloneShipSprite),botShips:botShipSprites().map(cloneShipSprite),defaultPlayerShipId:localStorage.getItem('warheads.playerShip')||''};$('shipJson').value=JSON.stringify(pack,null,2);downloadJsonFile('SHIPS/WarHeads-SHIPS-v0.7.33-'+Date.now()+'.json',pack);$('shipStatus').textContent='Exported SHIPS library JSON. Place/share it from the SHIPS folder.';toast('SHIPS library exported.',1400)}
+  exportShipsFromEditor = function(){let current=null;try{current=readShipEditor(JSON.parse($('shipJson').value||'null')?.id||null)}catch(e){current=readShipEditor()}if(current&&current.cells&&current.cells.length){let idx=shipDefs.findIndex(s=>s.id===current.id);if(idx>=0)shipDefs[idx]=current;else shipDefs.push(current);saveShips()}let pack={version:VERSION_0719,folder:'SHIPS',playerShips:playerShipSprites().map(cloneShipSprite),botShips:botShipSprites().map(cloneShipSprite),defaultPlayerShipId:localStorage.getItem('warheads.playerShip')||''};$('shipJson').value=JSON.stringify(pack,null,2);downloadJsonFile('SHIPS/WarHeads-SHIPS-v0.7.40-'+Date.now()+'.json',pack);$('shipStatus').textContent='Exported SHIPS library JSON. Place/share it from the SHIPS folder.';toast('SHIPS library exported.',1400)}
   openShipEditor = function(){installShipManagerPanel();shipPainting=false;let saved=savedPlayerShip(0)||playerShipSprites()[0]||{id:'ship-'+Date.now(),name:'My Ship',w:16,h:16,cells:makeRandomShipCells(),userMade:true,custom:true};loadShipEditor(saved);$('shipLab').classList.add('open')}
   // Re-wire ship buttons safely after the original handlers.
   setTimeout(()=>{try{installShipManagerPanel();if($('shipSave'))$('shipSave').onclick=saveShipFromEditor;if($('shipExport'))$('shipExport').onclick=exportShipsFromEditor;if($('shipNew'))$('shipNew').onclick=()=>loadShipEditor({id:'ship-'+Date.now(),name:'My Ship',w:16,h:16,cells:[],userMade:true,botMade:false,custom:true});if($('shipRandom'))$('shipRandom').onclick=()=>loadShipEditor({id:'ship-'+Date.now(),name:'Random Ship',w:16,h:16,cells:makeRandomShipCells(),userMade:true,botMade:false,custom:true});if($('shipLoadJson'))$('shipLoadJson').onclick=()=>{try{let data=JSON.parse($('shipJson').value);let arr=Array.isArray(data)?data:[...(data.playerShips||[]),...(data.botShips||[])];if(arr.length){shipDefs=[...shipDefs.filter(s=>!s.userMade&&!s.botMade),...arr.map(normShipSprite)];saveShips();renderShipLibraryList();loadShipEditor(playerShipSprites()[0]||botShipSprites()[0]||{cells:[]});toast('Ship JSON library loaded.')}else loadShipEditor(normShipSprite({...data,userMade:!data.botMade,custom:true}))}catch(e){toast('Invalid ship JSON.')}};}catch(e){console.warn('ship manager install failed',e)}},0);
@@ -1483,7 +1493,7 @@ function makeHumanLoadoutForSlot(slot=0){let id=($('localHumanPack'+(slot+1))?.v
   };
 
   // Ensure buttons use final safe handlers.
-  setTimeout(()=>{try{if($('menuShipEditor'))$('menuShipEditor').onclick=()=>{clearGameSession();setGameLoaded(false);showMenuPanel(null);ui.menu.classList.add('hidden');openShipEditor()};if($('menuLan'))$('menuLan').onclick=()=>{openLocalLanSetup();installLanShipAssignmentUI();populateShipAssignmentDropdowns();syncLanShipVisibility();};if($('versionText'))$('versionText').textContent=VERSION_0719;}catch(e){console.warn('v0.7.33 final hook failed',e)}},0);
+  setTimeout(()=>{try{if($('menuShipEditor'))$('menuShipEditor').onclick=()=>{clearGameSession();setGameLoaded(false);showMenuPanel(null);ui.menu.classList.add('hidden');openShipEditor()};if($('menuLan'))$('menuLan').onclick=()=>{openLocalLanSetup();installLanShipAssignmentUI();populateShipAssignmentDropdowns();syncLanShipVisibility();};if($('versionText'))$('versionText').textContent=VERSION_0719;}catch(e){console.warn('v0.7.40 final hook failed',e)}},0);
 })();
 
 WCE716_installCleanRecovery();
@@ -1491,9 +1501,9 @@ WCE716_installCleanRecovery();
 addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPack.value=settings.playerPackChoice||'gold';ui.menuPlayerPack.onchange=()=>{settings.playerPackChoice=ui.menuPlayerPack.value;settings.packMode=settings.playerPackChoice;localStorage.setItem('warheads.playerPackChoice',settings.playerPackChoice);if(!ships.length){playerWeapons[0]=makeSelectedPlayerLoadout();selected=0;renderWeaponSelect();}}}renderWeaponSelect();setGameLoaded(false);requestAnimationFrame(loop);
 
 
-/* v0.7.33 sci-fi visuals + mod menu cleanup + chunk planet damage */
+/* v0.7.40 sci-fi visuals + mod menu cleanup + chunk planet damage */
 (function WCE718_visualModPass(){
-  const V='v0.7.33';
+  const V='v0.7.40';
   try{
     if(typeof WCE_VERSION!=='undefined') window.WCE_VERSION=V;
     const vt=document.getElementById('versionText'); if(vt) vt.textContent=V;
@@ -1643,9 +1653,9 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
 
 
 
-/* v0.7.33 release-candidate UI/bot-config/icon/filename fix */
+/* v0.7.40 release-candidate UI/bot-config/icon/filename fix */
 (function WCE719_releaseCandidateUiFix(){
-  const V='v0.7.33';
+  const V='v0.7.40';
   function el(id){return document.getElementById(id)}
   function removeThemeClasses(){
     const cls=['theme-holo-blue','theme-deep-blue','theme-classic-green','theme-nebula-purple','theme-alien-amber','theme-crimson-alert','theme-ice-terminal','theme-retro-gold','theme-stealth-gray','theme-plasma-pink','theme-ocean-cyan','theme-custom'];
@@ -1664,7 +1674,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       document.querySelectorAll('select').forEach(s=>{ s.dataset.wce719Styled='1'; });
       document.querySelectorAll('.advancedTabs button').forEach(b=>b.addEventListener('click',()=>setTimeout(applySelectedHighlights,0),{once:false}));
       applySelectedHighlights();
-    }catch(e){console.warn('v0.7.33 theme apply failed',e)}
+    }catch(e){console.warn('v0.7.40 theme apply failed',e)}
   }
   function applySelectedHighlights(){
     try{
@@ -1697,7 +1707,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       if(el('openBotPackEditor')) el('openBotPackEditor').onclick=open;
       if(el('localOpenBotPacks')) el('localOpenBotPacks').onclick=open;
       ['botPackLabX','botPackLabClose'].forEach(id=>{ if(el(id)) el(id).onclick=()=>{ const lab=el('botPackLab'); if(lab){ lab.classList.remove('open'); lab.style.display=''; } }; });
-    }catch(e){console.warn('v0.7.33 bot config repair failed',e)}
+    }catch(e){console.warn('v0.7.40 bot config repair failed',e)}
   }
   function patchThemeControl(){
     try{
@@ -1723,20 +1733,20 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       ensureBotConfigPanel(); patchThemeControl(); patchModalOpeners(); applyThemeEverywhere();
       const note=document.querySelector('.gameCredit');
       if(note) note.innerHTML='WarHeads Classic Enhanced '+V+' &nbsp;|&nbsp; Developed By: Elemental Spark &nbsp;|&nbsp; <a href="https://www.elementalspark.com" target="_blank" rel="noopener">www.elementalspark.com</a>';
-    }catch(e){console.warn('v0.7.33 install failed',e)}
+    }catch(e){console.warn('v0.7.40 install failed',e)}
   },0);
 })();
 
 
 
-/* v0.7.33 in-game weapon selection/editor hotfix
+/* v0.7.40 in-game weapon selection/editor hotfix
    Keeps the selected weapon per player stable:
    - pack default is used only for that player's first shot
    - after firing/changing, that player's last-used weapon is restored on later turns
    - editing/saving during a game edits the currently selected weapon and equips it back to that player
 */
 (function WCE721_weaponTurnMemoryHotfix(){
-  const V='v0.7.33';
+  const V='v0.7.40';
   let weaponEditorOwnerSlot=0;
 
   function setVersionLabel(){
@@ -1807,7 +1817,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
         s.hasFiredWeapon=!!s.hasFiredWeapon;
       });
       selectWeaponForCurrentTurn(true);
-    }catch(e){ console.warn('v0.7.33 weapon memory init failed',e); }
+    }catch(e){ console.warn('v0.7.40 weapon memory init failed',e); }
   }
 
   const _WCE721_newMatch = newMatch;
@@ -1983,9 +1993,9 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
 
 
 
-/* v0.7.33 terrain/aim/export cleanup hotfix */
+/* v0.7.40 terrain/aim/export cleanup hotfix */
 (function WCE722_terrainAimExportCleanup(){
-  const VERSION='v0.7.33';
+  const VERSION='v0.7.40';
   function el(id){return document.getElementById(id)}
   try{
     // Add a real Aim Assist Line toggle into Options without disturbing the existing layout.
@@ -2001,7 +2011,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       aimLine.value=settings.showAimAssist?'on':'off';
       aimLine.onchange=()=>{settings.showAimAssist=aimLine.value!=='off';localStorage.setItem('warheads.showAimAssist',settings.showAimAssist?'on':'off')};
     }
-  }catch(e){console.warn('v0.7.33 aim option init failed',e)}
+  }catch(e){console.warn('v0.7.40 aim option init failed',e)}
 
   // Remove the old angular crater deformation from the silhouette. Real cuts now come from clean round hole masks.
   try{
@@ -2012,7 +2022,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       try{ bump=(p.bumps||[]).reduce((sum,b)=>sum+Math.cos(a-b.a)*b.off*b.w,0)/Math.max(1,(p.bumps||[]).length)*5; }catch(e){ bump=0; }
       return clamp(p.r*(1+bump), p.r*.30, p.r*1.32);
     };
-  }catch(e){console.warn('v0.7.33 planet radius override failed',e)}
+  }catch(e){console.warn('v0.7.40 planet radius override failed',e)}
 
   // Hide dotted crater/ring leftovers and replace them with clean cutouts plus a soft scorched rim.
   try{
@@ -2040,7 +2050,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       });
       ctx.restore();
     };
-  }catch(e){console.warn('v0.7.33 planet draw cleanup failed',e)}
+  }catch(e){console.warn('v0.7.40 planet draw cleanup failed',e)}
 
   // Clean build/repair: remove overlapping hole masks in the built/repaired area so terrain grows back cleanly.
   try{
@@ -2053,7 +2063,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
         planets.forEach(p=>{ if(p&&p.holes){ p.holes=p.holes.filter(h=>Math.hypot(h.x-x,h.y-y)>rad+(h.r||0)*.55); p.texture=null; }});
       }
     };
-  }catch(e){console.warn('v0.7.33 build cleanup failed',e)}
+  }catch(e){console.warn('v0.7.40 build cleanup failed',e)}
 
   // Aim line uses the same core forces as real shots: wind, planet gravity, speed cap, wall bounce/wrap, and soft enemy guidance.
   try{
@@ -2104,9 +2114,222 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       ctx.setLineDash([]);
       ctx.restore();
     };
-  }catch(e){console.warn('v0.7.33 draw aim override failed',e)}
+  }catch(e){console.warn('v0.7.40 draw aim override failed',e)}
 })();
 </script>
+
+<script id="wce-v0734-theme-options">
+(function(){
+  function add(){
+    try{
+      var sel=document.getElementById('menuUiTheme'); if(!sel) return;
+      var opts=[['theme-holo-horror','Holo Horror'],['theme-holo-film','Holo Film Deck'],['theme-holo-pretty','Holo Nebula Pretty'],['theme-holo-clean','Holo Clean Console']];
+      opts.forEach(function(o){ if(!Array.prototype.some.call(sel.options,function(x){return x.value===o[0]})){ var opt=document.createElement('option'); opt.value=o[0]; opt.textContent=o[1]; sel.appendChild(opt); }});
+      var old=sel.onchange;
+      sel.onchange=function(){
+        try{ ['theme-holo-horror','theme-holo-film','theme-holo-pretty','theme-holo-clean'].forEach(function(c){document.body.classList.remove(c)}); }catch(e){}
+        if(old) old.call(sel);
+        document.body.classList.add(sel.value);
+        localStorage.setItem('warheads.uiTheme',sel.value);
+      };
+      var saved=localStorage.getItem('warheads.uiTheme'); if(saved){ sel.value=saved; document.body.classList.add(saved); }
+    }catch(e){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',add); else add();
+})();
+</script>
+
+
+
+<script id="wce-v0739-camera-control-hotfix">
+(function(){
+  'use strict';
+  if(window.WCE_CAMERA_0739) return;
+  window.WCE_CAMERA_0739 = true;
+  const VERSION='v0.7.40';
+  let cameraZoomLocked=false;
+  let cameraFollowPaused=false;
+  let cameraManualPan=false;
+
+  function shotSequenceActive(){
+    try{
+      return !!(busy || endPauseActive || pendingTurnFinishAt ||
+        (Array.isArray(shots) && shots.length) ||
+        (Array.isArray(walkers) && walkers.length) ||
+        (Array.isArray(beams) && beams.length));
+    }catch(e){ return false; }
+  }
+  function syncVersion(){
+    try{ const vt=document.getElementById('versionText'); if(vt) vt.textContent=VERSION; }catch(e){}
+    try{ window.WCE_VERSION=VERSION; }catch(e){}
+  }
+  function preserveZoom(fn){
+    const oldZ = (typeof cam==='object' && cam) ? cam.z : null;
+    let out;
+    try{ out = fn && fn(); }catch(e){ throw e; }
+    finally{
+      try{ if(cameraZoomLocked && oldZ!=null && cam) cam.z = oldZ; }catch(e){}
+    }
+    return out;
+  }
+  function pauseShotFollow(reason){
+    cameraZoomLocked=true;
+    if(shotSequenceActive()) cameraFollowPaused=true;
+    try{ if(cam) cam.target=null; }catch(e){}
+  }
+  function breakAutoFollow(reason){
+    cameraZoomLocked=true;
+    cameraFollowPaused=true;
+    cameraManualPan=true;
+    try{ if(cam) cam.target=null; }catch(e){}
+  }
+  function autoFocusAllowed(){
+    if(cameraManualPan) return false;
+    if(cameraFollowPaused && shotSequenceActive()) return false;
+    return true;
+  }
+  function maybeResumeAfterShot(){
+    try{
+      if(cameraFollowPaused && !shotSequenceActive()){
+        cameraFollowPaused=false;
+        if(!cameraManualPan && ships && ships[turn] && cam){
+          const oldZ=cam.z;
+          cam.target=ships[turn];
+          if(cameraZoomLocked) cam.z=oldZ;
+        }
+      }
+    }catch(e){}
+  }
+  function installCameraPatch(){
+    syncVersion();
+    try{
+      if(typeof clearGameSession==='function' && !clearGameSession.__v0739Camera){
+        const oldClear=clearGameSession;
+        clearGameSession=function(){
+          cameraZoomLocked=false; cameraFollowPaused=false; cameraManualPan=false;
+          return oldClear.apply(this,arguments);
+        };
+        clearGameSession.__v0739Camera=true;
+      }
+    }catch(e){}
+    try{
+      if(typeof newMatch==='function' && !newMatch.__v0739Camera){
+        const oldNewMatch=newMatch;
+        newMatch=function(){
+          cameraZoomLocked=false; cameraFollowPaused=false; cameraManualPan=false;
+          return oldNewMatch.apply(this,arguments);
+        };
+        newMatch.__v0739Camera=true;
+      }
+    }catch(e){}
+    try{
+      if(typeof fitCameraToShips==='function' && !fitCameraToShips.__v0739Camera){
+        const oldFit=fitCameraToShips;
+        fitCameraToShips=function(){
+          if(cameraManualPan){ return; }
+          return preserveZoom(()=>oldFit.apply(this,arguments));
+        };
+        fitCameraToShips.__v0739Camera=true;
+      }
+    }catch(e){}
+    try{
+      if(typeof focusTurnCamera==='function' && !focusTurnCamera.__v0739Camera){
+        const oldFocus=focusTurnCamera;
+        focusTurnCamera=function(immediate){
+          if(cameraManualPan){ if(cam) cam.target=null; return; }
+          if(cameraFollowPaused && shotSequenceActive()){ if(cam) cam.target=null; return; }
+          return preserveZoom(()=>oldFocus.apply(this,arguments));
+        };
+        focusTurnCamera.__v0739Camera=true;
+      }
+    }catch(e){}
+    try{
+      if(typeof addShot==='function' && !addShot.__v0739Camera){
+        const oldAdd=addShot;
+        addShot=function(){
+          const oldTarget = cam ? cam.target : null;
+          const oldZ = cam ? cam.z : null;
+          const out = oldAdd.apply(this,arguments);
+          if(!autoFocusAllowed() && cam) cam.target=null;
+          else if(cameraZoomLocked && cam && oldZ!=null) cam.z=oldZ;
+          return out;
+        };
+        addShot.__v0739Camera=true;
+      }
+    }catch(e){}
+    try{
+      if(typeof launchShot==='function' && !launchShot.__v0739Camera){
+        const oldLaunch=launchShot;
+        launchShot=function(){
+          const oldZ=cam?cam.z:null;
+          const out=oldLaunch.apply(this,arguments);
+          if(!autoFocusAllowed() && cam) cam.target=null;
+          if(cameraZoomLocked && cam && oldZ!=null) cam.z=oldZ;
+          return out;
+        };
+        launchShot.__v0739Camera=true;
+      }
+    }catch(e){}
+    try{
+      if(typeof fireLaser==='function' && !fireLaser.__v0739Camera){
+        const oldLaser=fireLaser;
+        fireLaser=function(){
+          const oldZ=cam?cam.z:null;
+          const out=oldLaser.apply(this,arguments);
+          if(!autoFocusAllowed() && cam) cam.target=null;
+          if(cameraZoomLocked && cam && oldZ!=null) cam.z=oldZ;
+          return out;
+        };
+        fireLaser.__v0739Camera=true;
+      }
+    }catch(e){}
+    try{
+      if(typeof beginEndTurnPause==='function' && !beginEndTurnPause.__v0739Camera){
+        const oldPause=beginEndTurnPause;
+        beginEndTurnPause=function(){
+          const oldZ=cam?cam.z:null;
+          const out=oldPause.apply(this,arguments);
+          if(!autoFocusAllowed() && cam) cam.target=null;
+          if(cameraZoomLocked && cam && oldZ!=null) cam.z=oldZ;
+          return out;
+        };
+        beginEndTurnPause.__v0739Camera=true;
+      }
+    }catch(e){}
+    try{
+      if(typeof update==='function' && !update.__v0739Camera){
+        const oldUpdate=update;
+        update=function(dt){
+          const oldZ=cam?cam.z:null;
+          if(!autoFocusAllowed() && cam) cam.target=null;
+          const out=oldUpdate.apply(this,arguments);
+          if(!autoFocusAllowed() && cam) cam.target=null;
+          if(cameraZoomLocked && cam && oldZ!=null) cam.z=oldZ;
+          maybeResumeAfterShot();
+          return out;
+        };
+        update.__v0739Camera=true;
+      }
+    }catch(e){}
+    try{
+      const zin=document.getElementById('zoomIn'), zout=document.getElementById('zoomOut');
+      if(zin) zin.onclick=function(){ pauseShotFollow('zoomButton'); cam.z=clamp(cam.z*1.18,.25,2.6); syncUI&&syncUI(); };
+      if(zout) zout.onclick=function(){ pauseShotFollow('zoomButton'); cam.z=clamp(cam.z/1.18,.25,2.6); syncUI&&syncUI(); };
+    }catch(e){}
+    try{
+      const c = (typeof canvas!=='undefined' && canvas) ? canvas : document.getElementById('game');
+      if(c && !c.__v0739CameraEvents){
+        c.addEventListener('wheel', function(){ pauseShotFollow('wheel'); }, {capture:true, passive:true});
+        c.addEventListener('pointermove', function(e){ if(e && e.buttons) breakAutoFollow('pan'); }, {capture:true, passive:true});
+        c.addEventListener('touchmove', function(e){ if(e && e.touches && e.touches.length===2) pauseShotFollow('pinch'); }, {capture:true, passive:true});
+        c.__v0739CameraEvents=true;
+      }
+    }catch(e){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', installCameraPatch); else installCameraPatch();
+})();
+</script>
+
 </body>
 </html>
 

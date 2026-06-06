@@ -1,2 +1,3 @@
-Open `WarHeads Classic Enhanced.html` to play.
-On Windows, `WarHeadsCE.url` is a convenience shortcut pointing to that HTML file and uses a standard system icon.
+Open `index.html` to play WarHeads Classic Enhanced.
+On Windows, `WarHeadsCE.url` is a convenience shortcut pointing to the main entry.
+Multiplayer remains isolated under `warheads/multiplayer/`.
