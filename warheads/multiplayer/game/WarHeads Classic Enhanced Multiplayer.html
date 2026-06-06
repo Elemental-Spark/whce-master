@@ -347,6 +347,16 @@ body.theme-holo-blue #botPackLab .row b {
   text-shadow:0 0 8px rgba(40,247,255,.9),0 0 26px rgba(40,247,255,.42) !important;
 }
 
+
+/* v0.7.33 MP turn lock: waiting players may edit weapons, but cannot aim/fire until their turn */
+body.mp-waiting-turn #fire,
+body.mp-waiting-turn #angle,
+body.mp-waiting-turn #power,
+body.mp-waiting-turn #weaponSelect,
+body.mp-waiting-turn #defenseSelect{filter:grayscale(.75);opacity:.50!important;}
+body.mp-waiting-turn #labOpen{filter:none!important;opacity:1!important;box-shadow:0 0 15px rgba(35,223,255,.28)!important;}
+body.mp-waiting-turn .controls::after{content:'Waiting for your turn';display:inline-flex;align-items:center;color:#82baca;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:0 10px;}
+
 </style>
 </head>
 <body>
@@ -442,7 +452,7 @@ body.theme-holo-blue #botPackLab .row b {
       <div class="menuActions">
         <button class="primary" id="menuCreate">BOT PLAY</button>
         <button id="menuLan" title="Local turn-based LAN/hot-seat setup">LOCAL LAN</button>
-        <button id="menuMultiplayer" title="Open website multiplayer lobby">MULTIPLAYER</button>
+        <button id="menuMultiplayer" disabled aria-disabled="true" title="Coming soon in the server-authoritative web multiplayer branch">MULTIPLAYER</button>
         <button id="menuOptions">OPTIONS</button>
         <button id="menuShipEditor">SHIP EDITOR</button>
         <button id="menuEditor">WEAPON EDITOR</button>
@@ -563,6 +573,20 @@ body.theme-holo-blue #botPackLab .row b {
     </div>
   </section>
 </div>
+
+<script id="wce-mp-seed">
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const seedText = qs.get('mpSeed');
+  if(!seedText) return;
+  let seed = 2166136261;
+  for(let i=0;i<seedText.length;i++){ seed ^= seedText.charCodeAt(i); seed = Math.imul(seed, 16777619); }
+  function next(){ seed = Math.imul(seed ^ (seed >>> 15), 1 | seed); seed ^= seed + Math.imul(seed ^ (seed >>> 7), 61 | seed); return ((seed ^ (seed >>> 14)) >>> 0) / 4294967296; }
+  Math.random = next;
+  window.__WCE_MP_SEEDED__ = true;
+})();
+</script>
+
 <script>
 window.addEventListener('error', e => {
   const box = document.createElement('div');
@@ -1092,7 +1116,7 @@ function markShipEditorClean(){shipEditorCleanState=compactEditorJson($('shipJso
 function isShipEditorDirty(){return !!($('shipLab')&&$('shipLab').classList.contains('open')&&compactEditorJson($('shipJson')?.value||'')!==shipEditorCleanState)}
 function confirmLeaveShipEditor(){return !isShipEditorDirty()||confirm('Ship editor has unsaved changes. Leave without saving?')}
 function closeShipEditor(toMain=false){if(!confirmLeaveShipEditor())return false;shipPainting=false;$('shipLab').classList.remove('open');if(toMain||!inGame){returnToMainMenu()}else{if(ui.menu)ui.menu.classList.add('hidden');setGameLoaded(true)}return true}
-$('labOpen').onclick=openLab;$('gameMenu').onclick=()=>{ui.menu.classList.remove('hidden')};let testBackButton=$('testBackEditor');if(testBackButton)testBackButton.onclick=backToWeaponEditor;$('labMenu').onclick=()=>closeWeaponEditor(true);$('menuEditor').onclick=()=>{clearGameSession();setGameLoaded(false);showMenuPanel(null);ui.menu.classList.add('hidden');openLab()};ui.editName.oninput=syncJson;$('typeStaged').onclick=()=>{setEditorType('staged');syncJson()};$('typeSniper').onclick=()=>{setEditorType('sniper');syncJson()};$('labClose').onclick=()=>closeWeaponEditor(false);$('addStage').onclick=()=>{let w=readEditor();if(w.stages.length<10)w.stages.push(normStage({delay:w.stages.length*180,action:'explode',radius:28,damage:12,count:1}));weaponDefs[editing]=w;renderStages(w);syncJson()};$('saveWeapon').onclick=()=>{let wasInGame=inGame&&ships.length>0;let saved=readEditor(),base=weaponDefs[editing]||null;try{let j=JSON.parse(ui.weaponJson.value);if(j&&j.id&&!defaultWeapons.some(w=>w.id===j.id))saved.id=j.id;if(j&&/^#[0-9a-f]{6}$/i.test(j.color||''))saved.color=j.color}catch(e){}if(base&&!base.playerMade&&base.id&&defaultWeapons.some(w=>w.id===base.id))saved.id='custom-'+Date.now();saved=normWeapon({...saved,playerMade:true});saved=equipSavedWeapon(saved);addWeaponToCurrentPack(saved);saveCurrentPack();weaponDefs=loadWeapons();refreshSavedWeaponsInPacks(saved);editing=weaponDefs.findIndex(x=>x.id===saved.id);if(playerWeapons[0]){playerWeapons[0]=ensureWeaponInLoadout(playerWeapons[0],saved);selected=playerWeapons[0].findIndex(x=>x.id===saved.id)}renderWeaponSelect();ui.weaponJson.value=JSON.stringify(saved,null,2);markWeaponEditorClean();ui.saveStatus.textContent=`Saved "${saved.name}" and equipped it.`;ui.lab.classList.remove('open');if(!wasInGame){startWeaponTest(saved)}else{if(ui.menu)ui.menu.classList.add('hidden');toast('Weapon saved to selected pack, equipped, and ready to fire.');syncUI()}};$('loadJson').onclick=()=>{try{let d=JSON.parse(ui.weaponJson.value),defs=defaultWeaponIds();if(Array.isArray(d)){d.map(x=>normWeapon({...x,playerMade:!!x.playerMade||!defs.has(String(x.id||''))})).forEach(w=>{let i=weaponDefs.findIndex(x=>x.id===w.id);if(i>=0)weaponDefs[i]=w;else weaponDefs.push(w)})}else{let w=normWeapon({...d,playerMade:true});let i=weaponDefs.findIndex(x=>x.id===w.id);if(i>=0)weaponDefs[i]=w;else weaponDefs.push(w);editing=weaponDefs.findIndex(x=>x.id===w.id)}saveWeapons();weaponDefs=loadWeapons();refreshSavedWeaponsInPacks();renderWeaponSelect();loadEditor();markWeaponEditorClean();toast('JSON loaded into weapon pack.');syncUI()}catch(e){toast('Invalid JSON.')}};$('newWeapon').onclick=()=>{let w=normWeapon({id:'custom-'+Date.now(),name:'',playerMade:true,stages:Array.from({length:6},(_,i)=>({delay:i*150,action:i%2?'burst':'explode',radius:22+i*2,damage:8+i,count:i%2?3:1}))});weaponDefs.push(w);saveWeapons();editing=weaponDefs.length-1;if(playerWeapons[0]){playerWeapons[0]=ensureWeaponInLoadout(playerWeapons[0],w);selected=playerWeapons[0].findIndex(x=>x.id===w.id)}else selected=editing;renderWeaponSelect();loadEditor();syncUI()};$('cloneWeapon').onclick=()=>{let w=normWeapon({...JSON.parse(JSON.stringify(weaponDefs[editing])),playerMade:true});w.id='custom-'+Date.now();weaponDefs.push(w);saveWeapons();editing=weaponDefs.length-1;if(playerWeapons[0]){playerWeapons[0]=ensureWeaponInLoadout(playerWeapons[0],w);selected=playerWeapons[0].findIndex(x=>x.id===w.id)}else selected=editing;renderWeaponSelect();loadEditor();syncUI()};$('exportAll').onclick=()=>ui.weaponJson.value=JSON.stringify(makeSelectedPlayerLoadout(),null,2);$('menuCreate').onclick=()=>{settings.playerPackChoice=(ui.menuPlayerPack&&ui.menuPlayerPack.value)||'gold';settings.packMode=settings.playerPackChoice;localStorage.setItem('warheads.playerPackChoice',settings.playerPackChoice);startBotPlay();startMusic()};let legacyEditorButton=$('menuEditorStart');if(legacyEditorButton)legacyEditorButton.onclick=()=>{$('menuEditor').click()};$('menuLan').onclick=openLocalLanSetup;$('menuMultiplayer').onclick=()=>{window.location.href='warheads/multiplayer/index.html'};if($('menuLan'))$('menuLan').disabled=false;if($('menuMultiplayer')){$('menuMultiplayer').disabled=false;$('menuMultiplayer').removeAttribute('aria-disabled')};if($('localStart'))$('localStart').onclick=startLocalLanMatch;if($('localBack'))$('localBack').onclick=()=>showMenuPanel(null);if($('localLanClose'))$('localLanClose').onclick=()=>showMenuPanel(null);$('menuOptions').onclick=()=>{let opening=ui.optionsPanel.classList.contains('hidden');showMenuPanel(opening?'optionsPanel':null);startMusic()};$('optionsBack').onclick=()=>showMenuPanel(null);if($('optionsClose'))$('optionsClose').onclick=()=>showMenuPanel(null);if(ui.menuAimArc){ui.menuAimArc.value='0-360';ui.menuAimArc.onchange=applyAimArcOptions;applyAimArcOptions()}if(ui.menuUfoRate){ui.menuUfoRate.value='15';ui.menuUfoRate.onchange=readUfoOptions}if(ui.menuUfoMinTime)ui.menuUfoMinTime.onchange=()=>{if(ui.menuUfoRate)ui.menuUfoRate.value='custom';readUfoOptions()};if(ui.menuUfoMaxTime)ui.menuUfoMaxTime.onchange=()=>{if(ui.menuUfoRate)ui.menuUfoRate.value='custom';readUfoOptions()};if(ui.menuTurn)ui.menuTurn.value='120';if(ui.menuPhysics)ui.menuPhysics.value='bounce';if($('localTurn'))$('localTurn').value='120';if($('localPhysics'))$('localPhysics').value='bounce';readUfoOptions();if(ui.menuMusic){ui.menuMusic.value=settings.musicOn?'on':'off';ui.menuMusic.onchange=applyMusicOptions}if(ui.menuMusicVolume){ui.menuMusicVolume.value=settings.musicVolume;ui.menuMusicVolume.oninput=applyMusicOptions}if(ui.menuMusicTrack){populateMusicTracks();ui.menuMusicTrack.onchange=applyMusicOptions}tryLoadMusicFolder();
+$('labOpen').onclick=openLab;$('gameMenu').onclick=()=>{ui.menu.classList.remove('hidden')};let testBackButton=$('testBackEditor');if(testBackButton)testBackButton.onclick=backToWeaponEditor;$('labMenu').onclick=()=>closeWeaponEditor(true);$('menuEditor').onclick=()=>{clearGameSession();setGameLoaded(false);showMenuPanel(null);ui.menu.classList.add('hidden');openLab()};ui.editName.oninput=syncJson;$('typeStaged').onclick=()=>{setEditorType('staged');syncJson()};$('typeSniper').onclick=()=>{setEditorType('sniper');syncJson()};$('labClose').onclick=()=>closeWeaponEditor(false);$('addStage').onclick=()=>{let w=readEditor();if(w.stages.length<10)w.stages.push(normStage({delay:w.stages.length*180,action:'explode',radius:28,damage:12,count:1}));weaponDefs[editing]=w;renderStages(w);syncJson()};$('saveWeapon').onclick=()=>{let wasInGame=inGame&&ships.length>0;let saved=readEditor(),base=weaponDefs[editing]||null;try{let j=JSON.parse(ui.weaponJson.value);if(j&&j.id&&!defaultWeapons.some(w=>w.id===j.id))saved.id=j.id;if(j&&/^#[0-9a-f]{6}$/i.test(j.color||''))saved.color=j.color}catch(e){}if(base&&!base.playerMade&&base.id&&defaultWeapons.some(w=>w.id===base.id))saved.id='custom-'+Date.now();saved=normWeapon({...saved,playerMade:true});saved=equipSavedWeapon(saved);addWeaponToCurrentPack(saved);saveCurrentPack();weaponDefs=loadWeapons();refreshSavedWeaponsInPacks(saved);editing=weaponDefs.findIndex(x=>x.id===saved.id);if(playerWeapons[0]){playerWeapons[0]=ensureWeaponInLoadout(playerWeapons[0],saved);selected=playerWeapons[0].findIndex(x=>x.id===saved.id)}renderWeaponSelect();ui.weaponJson.value=JSON.stringify(saved,null,2);markWeaponEditorClean();ui.saveStatus.textContent=`Saved "${saved.name}" and equipped it.`;ui.lab.classList.remove('open');if(!wasInGame){startWeaponTest(saved)}else{if(ui.menu)ui.menu.classList.add('hidden');toast('Weapon saved to selected pack, equipped, and ready to fire.');syncUI()}};$('loadJson').onclick=()=>{try{let d=JSON.parse(ui.weaponJson.value),defs=defaultWeaponIds();if(Array.isArray(d)){d.map(x=>normWeapon({...x,playerMade:!!x.playerMade||!defs.has(String(x.id||''))})).forEach(w=>{let i=weaponDefs.findIndex(x=>x.id===w.id);if(i>=0)weaponDefs[i]=w;else weaponDefs.push(w)})}else{let w=normWeapon({...d,playerMade:true});let i=weaponDefs.findIndex(x=>x.id===w.id);if(i>=0)weaponDefs[i]=w;else weaponDefs.push(w);editing=weaponDefs.findIndex(x=>x.id===w.id)}saveWeapons();weaponDefs=loadWeapons();refreshSavedWeaponsInPacks();renderWeaponSelect();loadEditor();markWeaponEditorClean();toast('JSON loaded into weapon pack.');syncUI()}catch(e){toast('Invalid JSON.')}};$('newWeapon').onclick=()=>{let w=normWeapon({id:'custom-'+Date.now(),name:'',playerMade:true,stages:Array.from({length:6},(_,i)=>({delay:i*150,action:i%2?'burst':'explode',radius:22+i*2,damage:8+i,count:i%2?3:1}))});weaponDefs.push(w);saveWeapons();editing=weaponDefs.length-1;if(playerWeapons[0]){playerWeapons[0]=ensureWeaponInLoadout(playerWeapons[0],w);selected=playerWeapons[0].findIndex(x=>x.id===w.id)}else selected=editing;renderWeaponSelect();loadEditor();syncUI()};$('cloneWeapon').onclick=()=>{let w=normWeapon({...JSON.parse(JSON.stringify(weaponDefs[editing])),playerMade:true});w.id='custom-'+Date.now();weaponDefs.push(w);saveWeapons();editing=weaponDefs.length-1;if(playerWeapons[0]){playerWeapons[0]=ensureWeaponInLoadout(playerWeapons[0],w);selected=playerWeapons[0].findIndex(x=>x.id===w.id)}else selected=editing;renderWeaponSelect();loadEditor();syncUI()};$('exportAll').onclick=()=>ui.weaponJson.value=JSON.stringify(makeSelectedPlayerLoadout(),null,2);$('menuCreate').onclick=()=>{settings.playerPackChoice=(ui.menuPlayerPack&&ui.menuPlayerPack.value)||'gold';settings.packMode=settings.playerPackChoice;localStorage.setItem('warheads.playerPackChoice',settings.playerPackChoice);startBotPlay();startMusic()};let legacyEditorButton=$('menuEditorStart');if(legacyEditorButton)legacyEditorButton.onclick=()=>{$('menuEditor').click()};$('menuLan').onclick=openLocalLanSetup;$('menuMultiplayer').onclick=()=>{};if($('menuLan'))$('menuLan').disabled=false;if($('menuMultiplayer'))$('menuMultiplayer').disabled=true;if($('localStart'))$('localStart').onclick=startLocalLanMatch;if($('localBack'))$('localBack').onclick=()=>showMenuPanel(null);if($('localLanClose'))$('localLanClose').onclick=()=>showMenuPanel(null);$('menuOptions').onclick=()=>{let opening=ui.optionsPanel.classList.contains('hidden');showMenuPanel(opening?'optionsPanel':null);startMusic()};$('optionsBack').onclick=()=>showMenuPanel(null);if($('optionsClose'))$('optionsClose').onclick=()=>showMenuPanel(null);if(ui.menuAimArc){ui.menuAimArc.value='0-360';ui.menuAimArc.onchange=applyAimArcOptions;applyAimArcOptions()}if(ui.menuUfoRate){ui.menuUfoRate.value='15';ui.menuUfoRate.onchange=readUfoOptions}if(ui.menuUfoMinTime)ui.menuUfoMinTime.onchange=()=>{if(ui.menuUfoRate)ui.menuUfoRate.value='custom';readUfoOptions()};if(ui.menuUfoMaxTime)ui.menuUfoMaxTime.onchange=()=>{if(ui.menuUfoRate)ui.menuUfoRate.value='custom';readUfoOptions()};if(ui.menuTurn)ui.menuTurn.value='120';if(ui.menuPhysics)ui.menuPhysics.value='bounce';if($('localTurn'))$('localTurn').value='120';if($('localPhysics'))$('localPhysics').value='bounce';readUfoOptions();if(ui.menuMusic){ui.menuMusic.value=settings.musicOn?'on':'off';ui.menuMusic.onchange=applyMusicOptions}if(ui.menuMusicVolume){ui.menuMusicVolume.value=settings.musicVolume;ui.menuMusicVolume.oninput=applyMusicOptions}if(ui.menuMusicTrack){populateMusicTracks();ui.menuMusicTrack.onchange=applyMusicOptions}tryLoadMusicFolder();
 
 function makeRandomShipCells(){let cols=['#66d9ff','#ff7b55','#ffd21a','#b9ffd4','#cba6ff'],main=cols[Math.floor(rand(0,cols.length))],accent=cols[Math.floor(rand(0,cols.length))],cells=[];for(let y=1;y<15;y++){for(let x=0;x<8;x++){let edge=7-x,wide=clamp(2+Math.sin(y/15*Math.PI)*5+rand(-1,1),1,7);if(edge<wide&&(Math.random()<.82||y>10)){let c=Math.random()<.16?accent:main;cells.push({x,y,c});cells.push({x:15-x,y,c})}}}cells.push({x:7,y:1,c:'#ffffff'},{x:8,y:1,c:'#ffffff'},{x:6,y:14,c:'#ff7b55'},{x:9,y:14,c:'#ff7b55'});return cells}
 const shipPaletteColors=['#66d9ff','#b9ffd4','#ffffff','#244a55','#3b7a86','#1c3036','#ff7b55','#ffb15f','#ffd21a','#cba6ff','#ff4dff','#63ff1a','#0b1d13','#07130c','#000000'];
@@ -1466,7 +1490,14 @@ function makeHumanLoadoutForSlot(slot=0){let id=($('localHumanPack'+(slot+1))?.v
   setTimeout(()=>{installLanShipAssignmentUI();syncLanShipVisibility();if($('localHumans'))$('localHumans').addEventListener('change',syncLanShipVisibility);if($('localBots'))$('localBots').addEventListener('change',syncLanShipVisibility)},0);
 
   newMatch = function(){
-    if(matchMode==='local'){
+    if(matchMode==='multiplayer'){
+      let mpParts = Array.isArray(window.WCE_MP_ROOM_PARTICIPANTS) ? window.WCE_MP_ROOM_PARTICIPANTS : [];
+      settings.players=clamp(mpParts.length||settings.players||2,2,24);
+      settings.localHumans=mpParts.filter(p=>!p.bot).length;
+      settings.localBots=mpParts.filter(p=>p.bot).length;
+      settings.turnLength=clamp(settings.turnLength||120,20,120);
+      settings.physics=settings.physics||'bounce';
+    }else if(matchMode==='local'){
       settings.localHumans=clamp(parseInt($('localHumans')?.value||settings.localHumans||1,10),0,4);
       settings.localBots=clamp(parseInt($('localBots')?.value||settings.localBots||1,10),0,8);
       settings.players=clamp(settings.localHumans+settings.localBots,2,12);
@@ -1479,7 +1510,7 @@ function makeHumanLoadoutForSlot(slot=0){let id=($('localHumanPack'+(slot+1))?.v
     let planetTarget=Math.min(planetCap()-1,9+settings.players*4),guard=0;while(planets.length<planetTarget&&guard++<260){let meteor=Math.random()<.38,r=meteor?rand(75,210):rand(130,380);makeInitialPlanet(null,null,r,meteor?'meteor':'planet')}
     ships=[];playerWeapons=[];let colors=['#66d9ff','#ff7b66','#ffd15f','#b9ffd4','#cba6ff','#79e39d','#ff86cf','#ffffff'];let localHumans=matchMode==='local'?clamp(settings.localHumans||0,0,4):1;
     for(let i=0;i<settings.players;i++){let botIndex=Math.max(0,i-localHumans),isAi=matchMode==='local'?i>=localHumans:i>0;playerWeapons[i]=isAi?makeBotLoadoutForSlot(botIndex):makeHumanLoadoutForSlot(i);let humanName=matchMode==='local'?`Player ${i+1}`:'Player',botName=matchMode==='local'?`Bot ${botIndex+1}`:`Bot ${i}`;let s={hp:MAX_HEALTH,maxHp:MAX_HEALTH,color:colors[i%colors.length],defense:defenses[i%defenses.length].id,defenseBroken:false,defenseHp:1,defenseFreshTurn:-1,name:isAi?botName:humanName,ai:isAi,whiteoutUsed:false,vx:0,vy:0,lost:0,lostStartedAt:0,lostGrace:0,sprite:(isAi?chooseBotSprite(botIndex):choosePlayerSprite(i)),deathAnnounced:false};ships.push(s);let p=anchors[i%anchors.length],desired=Math.atan2(p.y-world.h/2,p.x-world.w/2);placeShip(s,p,safeShipAngle(p,desired))}
-    resetAllDefenses();shots=[];particles=[];beams=[];walkers=[];debris=[];ufos=[];boss=null;magnetFields=[];turn=0;turnCount=0;nextUfoAt=scheduleUfo();busy=false;ended=false;selected=0;defenseIndex=0;roundLeft=settings.turnLength;lastDamage=Array(settings.players).fill(0);roundDamage=Array(settings.players).fill(0);pendingDamage=Array(settings.players).fill(0);pendingDeathNotices=[];pendingTurnFinishAt=0;endPauseActive=false;turnStartHp=ships.map(s=>s.hp);damageFloaters=[];wind=rand(-.012,.012);if(ui.centerBanner){clearTimeout(showCenter.t);ui.centerBanner.classList.remove('show','gameover')}fitCameraToShips();focusTurnCamera(true);if(isMobileViewport()){cam.x=world.w/2;cam.y=world.h/2;cam.z=fullPlayfieldZoom();cam.target=null}renderWeaponSelect();syncUI();toast(matchMode==='local'?'Local turn-based match ready.':'Clean spawn. Aim, fire, survive.');if(ships[turn]?.ai)setTimeout(()=>shoot(true),900);
+    resetAllDefenses();shots=[];particles=[];beams=[];walkers=[];debris=[];ufos=[];boss=null;magnetFields=[];turn=0;turnCount=0;nextUfoAt=scheduleUfo();busy=false;ended=false;selected=0;defenseIndex=0;roundLeft=settings.turnLength;lastDamage=Array(settings.players).fill(0);roundDamage=Array(settings.players).fill(0);pendingDamage=Array(settings.players).fill(0);pendingDeathNotices=[];pendingTurnFinishAt=0;endPauseActive=false;turnStartHp=ships.map(s=>s.hp);damageFloaters=[];wind=rand(-.012,.012);if(ui.centerBanner){clearTimeout(showCenter.t);ui.centerBanner.classList.remove('show','gameover')}fitCameraToShips();focusTurnCamera(true);if(isMobileViewport()){cam.x=world.w/2;cam.y=world.h/2;cam.z=fullPlayfieldZoom();cam.target=null}renderWeaponSelect();syncUI();toast(matchMode==='local'?'Local turn-based match ready.':'Clean spawn. Aim, fire, survive.');if(ships[turn]?.ai&&matchMode!=='multiplayer')setTimeout(()=>shoot(true),900);
   };
 
   // Ensure buttons use final safe handlers.
@@ -2107,6 +2138,321 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
   }catch(e){console.warn('v0.7.33 draw aim override failed',e)}
 })();
 </script>
+
+<script id="wce-mp-bridge">
+(function(){
+  if(window.WCE_MP_BRIDGE_READY) return;
+  window.WCE_MP_BRIDGE_READY = true;
+  const qs = new URLSearchParams(location.search);
+  const mpMode = qs.get('mp') === '1';
+
+  function safeClone(obj){
+    try { return JSON.parse(JSON.stringify(obj)); } catch(e){ return null; }
+  }
+  function post(type, payload){
+    try { window.parent && window.parent.postMessage({ source:'WCE_MP_GAME', type, payload: payload || {} }, '*'); } catch(e){}
+  }
+  function setSelectValue(el, value){
+    if(!el) return;
+    const exists = [...el.options].some(o => String(o.value) === String(value));
+    if(exists) el.value = String(value);
+  }
+  function waitForGameReady(cb, tries=0){
+    if(typeof newMatch === 'function' && typeof shoot === 'function' && typeof finishTurn === 'function') return cb();
+    if(tries > 200) return post('error', { message:'Game bridge could not find required game functions.' });
+    setTimeout(() => waitForGameReady(cb, tries+1), 50);
+  }
+  function buildState(){
+    return safeClone({
+      version: 'v0.7.33-mp-branch',
+      turn, turnCount, roundLeft, ended, busy,
+      settings,
+      ships, planets, shots, walkers, particles, beams, shockwaves, debris, ufos, boss, magnetFields,
+      playerWeapons,
+      selected, defenseIndex,
+      cam
+    });
+  }
+  function applyState(state){
+    if(!state) return false;
+    try{
+      turn = +state.turn || 0;
+      turnCount = +state.turnCount || 0;
+      roundLeft = +state.roundLeft || (settings.turnLength || 120);
+      ended = !!state.ended;
+      busy = !!state.busy;
+      if(state.settings) Object.assign(settings, state.settings);
+      ships = Array.isArray(state.ships) ? state.ships : ships;
+      planets = Array.isArray(state.planets) ? state.planets : planets;
+      shots = Array.isArray(state.shots) ? state.shots : [];
+      walkers = Array.isArray(state.walkers) ? state.walkers : [];
+      particles = Array.isArray(state.particles) ? state.particles : [];
+      beams = Array.isArray(state.beams) ? state.beams : [];
+      shockwaves = Array.isArray(state.shockwaves) ? state.shockwaves : [];
+      debris = Array.isArray(state.debris) ? state.debris : [];
+      ufos = Array.isArray(state.ufos) ? state.ufos : [];
+      boss = state.boss || null;
+      magnetFields = Array.isArray(state.magnetFields) ? state.magnetFields : [];
+      playerWeapons = Array.isArray(state.playerWeapons) ? state.playerWeapons : playerWeapons;
+      selected = Number.isFinite(+state.selected) ? +state.selected : selected;
+      defenseIndex = Number.isFinite(+state.defenseIndex) ? +state.defenseIndex : defenseIndex;
+      if(state.cam) Object.assign(cam, state.cam);
+      renderWeaponSelect && renderWeaponSelect();
+      focusTurnCamera && focusTurnCamera(false);
+      syncUI && syncUI();
+      return true;
+    }catch(e){ post('error', { message:'State sync failed: '+(e.message||e) }); return false; }
+  }
+  function playerSlotName(slot, room){
+    const p = room && room.players && room.players[slot];
+    return p ? p.name : ('Player '+(slot+1));
+  }
+  function configureGame(room, mySlot){
+    waitForGameReady(function(){
+      try{
+        const parts = (room && Array.isArray(room.participants) && room.participants.length) ? room.participants : ((room && room.players) || []);
+        window.WCE_MP_ROOM_PARTICIPANTS = parts;
+        matchMode = 'multiplayer';
+        weaponTestMode = false;
+        testEditorWeaponId = null;
+        editorTimerOn = false;
+        editorTimer = 0;
+        settings.localHumans = parts.filter(p=>!p.bot).length;
+        settings.localBots = parts.filter(p=>p.bot).length;
+        settings.players = Math.max(2, parts.length || (settings.localHumans + settings.localBots));
+        settings.turnLength = Math.max(20, +room.turnLength || 120);
+        settings.physics = room.physics || 'bounce';
+        settings.playerPackChoice = room.pack || settings.playerPackChoice || 'gold';
+        settings.packMode = settings.playerPackChoice;
+        localStorage.setItem('warheads.playerPackChoice', settings.playerPackChoice);
+        setGameLoaded(true);
+        if(ui && ui.menu) ui.menu.classList.add('hidden');
+        if(ui && ui.centerBanner) ui.centerBanner.classList.remove('show','gameover');
+        newMatch();
+        let botNum=0;
+        parts.forEach((pl, i) => {
+          if(!ships[i]) return;
+          const thisBotIndex = pl.bot ? botNum++ : 0;
+          ships[i].name = pl.name || (pl.bot ? ('Bot '+(thisBotIndex+1)) : ('Player '+(i+1)));
+          ships[i].ai = !!pl.bot;
+          if(pl.bot){ playerWeapons[i] = (typeof makeBotLoadoutForSlot==='function') ? makeBotLoadoutForSlot(thisBotIndex) : (playerWeapons[i]||playerWeapons[0]); }
+          else { playerWeapons[i] = (typeof makeHumanLoadoutForSlot==='function') ? makeHumanLoadoutForSlot(i) : (playerWeapons[i]||playerWeapons[0]); }
+        });
+        turn = Math.max(0, Math.min(parts.length-1, +room.turn || 0));
+        roundLeft = settings.turnLength;
+        renderWeaponSelect && renderWeaponSelect();
+        focusTurnCamera && focusTurnCamera(false);
+        syncUI && syncUI();
+        post('ready', { slot: mySlot, state: buildState() });
+      }catch(e){ post('error', { message:'Multiplayer game start failed: '+(e.message||e) }); }
+    });
+  }
+  function applyRemoteShot(input){
+    waitForGameReady(function(){
+      try{
+        if(input.stateBefore) applyState(input.stateBefore);
+        selected = Math.max(0, Math.min((currentLoadout ? currentLoadout().length : 1)-1, +input.weaponIndex || 0));
+        if(ui && ui.weaponSelect) { ui.weaponSelect.value = String(selected); }
+        if(ui && ui.angle) ui.angle.value = String(input.angle ?? ui.angle.value ?? 45);
+        if(ui && ui.power) ui.power.value = String(input.power ?? ui.power.value ?? 70);
+        if(input.defense && ships[turn]) ships[turn].defense = input.defense;
+        syncUI && syncUI();
+        window.__WCE_MP_APPLYING_REMOTE = true;
+        try { shoot(false); } finally { setTimeout(()=>{ window.__WCE_MP_APPLYING_REMOTE = false; }, 50); }
+      }catch(e){ window.__WCE_MP_APPLYING_REMOTE = false; post('error', { message:'Remote shot failed: '+(e.message||e) }); }
+    });
+  }
+
+  window.WCE_MP = {
+    start: configureGame,
+    applyShot: applyRemoteShot,
+    exportState: buildState,
+    importState: applyState,
+    currentTurn: () => (typeof turn !== 'undefined' ? turn : 0),
+    isBusy: () => !!busy,
+    setControlLock: function(locked){
+      try{
+        if(ui && ui.fire) ui.fire.disabled = !!locked;
+        if(ui && ui.angle) ui.angle.disabled = !!locked;
+        if(ui && ui.power) ui.power.disabled = !!locked;
+        if(ui && ui.weaponSelect) ui.weaponSelect.disabled = !!locked;
+        if(ui && ui.defenseSelect) ui.defenseSelect.disabled = !!locked;
+      }catch(e){}
+    },
+    readInput: function(){
+      return {
+        angle: ui && ui.angle ? +ui.angle.value : 45,
+        power: ui && ui.power ? +ui.power.value : 70,
+        weaponIndex: typeof selected !== 'undefined' ? selected : 0,
+        defense: ui && ui.defenseSelect ? ui.defenseSelect.value : null,
+        stateBefore: buildState()
+      };
+    },
+    forceBotTurn: function(){
+      waitForGameReady(function(){
+        try{
+          if(!ships || !ships[turn] || !ships[turn].ai) return post('turnFinished', { state: buildState(), turn });
+          shoot(true);
+        }catch(e){ post('error', { message:'Bot turn failed: '+(e.message||e) }); post('turnFinished', { state: buildState(), turn }); }
+      });
+    }
+  };
+
+  if(mpMode){
+    waitForGameReady(function(){
+      try{
+        const originalShoot = shoot;
+        shoot = function(auto=false){
+          if(mpMode && matchMode==='multiplayer' && !auto && !window.__WCE_MP_APPLYING_REMOTE){
+            const active = ships && ships[turn];
+            if(active && !active.ai){ post('localShot', { input: window.WCE_MP.readInput() }); return; }
+          }
+          return originalShoot.apply(this, arguments);
+        };
+        const originalFinishTurn = finishTurn;
+        finishTurn = function(){
+          originalFinishTurn.apply(this, arguments);
+          setTimeout(() => post('turnFinished', { state: buildState(), turn }), 20);
+        };
+        const originalShowCenter = showCenter;
+        showCenter = function(title, sub, mode, ms){
+          originalShowCenter.apply(this, arguments);
+          if(mode === 'gameover') post('gameOver', { title, sub, state: buildState() });
+        };
+        post('bridgeReady', {});
+      }catch(e){ post('error', { message:'Bridge hook failed: '+(e.message||e) }); }
+    });
+  }
+})();
+</script>
+
+
+<script id="wce-mp-v0733-safety-hotfix">
+(function(){
+  'use strict';
+  if(window.WCE_MP_0733_PATCHED) return;
+  window.WCE_MP_0733_PATCHED = true;
+  const VERSION_MP_HOTFIX = 'v0.7.33';
+
+  function hasDrawableCanvas(tex){
+    return !!(tex && tex.canvas && typeof tex.canvas === 'object' && typeof tex.canvas.width === 'number' && typeof tex.canvas.height === 'number' && typeof tex.canvas.getContext === 'function');
+  }
+  function normalizePlanetForMp(p){
+    if(!p || typeof p !== 'object') return p;
+    if(!Array.isArray(p.bumps)) p.bumps = [];
+    if(!p.bumps.length) p.bumps = Array.from({length:18},(_,i)=>({a:i/18*Math.PI*2,off:0,w:1}));
+    if(!Array.isArray(p.craters)) p.craters = [];
+    if(!Array.isArray(p.holes)) p.holes = [];
+    if(!Number.isFinite(+p.r)) p.r = 80;
+    if(!Number.isFinite(+p.max)) p.max = p.r;
+    if(!Number.isFinite(+p.integrity)) p.integrity = .75;
+    if(!p.profile || typeof p.profile !== 'object') p.profile = { base:'#6f8292', rim:'#d6f1ff', shade:'#1b2632', accent:'#8fc7d8', phase:0 };
+    if(!hasDrawableCanvas(p.texture)) p.texture = null;
+    return p;
+  }
+  function normalizeMultiplayerStateAssets(){
+    try{
+      if(Array.isArray(planets)) planets.forEach(normalizePlanetForMp);
+      if(Array.isArray(shots)) shots.forEach(s=>{ if(s && s.orbit) normalizePlanetForMp(s.orbit); });
+      if(Array.isArray(walkers)) walkers.forEach(w=>{ if(w && w.p) normalizePlanetForMp(w.p); });
+      if(Array.isArray(ships)) ships.forEach(s=>{
+        if(!s || typeof s !== 'object') return;
+        if(s.sprite && (!Array.isArray(s.sprite.cells) || !s.sprite.cells.length)) s.sprite = null;
+      });
+    }catch(e){ console.warn('MP asset normalize failed', e); }
+  }
+
+  function installPlanetDrawGuard(){
+    if(typeof drawPixelPlanet !== 'function') return false;
+    if(drawPixelPlanet.__mp0733Guarded) return true;
+    const originalDrawPixelPlanet = drawPixelPlanet;
+    drawPixelPlanet = function(p,q,r){
+      normalizePlanetForMp(p);
+      try{
+        return originalDrawPixelPlanet.apply(this, arguments);
+      }catch(e){
+        if(!(e && String(e.message||e).includes('drawImage'))) throw e;
+        try{
+          // Rebuild the cached canvas texture that JSON sync cannot preserve.
+          if(typeof renderPlanetTexture === 'function') p.texture = renderPlanetTexture(p);
+          if(hasDrawableCanvas(p.texture)) return originalDrawPixelPlanet.apply(this, arguments);
+        }catch(rebuildErr){ console.warn('MP planet texture rebuild failed', rebuildErr); }
+        // Last-resort fallback: simple clean planet draw so the game never dies from a bad cached texture.
+        try{
+          const radius = Math.max(2, r || ((p.r||60)*(cam&&cam.z||1)));
+          ctx.save();
+          const grad = ctx.createRadialGradient(q.x-radius*.35,q.y-radius*.45,radius*.08,q.x,q.y,radius);
+          grad.addColorStop(0, (p.profile&&p.profile.rim)||'#d6f1ff');
+          grad.addColorStop(.48, (p.profile&&p.profile.base)||'#6f8292');
+          grad.addColorStop(1, (p.profile&&p.profile.shade)||'#0d141b');
+          ctx.fillStyle = grad;
+          ctx.beginPath(); ctx.arc(q.x,q.y,radius,0,Math.PI*2); ctx.fill();
+          ctx.strokeStyle='rgba(210,240,255,.35)'; ctx.lineWidth=Math.max(1,1.5*(cam&&cam.z||1)); ctx.stroke();
+          ctx.restore();
+        }catch(finalErr){ console.warn('MP fallback planet draw failed', finalErr); }
+      }
+    };
+    drawPixelPlanet.__mp0733Guarded = true;
+    return true;
+  }
+
+  function installTurnLockGuard(){
+    if(!window.WCE_MP || window.WCE_MP.__mp0733TurnGuarded) return false;
+    let mpLocked = false;
+    function enforce(){
+      try{
+        document.body.classList.toggle('mp-waiting-turn', !!mpLocked);
+        const disabled = !!mpLocked;
+        ['fire','angle','power','weaponSelect','defenseSelect'].forEach(id=>{ const el = ui && ui[id] ? ui[id] : document.getElementById(id); if(el) el.disabled = disabled; });
+        const fire = document.getElementById('fire');
+        if(fire && disabled) fire.textContent = 'WAIT';
+        const editor = document.getElementById('labOpen');
+        if(editor) editor.disabled = false;
+      }catch(e){}
+    }
+    const oldSet = window.WCE_MP.setControlLock;
+    window.WCE_MP.setControlLock = function(locked){
+      mpLocked = !!locked;
+      try{ if(oldSet) oldSet.call(window.WCE_MP, locked); }catch(e){}
+      enforce();
+    };
+    window.WCE_MP.isControlLocked = function(){ return !!mpLocked; };
+    const oldExport = window.WCE_MP.exportState;
+    window.WCE_MP.exportState = function(){ normalizeMultiplayerStateAssets(); return oldExport ? oldExport.call(window.WCE_MP) : null; };
+    const oldImport = window.WCE_MP.importState;
+    window.WCE_MP.importState = function(state){ const ok = oldImport ? oldImport.call(window.WCE_MP, state) : false; normalizeMultiplayerStateAssets(); installPlanetDrawGuard(); enforce(); return ok; };
+    const oldStart = window.WCE_MP.start;
+    window.WCE_MP.start = function(room,mySlot){ const res = oldStart ? oldStart.call(window.WCE_MP, room, mySlot) : undefined; setTimeout(()=>{ normalizeMultiplayerStateAssets(); installPlanetDrawGuard(); enforce(); }, 80); return res; };
+    if(typeof syncUI === 'function' && !syncUI.__mp0733TurnGuarded){
+      const oldSyncUI = syncUI;
+      syncUI = function(){ const ret = oldSyncUI.apply(this, arguments); if(mpLocked) enforce(); return ret; };
+      syncUI.__mp0733TurnGuarded = true;
+    }
+    if(typeof shoot === 'function' && !shoot.__mp0733TurnGuarded){
+      const oldShoot = shoot;
+      shoot = function(auto){
+        if(mpLocked && !auto && !window.__WCE_MP_APPLYING_REMOTE){
+          try{ if(typeof toast === 'function') toast('Waiting for your turn.', 1200); }catch(e){}
+          return;
+        }
+        return oldShoot.apply(this, arguments);
+      };
+      shoot.__mp0733TurnGuarded = true;
+    }
+    window.WCE_MP.__mp0733TurnGuarded = true;
+    enforce();
+    return true;
+  }
+
+  function installAll(tries){
+    installPlanetDrawGuard();
+    normalizeMultiplayerStateAssets();
+    if(!installTurnLockGuard() && tries < 200) setTimeout(()=>installAll(tries+1), 50);
+  }
+  installAll(0);
+})();
+</script>
+
 </body>
 </html>
 

@@ -1,569 +1,16 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <title>WarHeads Classic Enhanced</title>
-  <style>
-    :root { color-scheme: dark; --gold:#ffd21a; --ink:#020604; --panel:rgba(0,12,6,.86); --line:#39ff14; --text:#b9ff7a; --muted:#63c86c; --hot:#ff7b00; --good:#72ff20; --blue:#25f7ff; --mag:#ff4dff; }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { width:100%; height:100%; margin:0; overflow:hidden; background:#010402; color:var(--text); font-family:"Lucida Console","Courier New",ui-monospace,monospace; touch-action:none; }
-    #app { position:fixed; inset:0; min-width:320px; min-height:480px; background:#010402; }
-    #app::after { content:""; position:absolute; inset:0; pointer-events:none; z-index:20; opacity:.18; background:repeating-linear-gradient(0deg,rgba(255,255,255,.08) 0 1px,transparent 1px 4px),radial-gradient(circle at 50% 50%,transparent 55%,rgba(0,0,0,.36)); mix-blend-mode:screen; }
-    canvas { position:absolute; inset:0; width:100vw; height:100dvh; display:block; background:#010402; image-rendering:auto; }
-    .hud { position:absolute; inset:0; display:grid; grid-template-rows:auto 1fr auto; pointer-events:none; }
-    .top { pointer-events:auto; padding:max(8px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 8px max(16px,env(safe-area-inset-left)); display:grid; gap:8px; background:linear-gradient(180deg,rgba(0,8,3,.96),rgba(0,8,3,.18)); border-bottom:1px dashed rgba(57,255,20,.55); text-shadow:0 0 7px rgba(57,255,20,.35); }
-    .row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .brand { display:flex; align-items:center; gap:8px; font-weight:950; text-transform:uppercase; line-height:1.05; }
-    .tagline { color:var(--muted); font-size:11px; font-weight:850; text-transform:none; margin-left:8px; }
-    .mark { width:32px; height:32px; border-radius:0; display:grid; place-items:center; color:#010402; border:1px solid var(--line); background:#ffd21a; box-shadow:0 0 12px rgba(255,210,26,.4); }
-    .turn { color:var(--gold); font-weight:950; font-size:13px; text-align:right; }
-    .stats { display:grid; grid-template-columns:1fr auto 1fr; align-items:end; gap:8px; }
-    .team { display:grid; gap:3px; color:var(--muted); font-size:11px; font-weight:850; text-transform:uppercase; }
-    .team.right { text-align:right; }
-    .bar { height:8px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden; }
-    .bar span { display:block; height:100%; width:100%; transform-origin:left center; background:linear-gradient(90deg,var(--good),#f4dc65,var(--hot)); }
-    .meter { min-width:82px; padding:6px 8px; border:1px solid var(--line); border-radius:0; background:rgba(0,20,8,.86); text-align:center; font-size:12px; font-weight:950; box-shadow:inset 0 0 0 1px rgba(57,255,20,.18),0 0 10px rgba(57,255,20,.14); }
-    .damage { display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px; font-weight:900; color:#dce8da; }
-    .toast { position:absolute; left:50%; top:22%; transform:translate(-50%,-8px); max-width:min(86vw,520px); padding:12px 14px; border:1px solid var(--gold); border-radius:0; background:rgba(2,8,4,.9); color:var(--gold); font-weight:950; text-align:center; opacity:0; transition:.22s ease; pointer-events:none; box-shadow:0 0 22px rgba(255,210,26,.18); text-shadow:0 0 8px rgba(255,210,26,.45); }
-    .toast.show { opacity:1; transform:translate(-50%,0); }
-    .centerBanner { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:9; width:min(86vw,560px); display:none; gap:10px; padding:18px; border:2px double var(--gold); background:rgba(3,7,5,.94); color:#ffe7a2; text-align:center; font-weight:950; box-shadow:0 0 34px rgba(255,210,26,.22),0 18px 80px rgba(0,0,0,.55); text-shadow:0 0 10px rgba(255,210,26,.35); pointer-events:auto; }
-    .centerBanner.show { display:grid; }
-    .centerTitle { font-size:clamp(22px,5vw,42px); line-height:1.05; text-transform:uppercase; color:var(--gold); }
-    .centerSub { color:#d8e0c9; font-size:clamp(12px,2.4vw,16px); line-height:1.35; }
-    .centerBanner button { display:none; justify-self:center; min-width:190px; border-color:var(--gold); background:#ffd21a; color:#120900; }
-    .centerBanner.gameover button { display:block; }
-    .bottom { pointer-events:auto; padding:8px max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); display:grid; gap:8px; background:linear-gradient(0deg,rgba(0,8,3,.98),rgba(0,8,3,.22)); border-top:1px dashed rgba(57,255,20,.55); text-shadow:0 0 7px rgba(57,255,20,.3); }
-    .readouts { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
-    .readout { min-width:0; padding:7px 5px; border:1px solid var(--line); border-radius:0; background:rgba(0,18,8,.76); text-align:center; box-shadow:inset 0 0 0 1px rgba(57,255,20,.14); }
-    .readout b { display:block; font-size:14px; line-height:1.1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .readout span { display:block; margin-top:2px; color:var(--muted); font-size:9px; font-weight:850; text-transform:uppercase; }
-    .controls { display:grid; grid-template-columns:1fr 1fr 76px; gap:8px; align-items:end; }
-    label { display:grid; gap:4px; color:var(--muted); font-size:10px; font-weight:900; text-transform:uppercase; }
-    input[type=range] { width:100%; accent-color:var(--gold); }
-    button, select { border:1px solid var(--line); border-radius:0; background:#061408; color:var(--text); min-height:46px; font-weight:900; font-family:inherit; box-shadow:inset 0 0 0 1px rgba(57,255,20,.1); }
-    option { background:#061408; color:var(--text); }
-    .fire { min-height:48px; border:1px solid var(--gold); color:#120900; background:#ffd21a; font-size:17px; box-shadow:0 0 16px rgba(255,210,26,.25); }
-    .strip { display:grid; grid-template-columns:1fr auto 1fr auto auto; gap:6px; }
-    .pick { min-width:0; display:grid; grid-template-columns:38px 1fr 38px; gap:4px; }
-    .pick button { min-width:0; padding:0 6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .version { position:absolute; left:12px; top:116px; color:#ffd15f; font-size:11px; font-weight:950; pointer-events:none; }
-    .icon { width:42px; min-width:42px; }
-    .lab { position:fixed; inset:0; z-index:10; display:none; grid-template-rows:auto 1fr auto; padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom)); background:rgba(1,6,2,.98); border:2px solid var(--line); }
-    .lab.open { display:grid; }
-    .labBody { overflow:auto; display:grid; gap:8px; padding:10px 0; }
-    .stage { display:grid; grid-template-columns:repeat(5,1fr) auto; gap:6px; padding:8px; border:1px dashed var(--line); border-radius:0; background:rgba(0,18,8,.58); }
-    .stage small { grid-column:1/-1; color:var(--muted); font-weight:900; text-transform:uppercase; }
-    .lab input,.lab textarea,.lab select { width:100%; border:1px solid var(--line); border-radius:0; background:rgba(0,12,5,.9); color:var(--text); padding:9px; font-family:inherit; }
-    .lab textarea { min-height:130px; font-family:ui-monospace,Consolas,monospace; font-size:12px; }
-    .labActions { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
-    .saveStatus { color:var(--good); font-size:12px; font-weight:900; min-height:16px; }
-    .menu { position:fixed; inset:0; z-index:12; display:grid; place-items:center; padding:18px; background:radial-gradient(circle at 50% 22%,rgba(0,34,13,.92),rgba(1,4,2,.98)); }
-    #app.preGame #game, #app.preGame .hud { display:none !important; }
-    .menuActions { display:grid; grid-template-columns:1fr; gap:9px; }
-    .menuActions button { font-size:20px; letter-spacing:.03em; padding:18px 14px; text-transform:uppercase; }
-    .menuLogo { text-align:center; display:grid; gap:2px; padding:10px 4px 4px; }
-    .menuLogo .logoMain { font-size:34px; font-weight:1000; color:var(--gold); text-shadow:0 0 16px rgba(255,210,26,.42); text-transform:uppercase; }
-    .menuLogo .logoSub { color:var(--muted); font-size:13px; font-weight:900; text-transform:uppercase; }
-    .testBack { pointer-events:auto; }
 
-    .menu.hidden, .hidden { display:none !important; }
-    .menuPanel { width:min(520px,94vw); display:grid; gap:12px; padding:18px; border:2px double var(--line); border-radius:0; background:rgba(0,10,4,.94); box-shadow:0 0 34px rgba(57,255,20,.18),0 18px 70px rgba(0,0,0,.55); }
-    .menuTitle { font-size:28px; font-weight:1000; text-transform:uppercase; letter-spacing:0; color:var(--gold); text-shadow:0 0 10px rgba(255,210,26,.38); }
-    .modalPanel { position:relative; padding-top:42px; }
-    .menuGrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .primary { border:1px solid var(--gold); color:#120900; background:#ffd21a; font-weight:1000; box-shadow:0 0 14px rgba(255,210,26,.22); }
-    button, select { transition: transform .12s ease, filter .12s ease, box-shadow .12s ease, border-color .12s ease, color .12s ease, background .12s ease; }
-    button:not(:disabled):hover, select:not(:disabled):hover { filter:brightness(1.16); border-color:var(--gold); box-shadow:0 0 16px rgba(255,210,26,.22), inset 0 0 0 1px rgba(255,210,26,.18); }
-    .menuActions button:not(:disabled):hover { transform:translateY(-1px) scale(1.018); color:#fff7be; text-shadow:0 0 8px rgba(255,210,26,.46); }
-    .menuActions .primary:not(:disabled):hover { color:#110b00; background:#ffe97a; }
-    button:disabled, button.disabled { opacity:.36; cursor:not-allowed; filter:grayscale(.85); color:#637363; border-color:#245724; background:#061008; box-shadow:none; }
-    .menuActions button:disabled::after { content:'  [LOCKED]'; font-size:11px; color:#6c8b6c; }
-    .menuNote { color:var(--muted); font-size:12px; font-weight:800; line-height:1.35; }
-    .modalPanel { position:relative; grid-column:1/-1; padding:48px 12px 12px; border:1px dashed rgba(57,255,20,.45); background:rgba(0,14,6,.56); }
-    .panelX { position:absolute; right:10px; top:9px; z-index:6; width:48px; min-height:42px; padding:0; border-color:var(--gold); color:#120900; background:#ffd21a; font-size:20px; font-weight:1000; }
-    .panelWide { grid-column:1/-1; }
-    .panelTitle { grid-column:1/-1; color:var(--gold); font-size:16px; font-weight:1000; text-transform:uppercase; text-align:center; }
-    .typeButtons { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-    .typeButtons button.active { background:linear-gradient(180deg,#ffe37c,#ff9b49); color:#1b1104; border:0; }
-
-    .shipTools { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; align-items:end; }
-    .shipTools input[type=color] { width:100%; min-height:38px; padding:2px; }
-    .shipEditorPane { display:grid; grid-template-columns:minmax(260px,384px) 112px; gap:10px; align-items:start; }
-    .shipGrid { width:100%; display:grid; grid-template-columns:repeat(16,1fr); gap:2px; padding:8px; border:1px dashed var(--line); background:rgba(0,18,8,.58); touch-action:none; }
-    .shipGrid.painting { border-color:var(--gold); box-shadow:0 0 14px rgba(255,210,26,.26); }
-    .shipCell { aspect-ratio:1; min-height:16px; border:1px solid rgba(57,255,20,.22); background:rgba(0,0,0,.72); cursor:crosshair; }
-    .shipCell.on { box-shadow:0 0 7px currentColor; }
-    .shipPalette { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; align-content:start; padding:8px; border:1px dashed var(--line); background:rgba(0,18,8,.58); min-height:96px; }
-    .shipSwatch { width:28px; height:28px; border:1px solid rgba(255,255,255,.35); box-shadow:inset 0 0 0 2px rgba(0,0,0,.28); cursor:pointer; }
-    .shipSwatch.active { outline:2px solid var(--gold); box-shadow:0 0 10px currentColor, inset 0 0 0 2px rgba(0,0,0,.28); }
-    .shipPreview { min-height:44px; display:grid; place-items:center; border:1px solid var(--line); background:rgba(0,12,5,.9); color:var(--gold); font-weight:900; }
-    @media (max-width:700px) {
-      .readouts { grid-template-columns:repeat(3,1fr); }
-      .controls { grid-template-columns:1fr 1fr 72px; }
-      .strip { grid-template-columns:1fr; }
-      .pick { grid-template-columns:42px 1fr 42px; }
-      .stage { grid-template-columns:1fr 1fr; }
-      .labActions { grid-template-columns:1fr 1fr; }
-      .modalPanel { position:relative; padding-top:42px; }
-    .menuGrid { grid-template-columns:1fr; }
-      .shipEditorPane { grid-template-columns:1fr; }
-      .shipPalette { grid-template-columns:repeat(8,1fr); }
-    }
-    @media (max-height:560px) and (orientation:landscape) {
-      .top { padding-bottom:4px; }
-      .bottom { grid-template-columns:1.2fr 1fr; align-items:end; padding-top:6px; }
-      .readouts { grid-template-columns:repeat(5,1fr); grid-column:1/-1; }
-      .strip { grid-column:1/-1; }
-    }
-
-    .advancedTabs { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; grid-column:1/-1; }
-    .advancedTabs button { padding:10px 8px; font-size:12px; }
-    .advancedTabs button.active { border-color:var(--gold); color:var(--gold); box-shadow:0 0 12px rgba(255,210,26,.22); }
-    .advancedPage { display:none; grid-column:1/-1; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; max-height:46vh; overflow:auto; padding:8px; border:1px dashed rgba(57,255,20,.35); background:rgba(0,18,8,.42); }
-    .advancedPage.open { display:grid; }
-    .advancedPage label { min-width:0; }
-    .advancedPage .wide, .modalPanel .wide { grid-column:1/-1; }
-    .advancedNote { grid-column:1/-1; color:var(--muted); font-size:12px; line-height:1.35; border:1px dashed rgba(255,210,26,.35); padding:8px; background:rgba(255,210,26,.06); }
-    .folderList { grid-column:1/-1; display:grid; grid-template-columns:repeat(3,1fr); gap:6px; font-size:12px; }
-    .folderList code { display:block; border:1px solid rgba(57,255,20,.35); padding:6px; background:rgba(0,0,0,.35); color:#b9ffd4; }
-    .miniButtons { grid-column:1/-1; display:flex; gap:8px; flex-wrap:wrap; }
-    @media (max-width:760px){ .advancedPage { grid-template-columns:1fr; max-height:54vh; } .advancedTabs { grid-template-columns:repeat(2,1fr); } .folderList { grid-template-columns:1fr; } }
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const seedText = qs.get('mpSeed');
+  if(!seedText) return;
+  let seed = 2166136261;
+  for(let i=0;i<seedText.length;i++){ seed ^= seedText.charCodeAt(i); seed = Math.imul(seed, 16777619); }
+  function next(){ seed = Math.imul(seed ^ (seed >>> 15), 1 | seed); seed ^= seed + Math.imul(seed ^ (seed >>> 7), 61 | seed); return ((seed ^ (seed >>> 14)) >>> 0) / 4294967296; }
+  Math.random = next;
+  window.__WCE_MP_SEEDED__ = true;
+})();
 
 
-    /* v0.7.33 Weapon Editor Modding UX */
-    .lab.modWeaponEditor { grid-template-rows:auto 1fr auto; }
-    .labHeaderTitle { display:grid; gap:2px; }
-    .labSub { color:var(--muted); font-size:11px; font-weight:800; }
-    .editorTopGrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:end; }
-    .packTools { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px; border:1px dashed rgba(255,210,26,.45); background:rgba(255,210,26,.05); }
-    .packTools .wide { grid-column:1/-1; }
-    .packTools button { min-height:40px; }
-    .stage.modStage { grid-template-columns:1.1fr 1fr 1fr; gap:10px; padding:12px; border:1px solid rgba(57,255,20,.45); background:linear-gradient(180deg,rgba(0,22,9,.82),rgba(0,12,5,.7)); }
-    .stage.modStage small { display:flex; justify-content:space-between; align-items:center; gap:10px; }
-    .stage.modStage .stageHeaderBtns { display:flex; gap:6px; flex-wrap:wrap; }
-    .stage.modStage .wide { grid-column:1/-1; }
-    .stage.modStage .fullSlider { display:grid; gap:5px; }
-    .stage.modStage input[type=range] { height:32px; accent-color:var(--gold); }
-    .stage.modStage .sliderValue { color:var(--gold); font-size:12px; }
-    .stage.modStage textarea { min-height:90px; font-size:11px; background:#020905; }
-    .stage.modStage .stageHelp { border:1px dashed rgba(255,210,26,.38); padding:8px; color:#d7ffd0; background:rgba(255,210,26,.055); line-height:1.35; font-size:12px; }
-    .stage.modStage .jsonOpen { display:none; }
-    .stage.modStage.showJson .jsonOpen { display:grid; }
-    .stage.modStage select, .stage.modStage input { min-height:40px; }
-    .editorHint { padding:9px; border:1px dashed rgba(57,255,20,.35); color:#b9ffd4; font-size:12px; line-height:1.35; background:rgba(0,20,8,.55); }
-    .botPackGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; grid-column:1/-1; padding:8px; border:1px dashed rgba(57,255,20,.35); }
-    .botPackGrid .wide { grid-column:1/-1; color:var(--gold); font-weight:950; }
-    .bigActionButton { min-height:52px; font-size:15px; }
-    @media(max-width:760px){ .editorTopGrid,.packTools,.stage.modStage,.botPackGrid { grid-template-columns:1fr; } .labActions { grid-template-columns:1fr 1fr; } .lab textarea { min-height:115px; } }
-
-  
-
-    /* v0.7.33 clean-menu / simple-deep-editor recovery */
-    :root { --ui-accent:#35c8ff; --ui-panel:rgba(0,18,28,.92); --ui-line:#35c8ff; --ui-glow:rgba(53,200,255,.28); }
-    body.theme-classic-green { --ui-accent:#39ff14; --ui-panel:rgba(0,12,6,.92); --ui-line:#39ff14; --ui-glow:rgba(57,255,20,.26); }
-    body.theme-deep-blue { --ui-accent:#35c8ff; --ui-panel:rgba(0,18,36,.93); --ui-line:#35c8ff; --ui-glow:rgba(53,200,255,.28); }
-    body.theme-nebula-purple { --ui-accent:#b76dff; --ui-panel:rgba(22,5,34,.93); --ui-line:#b76dff; --ui-glow:rgba(183,109,255,.28); }
-    body.theme-alien-amber { --ui-accent:#ffd15f; --ui-panel:rgba(29,17,3,.93); --ui-line:#ffd15f; --ui-glow:rgba(255,209,95,.25); }
-    body.theme-crimson-alert { --ui-accent:#ff5f78; --ui-panel:rgba(32,5,9,.93); --ui-line:#ff5f78; --ui-glow:rgba(255,95,120,.25); }
-    body.theme-ice-terminal { --ui-accent:#b9f7ff; --ui-panel:rgba(4,24,32,.93); --ui-line:#b9f7ff; --ui-glow:rgba(185,247,255,.24); }
-    body.theme-retro-gold { --ui-accent:#ffe37c; --ui-panel:rgba(24,18,2,.93); --ui-line:#ffe37c; --ui-glow:rgba(255,227,124,.24); }
-    body.theme-stealth-gray { --ui-accent:#a8b6c7; --ui-panel:rgba(11,14,18,.95); --ui-line:#a8b6c7; --ui-glow:rgba(168,182,199,.20); }
-    body.theme-plasma-pink { --ui-accent:#ff6df2; --ui-panel:rgba(32,3,28,.93); --ui-line:#ff6df2; --ui-glow:rgba(255,109,242,.24); }
-    body.theme-ocean-cyan { --ui-accent:#28ffd0; --ui-panel:rgba(0,26,24,.93); --ui-line:#28ffd0; --ui-glow:rgba(40,255,208,.24); }
-    body.theme-custom { --ui-accent:var(--custom-menu-color,#35c8ff); --ui-panel:rgba(0,18,28,.93); --ui-line:var(--custom-menu-color,#35c8ff); --ui-glow:rgba(53,200,255,.25); }
-    body, button, select, input, textarea { accent-color:var(--ui-accent); }
-    .menuPanel, .lab { border-color:var(--ui-line) !important; background:var(--ui-panel) !important; box-shadow:0 0 34px var(--ui-glow),0 18px 70px rgba(0,0,0,.55) !important; }
-    .menuTitle,.menuLogo .logoMain,.panelTitle,.labHeaderTitle b { color:var(--ui-accent) !important; text-shadow:0 0 12px var(--ui-glow); }
-    .panelX { border-color:var(--ui-line) !important; color:var(--ui-accent) !important; }
-    .menuPanel { width:min(880px,calc(100vw - 24px)); max-height:calc(100dvh - 24px); }
-    .menuActions { grid-template-columns:repeat(2,minmax(180px,1fr)); gap:10px; }
-    .menuActions button { min-height:54px; }
-    .mobileDesktopHint { display:none !important; }
-    .cleanEditorToolbar { display:grid; grid-template-columns:repeat(4,minmax(130px,1fr)); gap:8px; padding:8px; border:1px dashed rgba(53,200,255,.45); background:rgba(53,200,255,.055); }
-    .cleanEditorToolbar button { min-height:42px; }
-    #lab.cleanWeaponEditor .editorHint { font-size:12px; line-height:1.35; color:#c8f8ff; background:rgba(53,200,255,.055); border:1px dashed rgba(53,200,255,.35); padding:8px; }
-    #lab.cleanWeaponEditor .editorTopGrid { grid-template-columns:1.1fr .9fr; }
-    #lab.cleanWeaponEditor .packTools { display:none !important; }
-    #lab.cleanWeaponEditor .packTools.open { display:grid !important; }
-    #lab.cleanWeaponEditor .weaponJsonWrap { display:none; }
-    #lab.cleanWeaponEditor .weaponJsonWrap.open { display:grid; }
-    .compactStage { display:grid; grid-template-columns:1.2fr 1fr 1fr 1fr auto; gap:8px; padding:10px; border:1px solid rgba(53,200,255,.38); background:linear-gradient(180deg,rgba(0,28,42,.72),rgba(0,12,18,.72)); }
-    .compactStage small { grid-column:1/-1; color:var(--ui-accent); display:flex; justify-content:space-between; align-items:center; }
-    .compactStage label { min-width:0; }
-    .compactStage input[type=range] { min-height:28px; width:100%; }
-    .compactStage .stageQuick { display:grid; grid-template-columns:1.3fr 1fr 1fr 1fr auto; gap:8px; grid-column:1/-1; align-items:end; }
-    .compactStage .stageDeep { display:none; grid-column:1/-1; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; padding:8px; border-top:1px dashed rgba(53,200,255,.35); margin-top:4px; }
-    .compactStage.open .stageDeep { display:grid; }
-    .compactStage .stageHelp { grid-column:1/-1; color:#dffcff; line-height:1.35; border:1px dashed rgba(255,210,26,.35); padding:8px; background:rgba(255,210,26,.055); }
-    .compactStage .stageJsonBox { display:none; grid-column:1/-1; }
-    .compactStage.showJson .stageJsonBox { display:grid; }
-    .compactStage .stageJsonBox textarea { min-height:90px; }
-    #packLab .packTools { display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)); }
-    #packLab #packWeaponList { min-height:140px; }
-    #packLab #packMoveUp, #packLab #packMoveDown { display:none !important; }
-    .packNote,.uiNote { color:#c8f8ff; font-size:12px; line-height:1.35; border:1px dashed rgba(53,200,255,.35); padding:8px; background:rgba(53,200,255,.055); grid-column:1/-1; }
-    .uiThemeBlock { grid-column:1/-1; display:grid; grid-template-columns:1fr 1fr; gap:8px; border:1px dashed rgba(53,200,255,.35); padding:8px; background:rgba(53,200,255,.05); }
-    .uiThemeBlock .wide { grid-column:1/-1; }
-    .localPackBlock { grid-column:1/-1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; border:1px dashed rgba(53,200,255,.35); padding:8px; background:rgba(53,200,255,.05); }
-    .localPackBlock .wide { grid-column:1/-1; color:var(--ui-accent); font-weight:950; }
-    #botPackLab #botPackGrid { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)); }
-    #optionsPanel #botPackGrid { display:none !important; }
-    .alwaysClose { position:absolute; right:8px; top:8px; min-width:44px; min-height:36px; z-index:4; }
-    @media(max-width:760px){ .menuPanel{width:calc(100vw - 14px);} .menuActions,.cleanEditorToolbar,.compactStage .stageQuick,#packLab .packTools,.uiThemeBlock,.localPackBlock{grid-template-columns:1fr;} .compactStage .stageDeep{grid-template-columns:1fr;} }
-
-  
-
-/* v0.7.33 ship library / LAN assignment cleanup */
-.shipManagerPanel{display:grid;gap:8px;border:1px dashed var(--line);background:rgba(0,18,8,.55);padding:9px;margin:6px 0;}
-.shipManagerPanel .shipManagerRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
-.shipManagerPanel select,.shipManagerPanel button{min-height:42px;}
-.localShipBlock{display:grid;grid-column:1/-1;grid-template-columns:1fr 1fr;gap:8px;border:1px dashed rgba(57,255,20,.55);padding:8px;background:rgba(0,18,8,.42);}
-.localShipBlock .wide,.shipManagerPanel .wide{grid-column:1/-1;color:var(--gold);font-weight:1000;text-transform:uppercase;}
-@media(max-width:760px){.shipManagerPanel .shipManagerRow,.localShipBlock{grid-template-columns:1fr}.shipManagerPanel select{font-size:14px}}
-
-
-
-/* v0.7.33 sci-fi holo visual pass */
-body.theme-holo-blue{
-  --ui-accent:#28f7ff; --ui-panel:rgba(3,24,40,.88); --ui-line:#2af2ff; --ui-glow:rgba(40,247,255,.36);
-  --panel:rgba(3,18,33,.88); --line:#2af2ff; --text:#e9fbff; --muted:#8de8ff; --gold:#72ecff; --good:#8effd4;
-  background:#020912;
-}
-body.theme-holo-blue::before{content:"";position:fixed;inset:0;z-index:-2;background:
-  radial-gradient(circle at 50% 12%, rgba(45,210,255,.16), transparent 34%),
-  radial-gradient(circle at 12% 82%, rgba(0,120,255,.11), transparent 28%),
-  linear-gradient(180deg,#020712 0%,#031426 55%,#01050b 100%);}
-body.theme-holo-blue::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
-  linear-gradient(rgba(120,240,255,.028) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(120,240,255,.018) 1px, transparent 1px);background-size:100% 4px, 64px 64px;mix-blend-mode:screen;}
-body.theme-holo-blue .menuPanel, body.theme-holo-blue .modalPanel, body.theme-holo-blue .lab, body.theme-holo-blue .centerBanner, body.theme-holo-blue .toast{
-  background:linear-gradient(180deg, rgba(4,34,58,.88), rgba(1,13,27,.92));
-  border:1px solid rgba(73,235,255,.72); border-radius:14px; color:#e9fbff;
-  box-shadow:0 0 34px rgba(33,220,255,.20), inset 0 0 36px rgba(33,220,255,.075);
-  backdrop-filter: blur(7px);
-}
-body.theme-holo-blue .logo, body.theme-holo-blue .panelTitle, body.theme-holo-blue .lab .row b{
-  color:#effcff; text-shadow:0 0 8px rgba(40,247,255,.9),0 0 26px rgba(40,247,255,.42); letter-spacing:.14em;
-}
-body.theme-holo-blue button, body.theme-holo-blue select, body.theme-holo-blue input, body.theme-holo-blue textarea{
-  border-radius:8px; border-color:rgba(40,247,255,.72)!important; color:#e9fbff!important;
-  background:linear-gradient(180deg, rgba(6,38,62,.88), rgba(2,16,31,.94))!important;
-  box-shadow:inset 0 0 18px rgba(40,247,255,.08);
-}
-body.theme-holo-blue button:hover, body.theme-holo-blue button.primary, body.theme-holo-blue .menuActions button:hover{
-  color:#001018!important; background:linear-gradient(180deg,#9efaff,#24d9ff)!important; text-shadow:none;
-  box-shadow:0 0 18px rgba(40,247,255,.55), inset 0 0 22px rgba(255,255,255,.28);
-}
-body.theme-holo-blue label, body.theme-holo-blue .stage, body.theme-holo-blue .packNote, body.theme-holo-blue .advancedPage, body.theme-holo-blue .uiThemeBlock{
-  background:rgba(2,19,34,.56)!important; border-color:rgba(40,247,255,.28)!important; border-radius:12px;
-}
-body.theme-holo-blue input[type=range]{height:24px; accent-color:#28f7ff;}
-body.theme-holo-blue .stageHelp, body.theme-holo-blue .advancedNote, body.theme-holo-blue .uiNote{color:#8de8ff;}
-body.theme-holo-blue .gameCredit{font-size:12px;color:#9ff7ff;text-align:center;}
-body.theme-holo-blue .gameCredit a{color:#ffffff;text-shadow:0 0 8px #28f7ff;}
-#menuUiColor, label:has(#menuUiColor){display:none!important;}
-.advancedPage label{position:relative;}
-.advancedPage label:hover{box-shadow:0 0 12px var(--ui-glow);}
-.advSliderValue{display:inline-block;min-width:64px;text-align:right;color:var(--gold);font-weight:900;margin-left:8px;}
-.advancedPage input[type=range]{width:100%;min-height:28px;}
-.advancedJsonPanel{grid-column:1/-1;display:none;gap:8px;border:1px solid var(--ui-line);background:rgba(0,20,36,.55);padding:8px;border-radius:10px;}
-.advancedJsonPanel.open{display:grid;}
-.advancedJsonPanel textarea{min-height:170px;font-size:12px;}
-.planetGrowHint{pointer-events:none;}
-
-
-
-/* v0.7.33 release-candidate UI fix: Holo select/highlight consistency */
-:root{ color-scheme:dark; }
-button, select, input, textarea { transition: border-color .14s ease, box-shadow .14s ease, background .14s ease, color .14s ease, transform .08s ease; }
-button:hover:not(:disabled), select:hover, input:hover, textarea:hover { filter: brightness(1.08); }
-button:active:not(:disabled){ transform: translateY(1px); }
-button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline:2px solid var(--ui-accent); outline-offset:2px; box-shadow:0 0 18px var(--ui-glow), inset 0 0 0 1px rgba(255,255,255,.12) !important; }
-select option, select optgroup { background:#06131f; color:#dffcff; }
-select option:checked { background:var(--ui-accent); color:#001018; }
-body.theme-holo-blue select, body.theme-holo-blue input, body.theme-holo-blue textarea,
-body.theme-holo-blue .lab select, body.theme-holo-blue .modalPanel select, body.theme-holo-blue .menuPanel select{
-  color-scheme:dark; background:linear-gradient(180deg,rgba(4,38,59,.96),rgba(1,16,28,.96)) !important;
-  color:#e8fdff !important; border-color:rgba(63,242,255,.74) !important;
-  box-shadow:0 0 12px rgba(40,247,255,.16), inset 0 0 16px rgba(40,247,255,.08) !important;
-}
-body.theme-holo-blue select option, body.theme-holo-blue select optgroup { background:#061b2b !important; color:#e8fdff !important; }
-body.theme-holo-blue select option:checked { background:#28f7ff !important; color:#001018 !important; }
-body.theme-holo-blue button.active,
-body.theme-holo-blue .advancedTabs button.active,
-body.theme-holo-blue .typeButtons button.active,
-body.theme-holo-blue .menuActions button.primary,
-body.theme-holo-blue .selected,
-body.theme-holo-blue .shipSwatch.active {
-  background:linear-gradient(90deg,rgba(41,247,255,.95),rgba(140,252,255,.72)) !important;
-  color:#001018 !important; border-color:#e8fdff !important;
-  text-shadow:0 0 8px rgba(255,255,255,.8) !important;
-  box-shadow:0 0 22px rgba(40,247,255,.45), inset 0 0 16px rgba(255,255,255,.20) !important;
-}
-body.theme-holo-blue .botPackGrid, body.theme-holo-blue .localPackBlock, body.theme-holo-blue .localShipBlock,
-body.theme-holo-blue .shipLibraryPanel, body.theme-holo-blue .packTools, body.theme-holo-blue .cleanEditorToolbar,
-body.theme-holo-blue .stageDeep, body.theme-holo-blue .advancedJsonPanel {
-  border-color:rgba(53,221,255,.42) !important; background:rgba(4,31,48,.50) !important;
-  box-shadow:inset 0 0 28px rgba(40,247,255,.055) !important;
-}
-body.theme-holo-blue .panelX, body.theme-holo-blue .alwaysClose { min-width:46px; min-height:40px; }
-body.theme-holo-blue .menuPanel .menuActions button[disabled], body.theme-holo-blue button:disabled { opacity:.45; filter:grayscale(.45); }
-
-
-/* v0.7.33 overlay stacking hotfix: Bot Config must appear above menu/game */
-#botPackLab {
-  position: fixed !important;
-  inset: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)) !important;
-  z-index: 120 !important;
-  width: auto !important;
-  height: auto !important;
-  max-width: none !important;
-  max-height: none !important;
-  pointer-events: auto !important;
-}
-#botPackLab.open { display: grid !important; }
-#botPackLab .labBody { max-height: calc(100dvh - 96px); overflow: auto; }
-#botPackLab::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: rgba(0,0,0,.62);
-  backdrop-filter: blur(2px);
-}
-#botPackLab #botPackGrid {
-  display: grid !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-body.theme-holo-blue #botPackLab {
-  background: linear-gradient(180deg, rgba(4,34,58,.96), rgba(1,13,27,.98)) !important;
-  border: 1px solid rgba(73,235,255,.9) !important;
-  box-shadow: 0 0 48px rgba(33,220,255,.32), inset 0 0 36px rgba(33,220,255,.10), 0 20px 120px rgba(0,0,0,.75) !important;
-}
-body.theme-holo-blue #botPackLab .row b {
-  color:#effcff !important;
-  text-shadow:0 0 8px rgba(40,247,255,.9),0 0 26px rgba(40,247,255,.42) !important;
-}
-
-</style>
-</head>
-<body>
-<div id="app" class="preGame">
-  <canvas id="game"></canvas>
-  <div class="hud">
-    <div class="top">
-      <div class="row">
-        <div class="brand"><div class="mark">*</div><div>WarHeads<br>Classic Enhanced</div><div class="tagline">(ultra early-access, expect changes and updates)</div></div>
-        <button class="icon" id="gameMenu">Menu</button><button class="icon hidden testBack" id="testBackEditor">Back To Editor</button>
-        <div class="turn" id="turnText">PLAYER TURN</div>
-      </div>
-      <div class="stats">
-        <div class="team"><span>Player</span><div class="bar"><span id="pHealth"></span></div></div>
-        <div class="meter" id="timerText">60</div>
-        <div class="team right"><span>Enemy</span><div class="bar"><span id="eHealth"></span></div></div>
-      </div>
-      <div class="damage"><div id="pDmg">Damage dealt 0</div><div style="text-align:right" id="eDmg">Damage taken 0</div></div>
-      <div class="version" id="versionText">v0.7.33</div>
-    </div>
-    <div><div class="toast" id="toast"></div><div class="centerBanner" id="centerBanner"><div class="centerTitle" id="centerTitle"></div><div class="centerSub" id="centerSub"></div><button id="centerButton">MAIN MENU</button></div></div>
-    <div class="bottom">
-      <div class="readouts">
-        <div class="readout"><b id="angleText">45 deg</b><span>Angle</span></div>
-        <div class="readout"><b id="powerText">64</b><span>Power</span></div>
-        <div class="readout"><b id="weaponText">Shell</b><span>Weapon</span></div>
-        <div class="readout"><b id="defenseText">Repel</b><span>Defense</span></div>
-        <div class="readout"><b id="zoomText">100%</b><span>Zoom</span></div>
-      </div>
-      <div class="controls">
-        <label>Angle <input id="angle" type="range" min="0" max="180" value="45"></label>
-        <label>Power <input id="power" type="range" min="20" max="140" value="76"></label>
-        <button class="fire" id="fire">FIRE</button>
-      </div>
-      <div class="strip">
-        <select id="weaponSelect"></select>
-        <button class="primary" id="labOpen">Weapon Editor</button>
-        <select id="defenseSelect">
-          <option value="repel">Repel Field</option>
-          <option value="bounce">Bounce Field</option>
-          <option value="portal">Portal Command</option>
-          <option value="absorb">Absorb Field</option>
-        </select>
-        <button class="icon" id="zoomOut">-</button>
-        <button class="icon" id="zoomIn">+</button>
-      </div>
-    </div>
-  </div>
-  <section class="lab modWeaponEditor" id="lab">
-    <div class="row"><div class="labHeaderTitle"><b>Weapon Editor / Pack Modder</b><span class="labSub">One shared editor for main menu, in-game edits, packs, JSON, and test firing.</span></div><div><button id="labMenu">Main Menu</button><button id="labClose">Close</button></div></div>
-    <div class="labBody">
-      <div class="editorHint">Hover or tap any shot action to see what it does. Each stage can be edited with clear sliders or directly as JSON. Use PACK tools to save a whole weapon pack, choose default weapon, reorder weapons, and export to UserWeaponPacks/.</div>
-      <div class="editorTopGrid">
-        <label>Name <input id="editName" maxlength="32" title="Displayed weapon name. Keep it readable for players."></label>
-        <label>Shot Type <div class="typeButtons"><button id="typeStaged" title="Runs stages by delay and settings.">Staged</button><button id="typeSniper" title="Fast single precision shot using the same stages on impact.">Sniper</button></div></label>
-      </div>
-      <div class="packTools">
-        <label>Active Pack <select id="packSelect"></select></label>
-        <label>Pack Name <input id="packName" maxlength="32" value="Default + My Weapons"></label>
-        <label>Default Weapon <select id="packDefault"></select></label>
-        <label>Weapon Order <select id="packWeaponList" size="5"></select></label>
-        <button id="packMoveUp">Move Up</button><button id="packMoveDown">Move Down</button><button id="packSave" class="primary">Save Pack</button><button id="packExport">Export Pack JSON</button>
-        <button id="packNew">New Pack</button><button id="packCloneWeapon">Clone Weapon Into Pack</button><button id="packDeleteWeapon">Delete Weapon From Pack</button><button id="packRestoreDefaults">Restore Default Shot Types</button>
-      </div>
-      <div id="stageList"></div>
-      <button id="addStage">Add Stage</button>
-      <div class="saveStatus" id="saveStatus"></div>
-      <label>Weapon JSON <textarea id="weaponJson" spellcheck="false"></textarea></label>
-    </div>
-    <div class="labActions"><button id="newWeapon">New Weapon</button><button id="cloneWeapon">Clone Weapon</button><button id="deleteWeapon">Delete Weapon</button><button id="loadJson">Load JSON</button><button id="exportWeapon">Export Weapon</button><button id="exportAll">Export Pack</button><button id="saveWeapon" class="primary bigActionButton">Save Weapon / Pack</button></div>
-  </section>
-  <section class="lab" id="shipLab">
-    <div class="row"><b>Ship Editor</b><div><button id="shipMenu">Main Menu</button><button id="shipClose">Close</button></div></div>
-    <div class="labBody">
-      <label>Name <input id="shipName" maxlength="20" value="My Ship"></label>
-      <div class="shipTools">
-        <label>Paint <input id="shipColor" type="color" value="#66d9ff"></label>
-        <label>Tool <select id="shipTool"><option value="paint">Paint</option><option value="erase">Erase</option></select></label>
-        <div class="shipPreview" id="shipPreview">16x16 PIXEL SHIP</div>
-      </div>
-      <div class="shipEditorPane"><div id="shipGrid" class="shipGrid"></div><div id="shipPalette" class="shipPalette"></div></div>
-      <div class="saveStatus" id="shipStatus"></div>
-      <label>Ship JSON <textarea id="shipJson" spellcheck="false"></textarea></label>
-    </div>
-    <div class="labActions"><button id="shipNew">New</button><button id="shipRandom">Random</button><button id="shipMirror">Mirror</button><button id="shipLoadJson">Load JSON</button><button id="shipExport">Export Ships</button><button id="shipSave">Save Ship</button></div>
-  </section>
-  <section class="menu" id="menu">
-    <div class="menuPanel">
-      <div class="menuLogo">
-        <div class="logoMain">WarHeads</div>
-        <div class="logoSub">Classic Enhanced</div>
-      </div>
-      <div class="menuActions">
-        <button class="primary" id="menuCreate">BOT PLAY</button>
-        <button id="menuLan" title="Local turn-based LAN/hot-seat setup">LOCAL LAN</button>
-        <button id="menuMultiplayer" title="Open website multiplayer lobby">MULTIPLAYER</button>
-        <button id="menuOptions">OPTIONS</button>
-        <button id="menuShipEditor">SHIP EDITOR</button>
-        <button id="menuEditor">WEAPON EDITOR</button>
-      </div>
-      <button id="menuEditorStart" class="hidden" type="button">Legacy 5 Minute Weapon Editor</button>
-      <div id="optionsPanel" class="hidden menuGrid modalPanel">
-        <button id="optionsClose" class="panelX" type="button" title="Close Options">X</button>
-        <label>Bot Players <select id="menuPlayers"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option selected>8</option></select></label>
-        <label>Turn Length <select id="menuTurn"><option value="30">30 sec</option><option value="45">45 sec</option><option value="60">60 sec</option><option value="90">90 sec</option><option value="120" selected>120 sec</option></select></label>
-        <label>Missed Shots <select id="menuPhysics"><option value="teleport">Teleport Wrap</option><option value="bounce" selected>Wall Bounce Classic</option></select></label>
-        <label>Aim Arc <select id="menuAimArc"><option value="0-180">Classic 0-180</option><option value="10-170">Safe 10-170</option><option value="0-360" selected>Full 360</option></select></label>
-        <label>Player Pack <select id="menuPlayerPack"><option value="gold" selected>Default + My Weapons</option><option value="generated">Generated Chaos + My Weapons</option><option value="saved">My Weapons Only</option></select></label>
-        <label>Add Saved Pack <select id="menuUsePack"><option value="yes" selected>Yes</option><option value="no">No</option></select></label>
-        <label>UFO Events <select id="menuUfoRate"><option value="0">Off</option><option value="15" selected>Often (15-30m)</option><option value="30">Rare</option><option value="5">Chaos Test</option><option value="custom">Custom</option></select></label>
-        <label>UFO Min Minutes <input id="menuUfoMinTime" type="number" min="1" max="180" value="15"></label>
-        <label>UFO Max Minutes <input id="menuUfoMaxTime" type="number" min="1" max="240" value="30"></label>
-        <label>Max UFOs <select id="menuUfoMax"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label>
-        <label>Boss Chance <select id="menuBossChance"><option value="0">Off</option><option value="0.02" selected>Very Rare</option><option value="0.08">Rare</option><option value="0.2">Chaos Test</option></select></label>
-        <label>Music <select id="menuMusic"><option value="on" selected>On</option><option value="off">Off</option></select></label>
-        <label>Music Volume <input id="menuMusicVolume" type="range" min="0" max="100" value="35"></label>
-        <label>Music Track <select id="menuMusicTrack"><option value="rotate" selected>Rotate 12 Chiptunes</option><option value="0">Orbit Waltz</option><option value="1">Pixel Comet</option><option value="2">Deep Space Drift</option><option value="3">Victory Static</option></select></label>
-
-        <div class="botPackGrid" id="botPackGrid"><div class="wide">Bot / LAN Pack Assignment</div>
-          <label>Bot Difficulty <select id="botDifficulty"><option value="easy">Easy</option><option value="normal" selected>Normal</option><option value="skilled">Skilled</option><option value="very skilled">Very Skilled</option></select></label>
-          <label>Random Bot Difficulty <select id="botDifficultyRandom"><option value="yes" selected>Yes</option><option value="no">No</option></select></label>
-          <label>Default Bot Pack <select id="botDefaultPack"></select></label>
-          <label>Human/LAN Player Pack <select id="humanDefaultPack"></select></label>
-          <label>Bot 1 Pack <select id="botPack1"></select></label><label>Bot 2 Pack <select id="botPack2"></select></label>
-          <label>Bot 3 Pack <select id="botPack3"></select></label><label>Bot 4 Pack <select id="botPack4"></select></label>
-          <label>Bot 5 Pack <select id="botPack5"></select></label><label>Bot 6 Pack <select id="botPack6"></select></label>
-          <label>Bot 7 Pack <select id="botPack7"></select></label><label>Bot 8 Pack <select id="botPack8"></select></label>
-        </div>
-        <button id="optionsAdvanced" class="primary">ADVANCED</button>
-        <button id="optionsBack">Close / Main Menu</button>
-      </div>
-
-      <div id="advancedPanel" class="hidden menuGrid modalPanel">
-        <button id="advancedClose" class="panelX" type="button" title="Close Advanced Options">X</button>
-        <div class="panelTitle">Advanced Mod Options</div>
-        <div class="advancedNote">Quick how-to: hover any setting for help, move sliders to tune the game, then Apply / Save. Use ADVANCED JSON for exact edits, Export to share presets, or Reset to restore defaults.</div>
-        <div class="advancedTabs">
-          <button type="button" data-advtab="gameplay" class="active">Gameplay</button>
-          <button type="button" data-advtab="physics">Physics</button>
-          <button type="button" data-advtab="planets">Planets</button>
-          <button type="button" data-advtab="chaos">Chaos/VFX</button>
-          <button type="button" data-advtab="assets">Assets</button>
-        </div>
-        <div id="advPage_gameplay" class="advancedPage open">
-          <label>Max Health <input id="advMaxHealth" type="number" min="50" max="5000" value="300"></label>
-          <label>Absorb Hits <input id="advAbsorbHits" type="number" min="1" max="25" value="5"></label>
-          <label>Fire Suspense Delay MS <input id="advFireDelay" type="number" min="0" max="6000" value="1850"></label>
-          <label>Post Shot Pause MS <input id="advPostShotPause" type="number" min="500" max="8000" value="2400"></label>
-          <label>Bot Procedural Weapons <input id="advBotProcWeapons" type="number" min="0" max="48" value="8"></label>
-          <label>Bot Mutation Chance % <input id="advBotMutationChance" type="number" min="0" max="100" value="55"></label>
-          <label>Stage Count Cap <input id="advStageCountCap" type="number" min="1" max="24" value="8"></label>
-          <label>Stage Damage Cap <input id="advStageDamageCap" type="number" min="10" max="1000" value="160"></label>
-        </div>
-        <div id="advPage_physics" class="advancedPage">
-          <label>Soft Homing <input id="advSoftHoming" type="number" min="0" max="0.5" step="0.001" value="0.034"></label>
-          <label>Explicit Homing Boost <input id="advHomingBoost" type="number" min="0" max="1" step="0.01" value="0.12"></label>
-          <label>Planet Gravity Strength <input id="advGravityStrength" type="number" min="0" max="2" step="0.01" value="0.22"></label>
-          <label>Planet Gravity Max Pull <input id="advGravityMaxPull" type="number" min="0" max="2" step="0.01" value="0.18"></label>
-          <label>Max Shot Speed <input id="advMaxShotSpeed" type="number" min="4" max="80" step="0.5" value="18"></label>
-          <label>Shot Power Scale <input id="advShotPowerScale" type="number" min="0.05" max="1" step="0.01" value="0.18"></label>
-          <label>Bounce Damping <input id="advBounceDamping" type="number" min="0.1" max="1.4" step="0.01" value="0.86"></label>
-          <label>Shot Max Life MS <input id="advShotMaxLife" type="number" min="5000" max="120000" value="34000"></label>
-        </div>
-        <div id="advPage_planets" class="advancedPage">
-          <label>Planet Cap Base <input id="advPlanetCapBase" type="number" min="1" max="80" value="14"></label>
-          <label>Planet Cap Per Player <input id="advPlanetCapPerPlayer" type="number" min="0" max="20" step="0.5" value="5"></label>
-          <label>Low Planet Floor Base <input id="advPlanetFloorBase" type="number" min="0" max="20" value="1"></label>
-          <label>Low Planet Floor Max <input id="advPlanetFloorMax" type="number" min="0" max="20" value="4"></label>
-          <label>Destruction Scale <input id="advPlanetDestructionScale" type="number" min="0.05" max="8" step="0.05" value="1"></label>
-          <label>Build / Create Scale <input id="advPlanetBuildScale" type="number" min="0.05" max="8" step="0.05" value="1"></label>
-          <label>Repair / Heal Scale <input id="advPlanetRepairScale" type="number" min="0.05" max="8" step="0.05" value="1"></label>
-          <label>Playfield Margin <input id="advPlayfieldMargin" type="number" min="0" max="600" value="150"></label>
-          <label>World Width Base <input id="advWorldWidthBase" type="number" min="1600" max="12000" value="2800"></label>
-          <label>World Height Base <input id="advWorldHeightBase" type="number" min="1000" max="9000" value="1800"></label>
-        </div>
-        <div id="advPage_chaos" class="advancedPage">
-          <label>Max Live Shots <input id="advMaxLiveShots" type="number" min="8" max="1000" value="128"></label>
-          <label>Warheads Per Turn <input id="advWarheadsPerTurn" type="number" min="8" max="1500" value="156"></label>
-          <label>Walkers Per Turn <input id="advWalkersPerTurn" type="number" min="0" max="128" value="12"></label>
-          <label>Max Live Walkers <input id="advMaxLiveWalkers" type="number" min="0" max="256" value="20"></label>
-          <label>Max Particles <input id="advMaxParticles" type="number" min="100" max="8000" value="1500"></label>
-          <label>Particle Scale <input id="advParticleScale" type="number" min="0.1" max="5" step="0.05" value="1"></label>
-          <label>Max Beams <input id="advMaxBeams" type="number" min="10" max="2000" value="170"></label>
-          <label>Max Trail Points <input id="advMaxTrailPoints" type="number" min="4" max="300" value="58"></label>
-          <label>Heavy SFX Cap <input id="advHeavySfxCap" type="number" min="1" max="40" value="5"></label>
-          <label>Light SFX Cap <input id="advLightSfxCap" type="number" min="1" max="60" value="9"></label>
-        </div>
-        <div id="advPage_assets" class="advancedPage">
-          <div class="advancedNote">Asset folders used by WarHeads. Put hosted/custom files in the matching folder, register them here, then reference them from your presets.</div>
-          <div class="folderList">
-            <code>MUSIC/</code><code>SOUNDS/</code><code>TEXTURES/</code><code>PARTICLES/</code><code>SCRIPTS/</code><code>OTHER/</code>
-          </div>
-          <label class="wide">Import Mod Settings JSON <input id="advImportSettings" type="file" accept="application/json,.json"></label>
-          <label class="wide">Register Local Asset Files <input id="advAssetFiles" type="file" multiple></label>
-          <textarea id="advAssetStatus" class="wide" readonly rows="5" placeholder="Registered asset filenames will appear here for your mod notes."></textarea>
-          <div class="miniButtons"><button type="button" id="advExportSettings">Export Settings JSON</button><button type="button" id="advFolderGuide">Download Folder Guide</button><button type="button" id="advResetDefaults">Reset Advanced Defaults</button></div>
-        </div>
-        <button class="primary panelWide" id="advancedSave">Apply / Save Advanced Settings</button>
-        <button class="panelWide" id="advancedBack">Back To Options</button>
-      </div>
-
-      <div id="localLanPanel" class="hidden menuGrid modalPanel">
-        <button id="localLanClose" class="panelX" type="button" title="Close Local LAN setup">X</button>
-        <div class="panelTitle">Local Turn-Based LAN</div>
-        <div class="menuNote panelWide">Same-screen / local turn-based setup. Pick humans and bots. If humans are 0, it becomes a full bot battle. BOT PLAY is untouched.</div>
-        <label>Human Players <select id="localHumans"><option value="0">0 - Bot Battle</option><option value="1">1 Human</option><option value="2" selected>2 Humans</option><option value="3">3 Humans</option><option value="4">4 Humans</option></select></label>
-        <label>Bot Players <select id="localBots"><option value="0">0 Bots</option><option value="1">1 Bot</option><option value="2" selected>2 Bots</option><option value="3">3 Bots</option><option value="4">4 Bots</option><option value="5">5 Bots</option><option value="6">6 Bots</option><option value="7">7 Bots</option><option value="8">8 Bots</option></select></label>
-        <label>Turn Length <select id="localTurn"><option value="30">30 sec</option><option value="45">45 sec</option><option value="60">60 sec</option><option value="90">90 sec</option><option value="120" selected>120 sec</option></select></label>
-        <label>Missed Shots <select id="localPhysics"><option value="teleport">Teleport Wrap</option><option value="bounce" selected>Wall Bounce Classic</option></select></label>
-        <button class="primary panelWide" id="localStart">START LOCAL MATCH</button>
-        <button class="panelWide" id="localBack">Main Menu</button>
-      </div>
-      <div class="menuNote gameCredit">WarHeads Classic Enhanced v0.7.33 &nbsp;|&nbsp; Developed By: Elemental Spark &nbsp;|&nbsp; <a href="https://www.elementalspark.com" target="_blank" rel="noopener">www.elementalspark.com</a></div>
-    </div>
-  </section>
-</div>
-<script>
 window.addEventListener('error', e => {
   const box = document.createElement('div');
   box.style.cssText = 'position:fixed;left:12px;right:12px;top:72px;z-index:9999;padding:12px;border:1px solid #ff7b55;border-radius:8px;background:#210d0a;color:#ffe9dc;font:700 13px system-ui';
@@ -1092,7 +539,7 @@ function markShipEditorClean(){shipEditorCleanState=compactEditorJson($('shipJso
 function isShipEditorDirty(){return !!($('shipLab')&&$('shipLab').classList.contains('open')&&compactEditorJson($('shipJson')?.value||'')!==shipEditorCleanState)}
 function confirmLeaveShipEditor(){return !isShipEditorDirty()||confirm('Ship editor has unsaved changes. Leave without saving?')}
 function closeShipEditor(toMain=false){if(!confirmLeaveShipEditor())return false;shipPainting=false;$('shipLab').classList.remove('open');if(toMain||!inGame){returnToMainMenu()}else{if(ui.menu)ui.menu.classList.add('hidden');setGameLoaded(true)}return true}
-$('labOpen').onclick=openLab;$('gameMenu').onclick=()=>{ui.menu.classList.remove('hidden')};let testBackButton=$('testBackEditor');if(testBackButton)testBackButton.onclick=backToWeaponEditor;$('labMenu').onclick=()=>closeWeaponEditor(true);$('menuEditor').onclick=()=>{clearGameSession();setGameLoaded(false);showMenuPanel(null);ui.menu.classList.add('hidden');openLab()};ui.editName.oninput=syncJson;$('typeStaged').onclick=()=>{setEditorType('staged');syncJson()};$('typeSniper').onclick=()=>{setEditorType('sniper');syncJson()};$('labClose').onclick=()=>closeWeaponEditor(false);$('addStage').onclick=()=>{let w=readEditor();if(w.stages.length<10)w.stages.push(normStage({delay:w.stages.length*180,action:'explode',radius:28,damage:12,count:1}));weaponDefs[editing]=w;renderStages(w);syncJson()};$('saveWeapon').onclick=()=>{let wasInGame=inGame&&ships.length>0;let saved=readEditor(),base=weaponDefs[editing]||null;try{let j=JSON.parse(ui.weaponJson.value);if(j&&j.id&&!defaultWeapons.some(w=>w.id===j.id))saved.id=j.id;if(j&&/^#[0-9a-f]{6}$/i.test(j.color||''))saved.color=j.color}catch(e){}if(base&&!base.playerMade&&base.id&&defaultWeapons.some(w=>w.id===base.id))saved.id='custom-'+Date.now();saved=normWeapon({...saved,playerMade:true});saved=equipSavedWeapon(saved);addWeaponToCurrentPack(saved);saveCurrentPack();weaponDefs=loadWeapons();refreshSavedWeaponsInPacks(saved);editing=weaponDefs.findIndex(x=>x.id===saved.id);if(playerWeapons[0]){playerWeapons[0]=ensureWeaponInLoadout(playerWeapons[0],saved);selected=playerWeapons[0].findIndex(x=>x.id===saved.id)}renderWeaponSelect();ui.weaponJson.value=JSON.stringify(saved,null,2);markWeaponEditorClean();ui.saveStatus.textContent=`Saved "${saved.name}" and equipped it.`;ui.lab.classList.remove('open');if(!wasInGame){startWeaponTest(saved)}else{if(ui.menu)ui.menu.classList.add('hidden');toast('Weapon saved to selected pack, equipped, and ready to fire.');syncUI()}};$('loadJson').onclick=()=>{try{let d=JSON.parse(ui.weaponJson.value),defs=defaultWeaponIds();if(Array.isArray(d)){d.map(x=>normWeapon({...x,playerMade:!!x.playerMade||!defs.has(String(x.id||''))})).forEach(w=>{let i=weaponDefs.findIndex(x=>x.id===w.id);if(i>=0)weaponDefs[i]=w;else weaponDefs.push(w)})}else{let w=normWeapon({...d,playerMade:true});let i=weaponDefs.findIndex(x=>x.id===w.id);if(i>=0)weaponDefs[i]=w;else weaponDefs.push(w);editing=weaponDefs.findIndex(x=>x.id===w.id)}saveWeapons();weaponDefs=loadWeapons();refreshSavedWeaponsInPacks();renderWeaponSelect();loadEditor();markWeaponEditorClean();toast('JSON loaded into weapon pack.');syncUI()}catch(e){toast('Invalid JSON.')}};$('newWeapon').onclick=()=>{let w=normWeapon({id:'custom-'+Date.now(),name:'',playerMade:true,stages:Array.from({length:6},(_,i)=>({delay:i*150,action:i%2?'burst':'explode',radius:22+i*2,damage:8+i,count:i%2?3:1}))});weaponDefs.push(w);saveWeapons();editing=weaponDefs.length-1;if(playerWeapons[0]){playerWeapons[0]=ensureWeaponInLoadout(playerWeapons[0],w);selected=playerWeapons[0].findIndex(x=>x.id===w.id)}else selected=editing;renderWeaponSelect();loadEditor();syncUI()};$('cloneWeapon').onclick=()=>{let w=normWeapon({...JSON.parse(JSON.stringify(weaponDefs[editing])),playerMade:true});w.id='custom-'+Date.now();weaponDefs.push(w);saveWeapons();editing=weaponDefs.length-1;if(playerWeapons[0]){playerWeapons[0]=ensureWeaponInLoadout(playerWeapons[0],w);selected=playerWeapons[0].findIndex(x=>x.id===w.id)}else selected=editing;renderWeaponSelect();loadEditor();syncUI()};$('exportAll').onclick=()=>ui.weaponJson.value=JSON.stringify(makeSelectedPlayerLoadout(),null,2);$('menuCreate').onclick=()=>{settings.playerPackChoice=(ui.menuPlayerPack&&ui.menuPlayerPack.value)||'gold';settings.packMode=settings.playerPackChoice;localStorage.setItem('warheads.playerPackChoice',settings.playerPackChoice);startBotPlay();startMusic()};let legacyEditorButton=$('menuEditorStart');if(legacyEditorButton)legacyEditorButton.onclick=()=>{$('menuEditor').click()};$('menuLan').onclick=openLocalLanSetup;$('menuMultiplayer').onclick=()=>{window.location.href='warheads/multiplayer/index.html'};if($('menuLan'))$('menuLan').disabled=false;if($('menuMultiplayer')){$('menuMultiplayer').disabled=false;$('menuMultiplayer').removeAttribute('aria-disabled')};if($('localStart'))$('localStart').onclick=startLocalLanMatch;if($('localBack'))$('localBack').onclick=()=>showMenuPanel(null);if($('localLanClose'))$('localLanClose').onclick=()=>showMenuPanel(null);$('menuOptions').onclick=()=>{let opening=ui.optionsPanel.classList.contains('hidden');showMenuPanel(opening?'optionsPanel':null);startMusic()};$('optionsBack').onclick=()=>showMenuPanel(null);if($('optionsClose'))$('optionsClose').onclick=()=>showMenuPanel(null);if(ui.menuAimArc){ui.menuAimArc.value='0-360';ui.menuAimArc.onchange=applyAimArcOptions;applyAimArcOptions()}if(ui.menuUfoRate){ui.menuUfoRate.value='15';ui.menuUfoRate.onchange=readUfoOptions}if(ui.menuUfoMinTime)ui.menuUfoMinTime.onchange=()=>{if(ui.menuUfoRate)ui.menuUfoRate.value='custom';readUfoOptions()};if(ui.menuUfoMaxTime)ui.menuUfoMaxTime.onchange=()=>{if(ui.menuUfoRate)ui.menuUfoRate.value='custom';readUfoOptions()};if(ui.menuTurn)ui.menuTurn.value='120';if(ui.menuPhysics)ui.menuPhysics.value='bounce';if($('localTurn'))$('localTurn').value='120';if($('localPhysics'))$('localPhysics').value='bounce';readUfoOptions();if(ui.menuMusic){ui.menuMusic.value=settings.musicOn?'on':'off';ui.menuMusic.onchange=applyMusicOptions}if(ui.menuMusicVolume){ui.menuMusicVolume.value=settings.musicVolume;ui.menuMusicVolume.oninput=applyMusicOptions}if(ui.menuMusicTrack){populateMusicTracks();ui.menuMusicTrack.onchange=applyMusicOptions}tryLoadMusicFolder();
+$('labOpen').onclick=openLab;$('gameMenu').onclick=()=>{ui.menu.classList.remove('hidden')};let testBackButton=$('testBackEditor');if(testBackButton)testBackButton.onclick=backToWeaponEditor;$('labMenu').onclick=()=>closeWeaponEditor(true);$('menuEditor').onclick=()=>{clearGameSession();setGameLoaded(false);showMenuPanel(null);ui.menu.classList.add('hidden');openLab()};ui.editName.oninput=syncJson;$('typeStaged').onclick=()=>{setEditorType('staged');syncJson()};$('typeSniper').onclick=()=>{setEditorType('sniper');syncJson()};$('labClose').onclick=()=>closeWeaponEditor(false);$('addStage').onclick=()=>{let w=readEditor();if(w.stages.length<10)w.stages.push(normStage({delay:w.stages.length*180,action:'explode',radius:28,damage:12,count:1}));weaponDefs[editing]=w;renderStages(w);syncJson()};$('saveWeapon').onclick=()=>{let wasInGame=inGame&&ships.length>0;let saved=readEditor(),base=weaponDefs[editing]||null;try{let j=JSON.parse(ui.weaponJson.value);if(j&&j.id&&!defaultWeapons.some(w=>w.id===j.id))saved.id=j.id;if(j&&/^#[0-9a-f]{6}$/i.test(j.color||''))saved.color=j.color}catch(e){}if(base&&!base.playerMade&&base.id&&defaultWeapons.some(w=>w.id===base.id))saved.id='custom-'+Date.now();saved=normWeapon({...saved,playerMade:true});saved=equipSavedWeapon(saved);addWeaponToCurrentPack(saved);saveCurrentPack();weaponDefs=loadWeapons();refreshSavedWeaponsInPacks(saved);editing=weaponDefs.findIndex(x=>x.id===saved.id);if(playerWeapons[0]){playerWeapons[0]=ensureWeaponInLoadout(playerWeapons[0],saved);selected=playerWeapons[0].findIndex(x=>x.id===saved.id)}renderWeaponSelect();ui.weaponJson.value=JSON.stringify(saved,null,2);markWeaponEditorClean();ui.saveStatus.textContent=`Saved "${saved.name}" and equipped it.`;ui.lab.classList.remove('open');if(!wasInGame){startWeaponTest(saved)}else{if(ui.menu)ui.menu.classList.add('hidden');toast('Weapon saved to selected pack, equipped, and ready to fire.');syncUI()}};$('loadJson').onclick=()=>{try{let d=JSON.parse(ui.weaponJson.value),defs=defaultWeaponIds();if(Array.isArray(d)){d.map(x=>normWeapon({...x,playerMade:!!x.playerMade||!defs.has(String(x.id||''))})).forEach(w=>{let i=weaponDefs.findIndex(x=>x.id===w.id);if(i>=0)weaponDefs[i]=w;else weaponDefs.push(w)})}else{let w=normWeapon({...d,playerMade:true});let i=weaponDefs.findIndex(x=>x.id===w.id);if(i>=0)weaponDefs[i]=w;else weaponDefs.push(w);editing=weaponDefs.findIndex(x=>x.id===w.id)}saveWeapons();weaponDefs=loadWeapons();refreshSavedWeaponsInPacks();renderWeaponSelect();loadEditor();markWeaponEditorClean();toast('JSON loaded into weapon pack.');syncUI()}catch(e){toast('Invalid JSON.')}};$('newWeapon').onclick=()=>{let w=normWeapon({id:'custom-'+Date.now(),name:'',playerMade:true,stages:Array.from({length:6},(_,i)=>({delay:i*150,action:i%2?'burst':'explode',radius:22+i*2,damage:8+i,count:i%2?3:1}))});weaponDefs.push(w);saveWeapons();editing=weaponDefs.length-1;if(playerWeapons[0]){playerWeapons[0]=ensureWeaponInLoadout(playerWeapons[0],w);selected=playerWeapons[0].findIndex(x=>x.id===w.id)}else selected=editing;renderWeaponSelect();loadEditor();syncUI()};$('cloneWeapon').onclick=()=>{let w=normWeapon({...JSON.parse(JSON.stringify(weaponDefs[editing])),playerMade:true});w.id='custom-'+Date.now();weaponDefs.push(w);saveWeapons();editing=weaponDefs.length-1;if(playerWeapons[0]){playerWeapons[0]=ensureWeaponInLoadout(playerWeapons[0],w);selected=playerWeapons[0].findIndex(x=>x.id===w.id)}else selected=editing;renderWeaponSelect();loadEditor();syncUI()};$('exportAll').onclick=()=>ui.weaponJson.value=JSON.stringify(makeSelectedPlayerLoadout(),null,2);$('menuCreate').onclick=()=>{settings.playerPackChoice=(ui.menuPlayerPack&&ui.menuPlayerPack.value)||'gold';settings.packMode=settings.playerPackChoice;localStorage.setItem('warheads.playerPackChoice',settings.playerPackChoice);startBotPlay();startMusic()};let legacyEditorButton=$('menuEditorStart');if(legacyEditorButton)legacyEditorButton.onclick=()=>{$('menuEditor').click()};$('menuLan').onclick=openLocalLanSetup;$('menuMultiplayer').onclick=()=>{};if($('menuLan'))$('menuLan').disabled=false;if($('menuMultiplayer'))$('menuMultiplayer').disabled=true;if($('localStart'))$('localStart').onclick=startLocalLanMatch;if($('localBack'))$('localBack').onclick=()=>showMenuPanel(null);if($('localLanClose'))$('localLanClose').onclick=()=>showMenuPanel(null);$('menuOptions').onclick=()=>{let opening=ui.optionsPanel.classList.contains('hidden');showMenuPanel(opening?'optionsPanel':null);startMusic()};$('optionsBack').onclick=()=>showMenuPanel(null);if($('optionsClose'))$('optionsClose').onclick=()=>showMenuPanel(null);if(ui.menuAimArc){ui.menuAimArc.value='0-360';ui.menuAimArc.onchange=applyAimArcOptions;applyAimArcOptions()}if(ui.menuUfoRate){ui.menuUfoRate.value='15';ui.menuUfoRate.onchange=readUfoOptions}if(ui.menuUfoMinTime)ui.menuUfoMinTime.onchange=()=>{if(ui.menuUfoRate)ui.menuUfoRate.value='custom';readUfoOptions()};if(ui.menuUfoMaxTime)ui.menuUfoMaxTime.onchange=()=>{if(ui.menuUfoRate)ui.menuUfoRate.value='custom';readUfoOptions()};if(ui.menuTurn)ui.menuTurn.value='120';if(ui.menuPhysics)ui.menuPhysics.value='bounce';if($('localTurn'))$('localTurn').value='120';if($('localPhysics'))$('localPhysics').value='bounce';readUfoOptions();if(ui.menuMusic){ui.menuMusic.value=settings.musicOn?'on':'off';ui.menuMusic.onchange=applyMusicOptions}if(ui.menuMusicVolume){ui.menuMusicVolume.value=settings.musicVolume;ui.menuMusicVolume.oninput=applyMusicOptions}if(ui.menuMusicTrack){populateMusicTracks();ui.menuMusicTrack.onchange=applyMusicOptions}tryLoadMusicFolder();
 
 function makeRandomShipCells(){let cols=['#66d9ff','#ff7b55','#ffd21a','#b9ffd4','#cba6ff'],main=cols[Math.floor(rand(0,cols.length))],accent=cols[Math.floor(rand(0,cols.length))],cells=[];for(let y=1;y<15;y++){for(let x=0;x<8;x++){let edge=7-x,wide=clamp(2+Math.sin(y/15*Math.PI)*5+rand(-1,1),1,7);if(edge<wide&&(Math.random()<.82||y>10)){let c=Math.random()<.16?accent:main;cells.push({x,y,c});cells.push({x:15-x,y,c})}}}cells.push({x:7,y:1,c:'#ffffff'},{x:8,y:1,c:'#ffffff'},{x:6,y:14,c:'#ff7b55'},{x:9,y:14,c:'#ff7b55'});return cells}
 const shipPaletteColors=['#66d9ff','#b9ffd4','#ffffff','#244a55','#3b7a86','#1c3036','#ff7b55','#ffb15f','#ffd21a','#cba6ff','#ff4dff','#63ff1a','#0b1d13','#07130c','#000000'];
@@ -1121,8 +568,8 @@ const advFieldMap={
 function fillAdvancedOptions(){Object.entries(advFieldMap).forEach(([id,key])=>{let el=$(id);if(el&&modSettings[key]!=null)el.value=modSettings[key]});let asset=$('advAssetStatus');if(asset)asset.value=localStorage.getItem('warheads.assetManifest')||''}
 function readAdvancedOptions(){Object.entries(advFieldMap).forEach(([id,key])=>{let el=$(id);if(el){let v=+el.value;modSettings[key]=Number.isFinite(v)?v:DEFAULT_MOD_SETTINGS[key]}});applyModSettings();saveModSettings();if(ships.length){ships.forEach(s=>{s.maxHp=Math.max(s.maxHp||MAX_HEALTH,MAX_HEALTH);s.hp=clamp(s.hp,0,s.maxHp)});syncUI()}return modSettings}
 function showAdvancedPage(name){document.querySelectorAll('.advancedPage').forEach(p=>p.classList.toggle('open',p.id==='advPage_'+name));document.querySelectorAll('[data-advtab]').forEach(b=>b.classList.toggle('active',b.dataset.advtab===name))}
-function exportAdvancedSettings(){let data={version:'v0.7.33',name:'WarHeads Classic Enhanced Mod Settings',settings:readAdvancedOptions()};downloadJsonFile('WarHeads-MOD_SETTINGS-v0.7.33.json',data)}
-function downloadFolderGuide(){let guide=`WarHeads Classic Enhanced v0.7.33 Mod Folders\n\nMUSIC/ - playlist.json and custom music files\nSOUNDS/ - custom launch/impact/UI sounds\nTEXTURES/ - planet, ship, UI and border art\nPARTICLES/ - particle and VFX presets\nSCRIPTS/ - local experimental scripts/presets\nOTHER/ - notes or uncategorized mod assets\n\nExport Advanced Settings from Options > Advanced and place shared presets beside these folders.`;try{let blob=new Blob([guide],{type:'text/plain'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='WarHeads_Mod_Folder_Guide_v0.7.33.txt';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},800)}catch(e){}}
+function exportAdvancedSettings(){let data={version:'v0.7.30',name:'WarHeads Classic Enhanced Mod Settings',settings:readAdvancedOptions()};downloadJsonFile('WarHeads-MOD_SETTINGS-v0.7.30.json',data)}
+function downloadFolderGuide(){let guide=`WarHeads Classic Enhanced v0.7.30 Mod Folders\n\nMUSIC/ - playlist.json and custom music files\nSOUNDS/ - custom launch/impact/UI sounds\nTEXTURES/ - planet, ship, UI and border art\nPARTICLES/ - particle and VFX presets\nSCRIPTS/ - local experimental scripts/presets\nOTHER/ - notes or uncategorized mod assets\n\nExport Advanced Settings from Options > Advanced and place shared presets beside these folders.`;try{let blob=new Blob([guide],{type:'text/plain'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='WarHeads_Mod_Folder_Guide_v0.7.30.txt';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},800)}catch(e){}}
 function importAdvancedSettingsFile(file){if(!file)return;let r=new FileReader();r.onload=()=>{try{let data=JSON.parse(r.result),incoming=data.settings||data;modSettings={...DEFAULT_MOD_SETTINGS,...incoming};applyModSettings();saveModSettings();fillAdvancedOptions();toast('Advanced mod settings imported.',1400)}catch(e){toast('Invalid mod settings JSON.',1600)}};r.readAsText(file)}
 function registerAssetFiles(files){let names=[...files].map(f=>f.name);let text='Registered local assets for notes only:\n'+names.join('\n');localStorage.setItem('warheads.assetManifest',text);if($('advAssetStatus'))$('advAssetStatus').value=text;toast(`${names.length} asset file name${names.length===1?'':'s'} registered.`,1200)}
 if($('optionsAdvanced'))$('optionsAdvanced').onclick=()=>{fillAdvancedOptions();showMenuPanel('advancedPanel')};
@@ -1140,9 +587,9 @@ fillAdvancedOptions();
 addEventListener('beforeunload',e=>{if(isWeaponEditorDirty()||isShipEditorDirty()){e.preventDefault();e.returnValue=''}});
 
 
-/* v0.7.33 Weapon Editor / Pack Modding Overhaul */
-const WCE_VERSION='v0.7.33';
-if($('versionText'))$('versionText').textContent='v0.7.33';
+/* v0.7.30 Weapon Editor / Pack Modding Overhaul */
+const WCE_VERSION='v0.7.30';
+if($('versionText'))$('versionText').textContent='v0.7.30';
 const SHOT_ACTIONS={
   Impact:[['explode','Explode / Crater'],['dig','DIG - Direct Tunneling Line'],['laser','Laser Beam'],['napalm','Napalm Carve'],['magnet','Magnet / Vortex']],
   Splitters:[['splitter','Tunneling Splitter'],['split','Simple Split'],['burst','Burst Ring'],['cluster','Cluster'],['warburst','Warburst']],
@@ -1238,12 +685,12 @@ setTimeout(installEditorModEvents,0);
 
 
 
-/* v0.7.33 clean UI / simple weapon editor / pack + LAN pack recovery */
+/* v0.7.30 clean UI / simple weapon editor / pack + LAN pack recovery */
 function WCE716_installCleanRecovery(){
   try{
     document.body.classList.add(localStorage.getItem('warheads.uiTheme')||'theme-deep-blue');
     document.documentElement.style.setProperty('--custom-menu-color', localStorage.getItem('warheads.uiColor')||'#35c8ff');
-    if($('versionText')) $('versionText').textContent='v0.7.33';
+    if($('versionText')) $('versionText').textContent='v0.7.30';
     ui.lab.classList.add('cleanWeaponEditor');
     let title=document.querySelector('#lab .labHeaderTitle');
     if(title){ title.innerHTML='<b>Weapon Editor</b><span class="labSub">Quick weapon building first. Deep stage JSON, pack editing, and mod controls live behind buttons.</span>'; }
@@ -1330,7 +777,7 @@ function WCE716_installCleanRecovery(){
     if($('menuEditor')) $('menuEditor').onclick=()=>{clearGameSession();setGameLoaded(false);showMenuPanel(null);ui.menu.classList.add('hidden');openLab();};
     if($('menuOptions')) $('menuOptions').onclick=()=>{let opening=ui.optionsPanel.classList.contains('hidden');showMenuPanel(opening?'optionsPanel':null);startMusic();};
     if($('menuLan')) $('menuLan').onclick=()=>{openLocalLanSetup(); WCE716_populateLocalPackDropdowns(); WCE716_syncLocalPacks();};
-  }catch(e){console.warn('v0.7.33 clean recovery install failed',e)}
+  }catch(e){console.warn('v0.7.30 clean recovery install failed',e)}
 }
 function WCE716_populateLocalPackDropdowns(){
   try{
@@ -1373,9 +820,9 @@ function openLab(){let load=(inGame&&ships.length?currentLoadout():(playerWeapon
 function makeHumanLoadoutForSlot(slot=0){let id=($('localHumanPack'+(slot+1))?.value)||($('humanDefaultPack')?.value)||settings.playerPackChoice||'gold';return String(id).startsWith('pack:')?loadoutFromPackId(id):(id==='all'?[...allWeaponMap().values()]:makeSelectedPlayerLoadout())}
 
 
-/* v0.7.33 startup-safe overrides + ship library / LAN ship assignment */
+/* v0.7.30 startup-safe overrides + ship library / LAN ship assignment */
 (function(){
-  const VERSION_0719='v0.7.33';
+  const VERSION_0719='v0.7.30';
   function safeNum(v,d){v=+v;return Number.isFinite(v)?v:d}
   function safeUniqueWeapons(list){return uniqueWeapons(list||[])}
 
@@ -1455,7 +902,7 @@ function makeHumanLoadoutForSlot(slot=0){let id=($('localHumanPack'+(slot+1))?.v
   readShipEditor = function(id=null){let existing=null;try{existing=JSON.parse($('shipJson').value||'null')}catch(e){}let botMade=!!existing?.botMade||String(existing?.id||id||'').startsWith('botship-');return normShipSprite({id:id||existing?.id||((botMade?'botship-edit-':'ship-')+Date.now()),name:$('shipName').value||(botMade?'Bot Ship':'My Ship'),w:16,h:16,userMade:!botMade,botMade,custom:true,cells:shipEditorCells,created:existing?.created||Date.now(),genIndex:existing?.genIndex||0})}
   syncShipJson = function(id=null){let existing=null;try{existing=JSON.parse($('shipJson').value||'null')}catch(e){}let sp=readShipEditor(id||existing?.id||null);$('shipJson').value=JSON.stringify(sp,null,2);$('shipStatus').textContent=''}
   saveShipFromEditor = function(){let raw=null;try{raw=JSON.parse($('shipJson').value)}catch(e){}let sp=normShipSprite({...readShipEditor(raw?.id||null),...(raw||{}),cells:shipEditorCells});if(!sp.botMade){sp.userMade=true;sp.botMade=false}let idx=shipDefs.findIndex(x=>x.id===sp.id);if(idx>=0)shipDefs[idx]=sp;else shipDefs.push(sp);if(!sp.botMade){playerShipId=sp.id;localStorage.setItem('warheads.playerShip',sp.id)}saveShips();renderShipLibraryList();if(ships[0]&&!sp.botMade)ships[0].sprite=cloneShipSprite(sp);markShipEditorClean();shipPainting=false;$('shipStatus').textContent=`Saved "${sp.name}" ${sp.botMade?'as BOT ship':'and assigned it to PLAYER'}.`;toast(sp.botMade?'Bot ship saved.':'Ship saved and assigned to PLAYER.',1500)}
-  exportShipsFromEditor = function(){let current=null;try{current=readShipEditor(JSON.parse($('shipJson').value||'null')?.id||null)}catch(e){current=readShipEditor()}if(current&&current.cells&&current.cells.length){let idx=shipDefs.findIndex(s=>s.id===current.id);if(idx>=0)shipDefs[idx]=current;else shipDefs.push(current);saveShips()}let pack={version:VERSION_0719,folder:'SHIPS',playerShips:playerShipSprites().map(cloneShipSprite),botShips:botShipSprites().map(cloneShipSprite),defaultPlayerShipId:localStorage.getItem('warheads.playerShip')||''};$('shipJson').value=JSON.stringify(pack,null,2);downloadJsonFile('SHIPS/WarHeads-SHIPS-v0.7.33-'+Date.now()+'.json',pack);$('shipStatus').textContent='Exported SHIPS library JSON. Place/share it from the SHIPS folder.';toast('SHIPS library exported.',1400)}
+  exportShipsFromEditor = function(){let current=null;try{current=readShipEditor(JSON.parse($('shipJson').value||'null')?.id||null)}catch(e){current=readShipEditor()}if(current&&current.cells&&current.cells.length){let idx=shipDefs.findIndex(s=>s.id===current.id);if(idx>=0)shipDefs[idx]=current;else shipDefs.push(current);saveShips()}let pack={version:VERSION_0719,folder:'SHIPS',playerShips:playerShipSprites().map(cloneShipSprite),botShips:botShipSprites().map(cloneShipSprite),defaultPlayerShipId:localStorage.getItem('warheads.playerShip')||''};$('shipJson').value=JSON.stringify(pack,null,2);downloadJsonFile('SHIPS/WarHeads-SHIPS-v0.7.30-'+Date.now()+'.json',pack);$('shipStatus').textContent='Exported SHIPS library JSON. Place/share it from the SHIPS folder.';toast('SHIPS library exported.',1400)}
   openShipEditor = function(){installShipManagerPanel();shipPainting=false;let saved=savedPlayerShip(0)||playerShipSprites()[0]||{id:'ship-'+Date.now(),name:'My Ship',w:16,h:16,cells:makeRandomShipCells(),userMade:true,custom:true};loadShipEditor(saved);$('shipLab').classList.add('open')}
   // Re-wire ship buttons safely after the original handlers.
   setTimeout(()=>{try{installShipManagerPanel();if($('shipSave'))$('shipSave').onclick=saveShipFromEditor;if($('shipExport'))$('shipExport').onclick=exportShipsFromEditor;if($('shipNew'))$('shipNew').onclick=()=>loadShipEditor({id:'ship-'+Date.now(),name:'My Ship',w:16,h:16,cells:[],userMade:true,botMade:false,custom:true});if($('shipRandom'))$('shipRandom').onclick=()=>loadShipEditor({id:'ship-'+Date.now(),name:'Random Ship',w:16,h:16,cells:makeRandomShipCells(),userMade:true,botMade:false,custom:true});if($('shipLoadJson'))$('shipLoadJson').onclick=()=>{try{let data=JSON.parse($('shipJson').value);let arr=Array.isArray(data)?data:[...(data.playerShips||[]),...(data.botShips||[])];if(arr.length){shipDefs=[...shipDefs.filter(s=>!s.userMade&&!s.botMade),...arr.map(normShipSprite)];saveShips();renderShipLibraryList();loadShipEditor(playerShipSprites()[0]||botShipSprites()[0]||{cells:[]});toast('Ship JSON library loaded.')}else loadShipEditor(normShipSprite({...data,userMade:!data.botMade,custom:true}))}catch(e){toast('Invalid ship JSON.')}};}catch(e){console.warn('ship manager install failed',e)}},0);
@@ -1483,7 +930,7 @@ function makeHumanLoadoutForSlot(slot=0){let id=($('localHumanPack'+(slot+1))?.v
   };
 
   // Ensure buttons use final safe handlers.
-  setTimeout(()=>{try{if($('menuShipEditor'))$('menuShipEditor').onclick=()=>{clearGameSession();setGameLoaded(false);showMenuPanel(null);ui.menu.classList.add('hidden');openShipEditor()};if($('menuLan'))$('menuLan').onclick=()=>{openLocalLanSetup();installLanShipAssignmentUI();populateShipAssignmentDropdowns();syncLanShipVisibility();};if($('versionText'))$('versionText').textContent=VERSION_0719;}catch(e){console.warn('v0.7.33 final hook failed',e)}},0);
+  setTimeout(()=>{try{if($('menuShipEditor'))$('menuShipEditor').onclick=()=>{clearGameSession();setGameLoaded(false);showMenuPanel(null);ui.menu.classList.add('hidden');openShipEditor()};if($('menuLan'))$('menuLan').onclick=()=>{openLocalLanSetup();installLanShipAssignmentUI();populateShipAssignmentDropdowns();syncLanShipVisibility();};if($('versionText'))$('versionText').textContent=VERSION_0719;}catch(e){console.warn('v0.7.30 final hook failed',e)}},0);
 })();
 
 WCE716_installCleanRecovery();
@@ -1491,9 +938,9 @@ WCE716_installCleanRecovery();
 addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPack.value=settings.playerPackChoice||'gold';ui.menuPlayerPack.onchange=()=>{settings.playerPackChoice=ui.menuPlayerPack.value;settings.packMode=settings.playerPackChoice;localStorage.setItem('warheads.playerPackChoice',settings.playerPackChoice);if(!ships.length){playerWeapons[0]=makeSelectedPlayerLoadout();selected=0;renderWeaponSelect();}}}renderWeaponSelect();setGameLoaded(false);requestAnimationFrame(loop);
 
 
-/* v0.7.33 sci-fi visuals + mod menu cleanup + chunk planet damage */
+/* v0.7.30 sci-fi visuals + mod menu cleanup + chunk planet damage */
 (function WCE718_visualModPass(){
-  const V='v0.7.33';
+  const V='v0.7.30';
   try{
     if(typeof WCE_VERSION!=='undefined') window.WCE_VERSION=V;
     const vt=document.getElementById('versionText'); if(vt) vt.textContent=V;
@@ -1643,9 +1090,9 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
 
 
 
-/* v0.7.33 release-candidate UI/bot-config/icon/filename fix */
+/* v0.7.30 release-candidate UI/bot-config/icon/filename fix */
 (function WCE719_releaseCandidateUiFix(){
-  const V='v0.7.33';
+  const V='v0.7.30';
   function el(id){return document.getElementById(id)}
   function removeThemeClasses(){
     const cls=['theme-holo-blue','theme-deep-blue','theme-classic-green','theme-nebula-purple','theme-alien-amber','theme-crimson-alert','theme-ice-terminal','theme-retro-gold','theme-stealth-gray','theme-plasma-pink','theme-ocean-cyan','theme-custom'];
@@ -1664,7 +1111,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       document.querySelectorAll('select').forEach(s=>{ s.dataset.wce719Styled='1'; });
       document.querySelectorAll('.advancedTabs button').forEach(b=>b.addEventListener('click',()=>setTimeout(applySelectedHighlights,0),{once:false}));
       applySelectedHighlights();
-    }catch(e){console.warn('v0.7.33 theme apply failed',e)}
+    }catch(e){console.warn('v0.7.30 theme apply failed',e)}
   }
   function applySelectedHighlights(){
     try{
@@ -1697,7 +1144,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       if(el('openBotPackEditor')) el('openBotPackEditor').onclick=open;
       if(el('localOpenBotPacks')) el('localOpenBotPacks').onclick=open;
       ['botPackLabX','botPackLabClose'].forEach(id=>{ if(el(id)) el(id).onclick=()=>{ const lab=el('botPackLab'); if(lab){ lab.classList.remove('open'); lab.style.display=''; } }; });
-    }catch(e){console.warn('v0.7.33 bot config repair failed',e)}
+    }catch(e){console.warn('v0.7.30 bot config repair failed',e)}
   }
   function patchThemeControl(){
     try{
@@ -1723,20 +1170,20 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       ensureBotConfigPanel(); patchThemeControl(); patchModalOpeners(); applyThemeEverywhere();
       const note=document.querySelector('.gameCredit');
       if(note) note.innerHTML='WarHeads Classic Enhanced '+V+' &nbsp;|&nbsp; Developed By: Elemental Spark &nbsp;|&nbsp; <a href="https://www.elementalspark.com" target="_blank" rel="noopener">www.elementalspark.com</a>';
-    }catch(e){console.warn('v0.7.33 install failed',e)}
+    }catch(e){console.warn('v0.7.30 install failed',e)}
   },0);
 })();
 
 
 
-/* v0.7.33 in-game weapon selection/editor hotfix
+/* v0.7.30 in-game weapon selection/editor hotfix
    Keeps the selected weapon per player stable:
    - pack default is used only for that player's first shot
    - after firing/changing, that player's last-used weapon is restored on later turns
    - editing/saving during a game edits the currently selected weapon and equips it back to that player
 */
 (function WCE721_weaponTurnMemoryHotfix(){
-  const V='v0.7.33';
+  const V='v0.7.30';
   let weaponEditorOwnerSlot=0;
 
   function setVersionLabel(){
@@ -1807,7 +1254,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
         s.hasFiredWeapon=!!s.hasFiredWeapon;
       });
       selectWeaponForCurrentTurn(true);
-    }catch(e){ console.warn('v0.7.33 weapon memory init failed',e); }
+    }catch(e){ console.warn('v0.7.30 weapon memory init failed',e); }
   }
 
   const _WCE721_newMatch = newMatch;
@@ -1983,9 +1430,9 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
 
 
 
-/* v0.7.33 terrain/aim/export cleanup hotfix */
+/* v0.7.30 terrain/aim/export cleanup hotfix */
 (function WCE722_terrainAimExportCleanup(){
-  const VERSION='v0.7.33';
+  const VERSION='v0.7.30';
   function el(id){return document.getElementById(id)}
   try{
     // Add a real Aim Assist Line toggle into Options without disturbing the existing layout.
@@ -2001,7 +1448,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       aimLine.value=settings.showAimAssist?'on':'off';
       aimLine.onchange=()=>{settings.showAimAssist=aimLine.value!=='off';localStorage.setItem('warheads.showAimAssist',settings.showAimAssist?'on':'off')};
     }
-  }catch(e){console.warn('v0.7.33 aim option init failed',e)}
+  }catch(e){console.warn('v0.7.30 aim option init failed',e)}
 
   // Remove the old angular crater deformation from the silhouette. Real cuts now come from clean round hole masks.
   try{
@@ -2012,7 +1459,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       try{ bump=(p.bumps||[]).reduce((sum,b)=>sum+Math.cos(a-b.a)*b.off*b.w,0)/Math.max(1,(p.bumps||[]).length)*5; }catch(e){ bump=0; }
       return clamp(p.r*(1+bump), p.r*.30, p.r*1.32);
     };
-  }catch(e){console.warn('v0.7.33 planet radius override failed',e)}
+  }catch(e){console.warn('v0.7.30 planet radius override failed',e)}
 
   // Hide dotted crater/ring leftovers and replace them with clean cutouts plus a soft scorched rim.
   try{
@@ -2040,7 +1487,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       });
       ctx.restore();
     };
-  }catch(e){console.warn('v0.7.33 planet draw cleanup failed',e)}
+  }catch(e){console.warn('v0.7.30 planet draw cleanup failed',e)}
 
   // Clean build/repair: remove overlapping hole masks in the built/repaired area so terrain grows back cleanly.
   try{
@@ -2053,7 +1500,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
         planets.forEach(p=>{ if(p&&p.holes){ p.holes=p.holes.filter(h=>Math.hypot(h.x-x,h.y-y)>rad+(h.r||0)*.55); p.texture=null; }});
       }
     };
-  }catch(e){console.warn('v0.7.33 build cleanup failed',e)}
+  }catch(e){console.warn('v0.7.30 build cleanup failed',e)}
 
   // Aim line uses the same core forces as real shots: wind, planet gravity, speed cap, wall bounce/wrap, and soft enemy guidance.
   try{
@@ -2104,30 +1551,192 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       ctx.setLineDash([]);
       ctx.restore();
     };
-  }catch(e){console.warn('v0.7.33 draw aim override failed',e)}
+  }catch(e){console.warn('v0.7.30 draw aim override failed',e)}
 })();
-</script>
-</body>
-</html>
 
 
+(function(){
+  if(window.WCE_MP_BRIDGE_READY) return;
+  window.WCE_MP_BRIDGE_READY = true;
+  const qs = new URLSearchParams(location.search);
+  const mpMode = qs.get('mp') === '1';
+  let mpRoom = null, mpMySlot = -1, mpClientId = '', mpIsHost = false, mpBotTimer = 0;
 
+  function mpParticipants(room){
+    if(!room) return [];
+    if(Array.isArray(room.participants) && room.participants.length) return room.participants;
+    const humans = Array.isArray(room.players) ? room.players.map(p => Object.assign({bot:false}, p)) : [];
+    const bots = Array.from({length: Math.max(0, +(room.bots||0))}, (_,i) => ({clientId:'bot-'+i, name:'Bot '+(i+1), slot:humans.length+i, bot:true, ready:true}));
+    return humans.concat(bots);
+  }
+  function mpActive(room){ return mpParticipants(room)[+(room && room.turn || 0)] || null; }
+  function canControlMpTurn(){
+    const a = mpActive(mpRoom);
+    if(!a) return false;
+    if(a.bot) return !!mpIsHost;
+    return a.clientId === mpClientId;
+  }
+  function maybeRunHostBotTurn(){
+    if(!mpMode || !mpIsHost || !mpRoom || !ships || !ships[turn] || !ships[turn].ai || busy || ended) return;
+    clearTimeout(mpBotTimer);
+    mpBotTimer = setTimeout(() => { try{ if(ships[turn] && ships[turn].ai && !busy && !ended) shoot(true); }catch(e){ post('error', {message:'Host bot turn failed: '+(e.message||e)}); } }, 850);
+  }
 
+  function safeClone(obj){
+    try { return JSON.parse(JSON.stringify(obj)); } catch(e){ return null; }
+  }
+  function post(type, payload){
+    try { window.parent && window.parent.postMessage({ source:'WCE_MP_GAME', type, payload: payload || {} }, '*'); } catch(e){}
+  }
+  function setSelectValue(el, value){
+    if(!el) return;
+    const exists = [...el.options].some(o => String(o.value) === String(value));
+    if(exists) el.value = String(value);
+  }
+  function waitForGameReady(cb, tries=0){
+    if(typeof newMatch === 'function' && typeof shoot === 'function' && typeof finishTurn === 'function') return cb();
+    if(tries > 200) return post('error', { message:'Game bridge could not find required game functions.' });
+    setTimeout(() => waitForGameReady(cb, tries+1), 50);
+  }
+  function buildState(){
+    return safeClone({
+      version: 'v0.7.30-mp-branch',
+      turn, turnCount, roundLeft, ended, busy,
+      settings,
+      ships, planets, shots, walkers, particles, beams, shockwaves, debris, ufos, boss, magnetFields,
+      playerWeapons,
+      selected, defenseIndex,
+      cam
+    });
+  }
+  function applyState(state){
+    if(!state) return false;
+    try{
+      turn = +state.turn || 0;
+      if(mpRoom) mpRoom.turn = turn;
+      turnCount = +state.turnCount || 0;
+      roundLeft = +state.roundLeft || (settings.turnLength || 120);
+      ended = !!state.ended;
+      busy = !!state.busy;
+      if(state.settings) Object.assign(settings, state.settings);
+      ships = Array.isArray(state.ships) ? state.ships : ships;
+      planets = Array.isArray(state.planets) ? state.planets : planets;
+      shots = Array.isArray(state.shots) ? state.shots : [];
+      walkers = Array.isArray(state.walkers) ? state.walkers : [];
+      particles = Array.isArray(state.particles) ? state.particles : [];
+      beams = Array.isArray(state.beams) ? state.beams : [];
+      shockwaves = Array.isArray(state.shockwaves) ? state.shockwaves : [];
+      debris = Array.isArray(state.debris) ? state.debris : [];
+      ufos = Array.isArray(state.ufos) ? state.ufos : [];
+      boss = state.boss || null;
+      magnetFields = Array.isArray(state.magnetFields) ? state.magnetFields : [];
+      playerWeapons = Array.isArray(state.playerWeapons) ? state.playerWeapons : playerWeapons;
+      selected = Number.isFinite(+state.selected) ? +state.selected : selected;
+      defenseIndex = Number.isFinite(+state.defenseIndex) ? +state.defenseIndex : defenseIndex;
+      if(state.cam) Object.assign(cam, state.cam);
+      renderWeaponSelect && renderWeaponSelect();
+      focusTurnCamera && focusTurnCamera(false);
+      syncUI && syncUI();
+      maybeRunHostBotTurn();
+      return true;
+    }catch(e){ post('error', { message:'State sync failed: '+(e.message||e) }); return false; }
+  }
+  function playerSlotName(slot, room){
+    const p = room && room.players && room.players[slot];
+    return p ? p.name : ('Player '+(slot+1));
+  }
+  function configureGame(room, mySlot, clientId){
+    waitForGameReady(function(){
+      try{
+        mpRoom = room;
+        mpMySlot = mySlot;
+        mpClientId = clientId || '';
+        mpIsHost = !!(room && room.hostId === mpClientId);
+        matchMode = 'multiplayer';
+        weaponTestMode = false;
+        testEditorWeaponId = null;
+        editorTimerOn = false;
+        editorTimer = 0;
+        settings.localHumans = Math.max(1, (room.players || []).length);
+        settings.localBots = Math.max(0, +room.bots || 0);
+        settings.players = Math.max(2, settings.localHumans + settings.localBots);
+        settings.turnLength = Math.max(20, +room.turnLength || 120);
+        settings.physics = room.physics || 'bounce';
+        settings.playerPackChoice = room.pack || settings.playerPackChoice || 'gold';
+        settings.packMode = settings.playerPackChoice;
+        localStorage.setItem('warheads.playerPackChoice', settings.playerPackChoice);
+        setGameLoaded(true);
+        if(ui && ui.menu) ui.menu.classList.add('hidden');
+        if(ui && ui.centerBanner) ui.centerBanner.classList.remove('show','gameover');
+        newMatch();
+        (room.players || []).forEach((pl, i) => { if(ships[i]) { ships[i].name = pl.name || ('Player '+(i+1)); ships[i].ai = false; } });
+        for(let i=(room.players||[]).length; i<ships.length; i++){ if(ships[i]) { ships[i].name = 'Bot '+(i-(room.players||[]).length+1); ships[i].ai = !!mpIsHost; ships[i].mpBot = true; } }
+        roundLeft = settings.turnLength;
+        focusTurnCamera && focusTurnCamera(false);
+        syncUI && syncUI();
+        post('ready', { slot: mySlot, state: buildState() });
+        maybeRunHostBotTurn();
+      }catch(e){ post('error', { message:'Multiplayer game start failed: '+(e.message||e) }); }
+    });
+  }
+  function applyRemoteShot(input){
+    waitForGameReady(function(){
+      try{
+        if(input.stateBefore) applyState(input.stateBefore);
+        selected = Math.max(0, Math.min((currentLoadout ? currentLoadout().length : 1)-1, +input.weaponIndex || 0));
+        if(ui && ui.weaponSelect) { ui.weaponSelect.value = String(selected); }
+        if(ui && ui.angle) ui.angle.value = String(input.angle ?? ui.angle.value ?? 45);
+        if(ui && ui.power) ui.power.value = String(input.power ?? ui.power.value ?? 70);
+        if(input.defense && ships[turn]) ships[turn].defense = input.defense;
+        syncUI && syncUI();
+        shoot(false);
+      }catch(e){ post('error', { message:'Remote shot failed: '+(e.message||e) }); }
+    });
+  }
 
+  window.WCE_MP = {
+    start: configureGame,
+    applyShot: applyRemoteShot,
+    exportState: buildState,
+    importState: applyState,
+    currentTurn: () => (typeof turn !== 'undefined' ? turn : 0),
+    isBusy: () => !!busy,
+    setControlLock: function(locked){
+      try{
+        if(ui && ui.fire) ui.fire.disabled = !!locked;
+        if(ui && ui.angle) ui.angle.disabled = !!locked;
+        if(ui && ui.power) ui.power.disabled = !!locked;
+        if(ui && ui.weaponSelect) ui.weaponSelect.disabled = !!locked;
+        if(ui && ui.defenseSelect) ui.defenseSelect.disabled = !!locked;
+      }catch(e){}
+    },
+    readInput: function(){
+      return {
+        angle: ui && ui.angle ? +ui.angle.value : 45,
+        power: ui && ui.power ? +ui.power.value : 70,
+        weaponIndex: typeof selected !== 'undefined' ? selected : 0,
+        defense: ui && ui.defenseSelect ? ui.defenseSelect.value : null,
+        stateBefore: buildState()
+      };
+    }
+  };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  if(mpMode){
+    waitForGameReady(function(){
+      try{
+        const originalFinishTurn = finishTurn;
+        finishTurn = function(){
+          const controller = canControlMpTurn();
+          originalFinishTurn.apply(this, arguments);
+          if(controller) setTimeout(() => post('turnFinished', { state: buildState(), turn }), 20);
+        };
+        const originalShowCenter = showCenter;
+        showCenter = function(title, sub, mode, ms){
+          originalShowCenter.apply(this, arguments);
+          if(mode === 'gameover') post('gameOver', { title, sub, state: buildState() });
+        };
+        post('bridgeReady', {});
+      }catch(e){ post('error', { message:'Bridge hook failed: '+(e.message||e) }); }
+    });
+  }
+})();

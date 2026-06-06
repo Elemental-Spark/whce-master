@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>WarHeads Classic Enhanced Multiplayer</title>
+  <link rel="stylesheet" href="multiplayer.css">
+</head>
+<body>
+  <main id="shell" class="shell">
+    <section id="nameScreen" class="panel namePanel">
+      <div class="logo">WARHEADS CLASSIC ENHANCED</div>
+      <div class="sub">Website Multiplayer Lobby</div>
+      <p class="safety"><b>Safety:</b> Never share personal information, addresses, passwords, phone numbers, private accounts, or real-world plans with people you do not know.</p>
+      <label class="field">Username
+        <input id="nameInput" maxlength="20" autocomplete="nickname" placeholder="Pilot name">
+      </label>
+      <button id="enterLobby" class="primary">ENTER LOBBY</button>
+      <div id="nameError" class="error"></div>
+      <p class="small">Names and chat use a starter moderation filter. Admins can expand <code>blocked-names.json</code>.</p>
+    </section>
+
+    <section id="lobbyScreen" class="panel hidden">
+      <div class="topbar">
+        <div><div class="logo sm">WARHEADS LOBBY</div><div id="connStatus" class="sub">Connecting...</div></div>
+        <div class="actions"><button id="resetSession">RESET SESSION</button><button id="refreshLobby">REFRESH</button></div>
+      </div>
+      <div class="grid two">
+        <section class="card">
+          <h2>Create Game</h2>
+          <label class="field">Game Name <input id="roomName" maxlength="20" placeholder="Saturday Chaos"></label>
+          <div class="grid two tight">
+            <label class="field">Players <select id="roomPlayers"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option></select></label>
+            <label class="field">Bots <select id="roomBots"><option selected>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></label>
+            <label class="field">Turns <select id="roomTurn"><option>60</option><option>90</option><option selected>120</option></select></label>
+            <label class="field">Missed Shots <select id="roomPhysics"><option value="bounce" selected>Wall Bounce</option><option value="teleport">Teleport Wrap</option></select></label>
+          </div>
+          <button id="createRoom" class="primary">CREATE HOSTED GAME</button>
+        </section>
+        <section class="card">
+          <h2>Open Games</h2>
+          <div id="rooms" class="list empty">No rooms yet.</div>
+        </section>
+      </div>
+      <section class="card chatCard">
+        <h2>Lobby Chat</h2>
+        <div id="lobbyChat" class="chat"></div>
+        <div class="chatInput"><input id="lobbyChatInput" maxlength="220" placeholder="Be cool. Do not share private information."><button id="sendLobbyChat">SEND</button></div>
+      </section>
+    </section>
+
+    <section id="roomScreen" class="panel hidden">
+      <div class="topbar">
+        <div><div id="roomTitle" class="logo sm">ROOM</div><div id="roomInfo" class="sub"></div></div>
+        <div class="actions"><button id="leaveRoom">LEAVE</button><button id="closeRoom">CLOSE ROOM</button><button id="startRoom" class="primary">START</button></div>
+      </div>
+      <p class="safety"><b>Safety:</b> Chat with caution. Never give anyone private information or contact details.</p>
+      <div class="grid two">
+        <section class="card"><h2>Players</h2><div id="players" class="list"></div><button id="readyBtn">READY</button></section>
+        <section class="card"><h2>Host Options</h2><div id="hostOptions" class="grid two tight"></div></section>
+      </div>
+      <section class="card chatCard"><h2>Room Chat</h2><div id="roomChat" class="chat"></div><div class="chatInput"><input id="roomChatInput" maxlength="220" placeholder="Room message"><button id="sendRoomChat">SEND</button></div></section>
+    </section>
+
+    <section id="gameScreen" class="game hidden">
+      <div id="mpOverlay" class="mpOverlay">
+        <div id="turnBadge" class="turnBadge">Waiting...</div>
+        <div class="gameActions"><button id="mpLeave">LEAVE GAME</button></div>
+      </div>
+      <iframe id="gameFrame" title="WarHeads Classic Enhanced Multiplayer"></iframe>
+    </section>
+  </main>
+  <script src="multiplayer-client.js"></script>
+</body>
+</html>
