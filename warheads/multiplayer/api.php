@@ -1,6 +1,6 @@
 <?php
 // WarHeads Classic Enhanced - shared-hosting multiplayer API (PHP polling, no npm required)
-// v0.7.40 multiplayer late-join queue/cycle-sync hotfix. Multiplayer only.
+// v0.7.67 stable mobile menu rollback + lobby JSON recovery hotfix. Multiplayer only.
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
@@ -14,14 +14,26 @@ $MAX_NAME_LEN = 20;
 $MAX_CHAT_LEN = 220;
 $ROOM_IDLE_SECONDS = 3600;
 $EMPTY_ROOM_SECONDS = 30;
-$CLIENT_IDLE_SECONDS = 300;
+$CLIENT_IDLE_SECONDS = 900;
 $MAX_HUMANS = 16;
 $MAX_BOTS = 8;
 
 if (!is_dir($DATA_DIR)) @mkdir($DATA_DIR, 0775, true);
 if (!file_exists($STATE_FILE)) file_put_contents($STATE_FILE, json_encode(default_state(), JSON_PRETTY_PRINT));
 
-function default_state(){ return ['version'=>'0.7.40-php-mp','clients'=>[], 'rooms'=>[], 'lobbyChat'=>[], 'seq'=>1, 'updatedAt'=>time()]; }
+function default_state(){ return ['version'=>'0.7.67-php-mp','clients'=>[], 'rooms'=>[], 'lobbyChat'=>[], 'seq'=>1, 'updatedAt'=>time()]; }
+function normalize_state(&$state){
+  // v0.7.67: recover from empty/damaged shared-host state without breaking the lobby.
+  $def=default_state();
+  if(!is_array($state)) $state=$def;
+  foreach($def as $k=>$v){ if(!array_key_exists($k,$state)) $state[$k]=$v; }
+  if(!is_array($state['clients'])) $state['clients']=[];
+  if(!is_array($state['rooms'])) $state['rooms']=[];
+  if(!is_array($state['lobbyChat'])) $state['lobbyChat']=[];
+  if(!isset($state['seq']) || !is_numeric($state['seq'])) $state['seq']=1;
+  if(!isset($state['updatedAt']) || !is_numeric($state['updatedAt'])) $state['updatedAt']=time();
+  $state['version']='0.7.67-php-mp';
+}
 function input_json(){ $raw=file_get_contents('php://input'); $j=json_decode($raw,true); return is_array($j)?$j:$_REQUEST; }
 function clean_id($s){ $s=preg_replace('/[^a-zA-Z0-9_\-]/','',strval($s)); return $s ?: ('client-'.bin2hex(random_bytes(5))); }
 function u_lower($s){ return function_exists('mb_strtolower') ? mb_strtolower($s,'UTF-8') : strtolower($s); }
@@ -31,6 +43,8 @@ function u_pos($hay,$needle){ return function_exists('mb_strpos') ? mb_strpos($h
 function safe_id($prefix){ return $prefix.'-'.bin2hex(random_bytes(5)); }
 function clamp_int($v,$min,$max){ $v=intval($v); if($v<$min) return $min; if($v>$max) return $max; return $v; }
 function clean_text($s,$max=220){ $s=trim(strval($s)); $s=preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u','',$s); $s=preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u','',$s); return u_sub($s,0,$max); }
+function clean_pack_choice($s){ $s=clean_text($s,64); $s=preg_replace('/[^a-zA-Z0-9_:\-]/','',$s); return $s!=='' ? $s : 'gold'; }
+function clean_pack_label($s,$choice='gold'){ $s=clean_text($s,48); if($s===''){ $map=['gold'=>'Default + My Weapons','pack:experimental'=>'Experimental','generated'=>'Generated Chaos + My Weapons','saved'=>'My Weapons Only','all'=>'ALL Weapons']; return $map[$choice]??$choice; } return $s; }
 function norm_scan($s){
   $s=u_lower(clean_text($s,300));
   if (class_exists('Normalizer')) $s=Normalizer::normalize($s, Normalizer::FORM_KC);
@@ -74,7 +88,9 @@ function sanitize_mod_settings($m){
     'planetDestructionScale'=>[0.1,6.0], 'planetBuildScale'=>[0.1,4.0], 'planetRepairScale'=>[0.1,4.0],
     'worldWidthBase'=>[1600,5200], 'worldWidthPerPlayer'=>[120,520], 'worldHeightBase'=>[1000,3200], 'worldHeightPerPlayer'=>[80,320],
     'gravityStrength'=>[0,1.2], 'gravityMaxPull'=>[0,0.6], 'maxShotSpeed'=>[4,70], 'softHoming'=>[0,0.18], 'homingBoost'=>[0,0.7],
-    'stageRadiusCap'=>[20,360], 'stageDamageCap'=>[0,240], 'stageCountCap'=>[1,18], 'heavySfxCap'=>[1,12], 'lightSfxCap'=>[2,24]
+    'stageRadiusCap'=>[20,360], 'stageDamageCap'=>[0,240], 'stageCountCap'=>[1,18], 'heavySfxCap'=>[1,12], 'lightSfxCap'=>[2,24],
+    'cleanupIntervalMs'=>[1000,30000], 'cleanupMaxPlanetHoles'=>[18,120], 'cleanupMaxPlanetChunks'=>[4,80],
+    'oatDelayMs'=>[40,2500], 'oatPayloadStage'=>[1,10]
   ];
   $out=[];
   foreach($caps as $k=>$lim){
@@ -82,18 +98,21 @@ function sanitize_mod_settings($m){
       $v=$m[$k]+0; if($v<$lim[0])$v=$lim[0]; if($v>$lim[1])$v=$lim[1]; $out[$k]=$v;
     }
   }
+  $styles=['random','classic','bubble','hex','crystal','eightbit','8bit','pixel16','16bit','future','cyber','alien','rings','lava','ice','desert','ocean','void'];
+  if(isset($m['planetStyle']) && in_array(strval($m['planetStyle']), $styles, true)) $out['planetStyle']=strval($m['planetStyle']);
   return $out;
 }
 function room_mod_summary($room){
   $m=$room['modSettings']??[];
   if(!is_array($m) || !count($m)) return 'Gold defaults';
   $bits=[];
-  foreach(['planetCapBase'=>'Planets','maxLiveShots'=>'Shots','warheadsPerTurn'=>'Warheads','planetDestructionScale'=>'Destruction','softHoming'=>'Guidance'] as $k=>$label){ if(isset($m[$k])) $bits[]=$label.': '.$m[$k]; }
+  foreach(['planetCapBase'=>'Planets','maxLiveShots'=>'Shots','warheadsPerTurn'=>'Warheads','planetDestructionScale'=>'Destruction','softHoming'=>'Guidance','cleanupIntervalMs'=>'Cleanup'] as $k=>$label){ if(isset($m[$k])) $bits[]=$label.': '.$m[$k]; }
+  if(isset($m['planetStyle'])) $bits[]='Planet style: '.$m['planetStyle'];
   return count($bits)?implode(' · ',$bits):'Custom mod preset';
 }
 
-function public_client($c){ return ['id'=>$c['id']??'', 'name'=>$c['name']??'Guest', 'roomId'=>$c['roomId']??null]; }
-function public_participant($p){ return ['clientId'=>$p['clientId']??'', 'name'=>$p['name']??'Pilot', 'slot'=>intval($p['slot']??0), 'ready'=>!empty($p['ready']), 'bot'=>!empty($p['bot'])]; }
+function public_client($c){ return ['id'=>$c['id']??'', 'name'=>$c['name']??'Guest', 'roomId'=>$c['roomId']??null, 'packChoice'=>$c['packChoice']??'gold', 'packLabel'=>$c['packLabel']??'Default + My Weapons']; }
+function public_participant($p){ return ['clientId'=>$p['clientId']??'', 'name'=>$p['name']??'Pilot', 'slot'=>intval($p['slot']??0), 'ready'=>!empty($p['ready']), 'bot'=>!empty($p['bot']), 'packChoice'=>$p['packChoice']??($p['bot']?'bot':'gold'), 'packLabel'=>$p['packLabel']??($p['bot']?'Bot Pack':'Default + My Weapons')]; }
 function room_participants($r){
   if(!empty($r['participants']) && is_array($r['participants'])) return array_values($r['participants']);
   return array_values($r['players'] ?? []);
@@ -109,6 +128,7 @@ function public_room($r){
     'participants'=>array_map('public_participant', $parts),
     'spectators'=>$r['spectators']??[],
     'lateJoiners'=>array_values($r['lateJoiners']??[]),
+    'packChoices'=>array_values(array_map(function($p){ return ['name'=>$p['name']??'Pilot','packChoice'=>$p['packChoice']??'gold','packLabel'=>$p['packLabel']??'Default + My Weapons']; }, $parts)),
     'createdAt'=>$r['createdAt'], 'updatedAt'=>$r['updatedAt']
   ];
 }
@@ -128,11 +148,11 @@ function add_event(&$state,&$room,$type,$payload=[]){
 function build_participants($room){
   $parts=[]; $slot=0;
   foreach(($room['players']??[]) as $p){
-    $parts[]=['clientId'=>$p['clientId'], 'name'=>$p['name'], 'slot'=>$slot++, 'ready'=>!empty($p['ready']), 'bot'=>false];
+    $parts[]=['clientId'=>$p['clientId'], 'name'=>$p['name'], 'slot'=>$slot++, 'ready'=>!empty($p['ready']), 'bot'=>false, 'packChoice'=>$p['packChoice']??'gold', 'packLabel'=>$p['packLabel']??'Default + My Weapons'];
   }
   $bots=clamp_int($room['bots']??0,0,8);
   for($i=0;$i<$bots;$i++){
-    $parts[]=['clientId'=>'bot-'.$room['id'].'-'.$i, 'name'=>'Bot '.($i+1), 'slot'=>$slot++, 'ready'=>true, 'bot'=>true];
+    $parts[]=['clientId'=>'bot-'.$room['id'].'-'.$i, 'name'=>'Bot '.($i+1), 'slot'=>$slot++, 'ready'=>true, 'bot'=>true, 'packChoice'=>'bot', 'packLabel'=>'Bot Pack'];
   }
   return $parts;
 }
@@ -157,7 +177,7 @@ function commit_late_joiners(&$state,&$room,&$chatText){
     $already=false;
     foreach(($room['participants']??[]) as $p){ if(($p['clientId']??'')===$jid) { $already=true; break; } }
     if($already) continue;
-    $player=['clientId'=>$jid,'name'=>$jname,'slot'=>$slot,'ready'=>true,'bot'=>false,'lateJoined'=>true,'joinedAt'=>time()];
+    $player=['clientId'=>$jid,'name'=>$jname,'slot'=>$slot,'ready'=>true,'bot'=>false,'lateJoined'=>true,'joinedAt'=>time(),'packChoice'=>clean_pack_choice($q['packChoice']??($state['clients'][$jid]['packChoice']??'gold')),'packLabel'=>clean_pack_label($q['packLabel']??($state['clients'][$jid]['packLabel']??''), clean_pack_choice($q['packChoice']??($state['clients'][$jid]['packChoice']??'gold')))];
     $room['players'][]=$player;
     $room['participants'][]=$player;
     if(isset($state['clients'][$jid])){ $state['clients'][$jid]['roomId']=$room['id']; $state['clients'][$jid]['spectating']=false; $state['clients'][$jid]['lateQueued']=false; }
@@ -169,13 +189,80 @@ function commit_late_joiners(&$state,&$room,&$chatText){
   reindex_players($room);
   if(count($added)){
     $names=array_map(function($p){ return $p['name']??'Pilot'; }, $added);
-    $chatText=implode(', ', $names).' entered the battle at the new turn cycle.';
+    $chatText=implode(', ', $names).' entered the battle and will skip this turn.';
     $room['chat'][]=['system'=>true,'text'=>$chatText,'at'=>time()];
     $room['chat']=array_slice($room['chat'],-80);
   }
   return $added;
 }
-function reindex_players(&$room){ foreach(($room['players']??[]) as $i=>$p){ $room['players'][$i]['slot']=$i; } }
+function reindex_players(&$room){
+  foreach(($room['players']??[]) as $i=>$p){ $room['players'][$i]['slot']=$i; }
+  if(!empty($room['participants']) && is_array($room['participants'])){ foreach($room['participants'] as $i=>$p){ $room['participants'][$i]['slot']=$i; } }
+}
+function normalize_running_turn(&$state,&$room,$forceClearShot=false,$reason='roster changed'){
+  if(($room['state']??'')!=='running') return false;
+  $parts=room_participants($room);
+  $count=count($parts);
+  if($count<=0) return false;
+  $changed=false;
+  $turn=intval($room['turn']??0);
+  if($turn<0 || $turn>=$count){ $turn=0; $changed=true; }
+  $rid=$room['id']??'';
+  $active=$parts[$turn]??null;
+  if($active && empty($active['bot'])){
+    $aid=$active['clientId']??'';
+    $valid=$aid!=='' && !empty($state['clients'][$aid]) && (($state['clients'][$aid]['roomId']??'')===$rid) && empty($state['clients'][$aid]['spectating']);
+    if(!$valid){
+      $start=$turn;
+      $guard=0;
+      do{
+        $turn=($turn+1)%$count;
+        $cand=$parts[$turn]??null;
+        if(!$cand) continue;
+        if(!empty($cand['bot'])) break;
+        $cid=$cand['clientId']??'';
+        if($cid!=='' && !empty($state['clients'][$cid]) && (($state['clients'][$cid]['roomId']??'')===$rid) && empty($state['clients'][$cid]['spectating'])) break;
+      }while(++$guard<$count && $turn!==$start);
+      $changed=true;
+    }
+  }
+  if($room['turn']!==$turn){ $room['turn']=$turn; $changed=true; }
+  if($forceClearShot || $changed){
+    $room['turnPhase']='idle';
+    $room['turnToken']=intval($room['turnToken']??0)+1;
+    $room['lastFinishedTurnToken']=-1;
+    $room['turnStartedAt']=time();
+    if(is_array($room['latestState']??null)){
+      $room['latestState']['turn']=intval($room['turn']??0);
+      $room['latestState']['busy']=false;
+      $room['latestState']['roundLeft']=intval($room['turnLength']??120);
+    }
+    $parts=room_participants($room);
+    add_event($state,$room,'stateSync',['state'=>$room['latestState']??null,'turn'=>intval($room['turn']??0),'turnToken'=>intval($room['turnToken']??0),'room'=>public_room($room),'activeClientId'=>($parts[intval($room['turn']??0)]['clientId']??null),'recoverReason'=>$reason]);
+    return true;
+  }
+  return false;
+}
+function recover_client_into_room(&$state,&$room,$cid){
+  if(empty($state['clients'][$cid]) || empty($room['id'])) return false;
+  $client=&$state['clients'][$cid];
+  $name=clean_text($client['name']??'Pilot',20); if($name==='') $name='Pilot';
+  $choice=clean_pack_choice($client['packChoice']??'gold');
+  $label=clean_pack_label($client['packLabel']??'', $choice);
+  foreach(($room['players']??[]) as &$p){ if(($p['clientId']??'')===$cid){ $client['roomId']=$room['id']; $client['spectating']=false; $client['lateQueued']=false; $p['packChoice']=$choice; $p['packLabel']=$label; return true; } } unset($p);
+  foreach(($room['participants']??[]) as &$p){
+    $wasBot=!empty($p['bot']);
+    $matchesOld=(($p['originalClientId']??'')===$cid) || (($p['originalName']??'')===$name) || ($wasBot && (($p['name']??'')===$name.' Bot'));
+    if($matchesOld){
+      $p['clientId']=$cid; $p['name']=$name; $p['bot']=false; $p['ready']=true; $p['rejoinedAt']=time(); $p['packChoice']=$choice; $p['packLabel']=$label;
+      $exists=false; foreach(($room['players']??[]) as $pl){ if(($pl['clientId']??'')===$cid){ $exists=true; break; } }
+      if(!$exists){ $room['players'][]=['clientId'=>$cid,'name'=>$name,'slot'=>count($room['players']??[]),'ready'=>true,'bot'=>false,'packChoice'=>$choice,'packLabel'=>$label]; }
+      $client['roomId']=$room['id']; $client['spectating']=false; $client['lateQueued']=false; reindex_players($room); return true;
+    }
+  } unset($p);
+  return false;
+}
+
 
 function room_client_ids($room){
   $ids=[];
@@ -208,8 +295,13 @@ function leave_room(&$state,$cid,$reason='left'){
 
   // During a running match, leaving players become bots so the room keeps going.
   if(($room['state']??'')==='running'){
+    $wasActive=false;
+    $active=room_participants($room)[intval($room['turn']??0)]??null;
+    if($active && empty($active['bot']) && ($active['clientId']??'')===$cid) $wasActive=true;
     foreach(($room['participants']??[]) as &$p){
       if(empty($p['bot']) && ($p['clientId']??'')===$cid){
+        $p['originalClientId']=$cid;
+        $p['originalName']=$name;
         $p['clientId']='bot-replace-'.$rid.'-'.$p['slot'];
         $p['name']=$name.' Bot';
         $p['bot']=true;
@@ -222,7 +314,8 @@ function leave_room(&$state,$cid,$reason='left'){
     if(count($room['players'])===0){ unset($state['rooms'][$rid]); return; }
     $room['chat'][]=['system'=>true,'text'=>$name.' '.$reason.' and was replaced by a bot.','at'=>time()];
     $room['chat']=array_slice($room['chat'],-80);
-    add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]);
+    if($wasActive && ($room['turnPhase']??'idle')==='shot') normalize_running_turn($state,$room,true,'active player left during shot');
+    else add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]);
     return;
   }
 
@@ -241,6 +334,8 @@ function purge_old(&$state){
   foreach(array_keys($state['clients']) as $cid){ if($now-($state['clients'][$cid]['lastSeen']??0)>$CLIENT_IDLE_SECONDS) leave_room($state,$cid,'timed out'); }
   foreach(array_keys($state['clients']) as $cid){ if($now-($state['clients'][$cid]['lastSeen']??0)>$CLIENT_IDLE_SECONDS+60) unset($state['clients'][$cid]); }
   foreach(array_keys($state['rooms']) as $rid){
+    if(!isset($state['rooms'][$rid])) continue;
+    if(($state['rooms'][$rid]['state']??'')==='running') normalize_running_turn($state,$state['rooms'][$rid],false,'active player unavailable');
     $r=$state['rooms'][$rid];
     if((count($r['players'])===0 && ($r['state']??'lobby')!=='running' && $now-($r['emptyAt']??$r['updatedAt'])>$EMPTY_ROOM_SECONDS) || ($now-($r['updatedAt']??$now)>$ROOM_IDLE_SECONDS)) unset($state['rooms'][$rid]);
   }
@@ -249,8 +344,7 @@ function response($ok,$extra=[]){ echo json_encode(array_merge(['ok'=>$ok],$extr
 
 $in=input_json(); $action=$in['action'] ?? 'poll'; $cid=clean_id($in['clientId'] ?? ''); $lastSeq=intval($in['lastSeq'] ?? 0);
 $fp=fopen($STATE_FILE,'c+'); if(!$fp) response(false,['message'=>'Could not open multiplayer data file. Check folder permissions.']);
-flock($fp, LOCK_EX); $raw=stream_get_contents($fp); $state=json_decode($raw,true); if(!is_array($state)) $state=default_state();
-if(($state['version']??'')!=='0.7.40-php-mp') $state['version']='0.7.40-php-mp';
+flock($fp, LOCK_EX); $raw=stream_get_contents($fp); $state=json_decode($raw,true); normalize_state($state);
 if(empty($state['clients'][$cid])) $state['clients'][$cid]=['id'=>$cid,'name'=>'','roomId'=>null,'lastSeen'=>time(),'connectedAt'=>time()];
 $state['clients'][$cid]['lastSeen']=time(); purge_old($state);
 $client=&$state['clients'][$cid]; $events=[]; $message=''; $roomOut=null; $chatOut=[];
@@ -269,36 +363,72 @@ switch($action){
     $client['lateQueued']=false;
     $message='Session reset.';
     break;
+  case 'recoverRoom':
+    $rid=clean_id($in['roomId']??'');
+    if($rid==='' || empty($state['rooms'][$rid])){ $message='Room could not be recovered.'; break; }
+    $room=&$state['rooms'][$rid];
+    if(recover_client_into_room($state,$room,$cid)){
+      $room['chat'][]=['system'=>true,'text'=>($client['name']?:'Pilot').' reconnected.','at'=>time()];
+      $room['chat']=array_slice($room['chat'],-$MAX_ROOM_CHAT);
+      normalize_running_turn($state,$room,false,'player reconnected');
+      add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]);
+      $message='Reconnected to room.';
+      break;
+    }
+    if(($room['state']??'')==='running'){
+      if(!empty($room['allowLateJoin']) && active_human_count($room) + queued_late_count($room) < intval($room['maxPlayers']??$MAX_HUMANS)){
+        $client['roomId']=$rid; $client['spectating']=true; $client['lateQueued']=true;
+        $room['spectators']=$room['spectators']??[]; $room['lateJoiners']=$room['lateJoiners']??[];
+        $room['spectators'][$cid]=['id'=>$cid,'name'=>$client['name']?:'Pilot','at'=>time(),'lateJoin'=>true,'queued'=>true,'packChoice'=>$client['packChoice']??'gold','packLabel'=>$client['packLabel']??'Default + My Weapons'];
+        $room['lateJoiners'][$cid]=['id'=>$cid,'clientId'=>$cid,'name'=>$client['name']?:'Pilot','at'=>time(),'packChoice'=>$client['packChoice']??'gold','packLabel'=>$client['packLabel']??'Default + My Weapons'];
+        $room['chat'][]=['system'=>true,'text'=>($client['name']?:'Pilot').' reconnected late and will enter after this turn.','at'=>time()];
+        $room['chat']=array_slice($room['chat'],-$MAX_ROOM_CHAT);
+        add_event($state,$room,'lateJoinQueued',['room'=>public_room($room),'chat'=>$room['chat'],'name'=>$client['name']?:'Pilot']);
+        $message='Rejoined as late queue.';
+      } else $message='Room is running and late join is disabled.';
+      break;
+    }
+    if(count($room['players']) < $room['maxPlayers']){
+      $client['roomId']=$rid; $client['spectating']=false; $client['lateQueued']=false;
+      $room['players'][]=['clientId'=>$cid,'name'=>$client['name']?:'Pilot','slot'=>count($room['players']),'ready'=>false,'bot'=>false,'packChoice'=>$client['packChoice']??'gold','packLabel'=>$client['packLabel']??'Default + My Weapons'];
+      $room['chat'][]=['system'=>true,'text'=>($client['name']?:'Pilot').' rejoined.','at'=>time()];
+      $room['chat']=array_slice($room['chat'],-$MAX_ROOM_CHAT);
+      add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]);
+      $message='Rejoined room.';
+    }
+    break;
   case 'createRoom':
-    if(empty($client['name'])) { $message='Set a name first.'; break; }
+    if(empty($client['name'])) { flock($fp,LOCK_UN); fclose($fp); response(false,['message'=>'Set a name first.']); }
+    $client['packChoice']=clean_pack_choice($in['packChoice']??($client['packChoice']??'gold')); $client['packLabel']=clean_pack_label($in['packLabel']??($client['packLabel']??''), $client['packChoice']);
     leave_room($state,$cid,'changed rooms');
     $roomName=clean_text($in['name'] ?? ($client['name'].' Game'), 32); if($roomName==='') $roomName=$client['name'].' Game';
     $bad=unsafe_name($roomName); if($bad){ $message=$bad; break; }
     $rid=safe_id('room');
     $room=['id'=>$rid,'name'=>$roomName,'hostId'=>$cid,'locked'=>false,'state'=>'lobby','maxPlayers'=>clamp_int($in['maxPlayers']??4,1,$MAX_HUMANS),'bots'=>clamp_int($in['bots']??0,0,$MAX_BOTS),'turnLength'=>clamp_int($in['turnLength']??120,20,120),'physics'=>(($in['physics']??'bounce')==='teleport'?'teleport':'bounce'),'allowLateJoin'=>!empty($in['allowLateJoin']),'allowSpectators'=>!empty($in['allowSpectators']),'modSettings'=>sanitize_mod_settings($in['modSettings']??[]),'seed'=>safe_id('seed'),'turn'=>0,'turnPhase'=>'idle','turnToken'=>0,'turnStartedAt'=>time(),'players'=>[], 'participants'=>[], 'spectators'=>[], 'lateJoiners'=>[], 'chat'=>[], 'events'=>[], 'latestState'=>null, 'createdAt'=>time(), 'updatedAt'=>time()];
     $state['rooms'][$rid]=$room; $client['roomId']=$rid;
-    $state['rooms'][$rid]['players'][]=['clientId'=>$cid,'name'=>$client['name'],'slot'=>0,'ready'=>false,'bot'=>false];
+    $state['rooms'][$rid]['players'][]=['clientId'=>$cid,'name'=>$client['name'],'slot'=>0,'ready'=>false,'bot'=>false,'packChoice'=>$client['packChoice']??'gold','packLabel'=>$client['packLabel']??'Default + My Weapons'];
     $state['rooms'][$rid]['chat'][]=['system'=>true,'text'=>$client['name'].' created the room.','at'=>time()];
     add_event($state,$state['rooms'][$rid],'room',['room'=>public_room($state['rooms'][$rid]),'chat'=>$state['rooms'][$rid]['chat']]);
     break;
   case 'joinRoom':
     $rid=clean_id($in['roomId'] ?? '');
     if(empty($client['name'])) { $message='Set a name first.'; break; }
+    $client['packChoice']=clean_pack_choice($in['packChoice']??($client['packChoice']??'gold')); $client['packLabel']=clean_pack_label($in['packLabel']??($client['packLabel']??''), $client['packChoice']);
     if(empty($state['rooms'][$rid])) { $message='Room not found.'; break; }
     if(!empty($state['rooms'][$rid]['banned'][$cid])) { $message='You are not allowed in that room.'; break; }
     if(($state['rooms'][$rid]['state']??'')!=='lobby' && empty($state['rooms'][$rid]['allowLateJoin'])) { $message='That game already started.'; break; }
     $room=&$state['rooms'][$rid];
     if(($room['state']??'')==='running'){
-      // v0.7.40: late joiners wait in a poker-style queue. They spectate the current cycle,
+      // v0.7.44: late joiners wait in a poker-style queue. They spectate the current cycle,
       // then enter at the next cycle boundary without stealing an existing player slot.
       if(active_human_count($room) + queued_late_count($room) >= intval($room['maxPlayers']??$MAX_HUMANS)) { $message='That game is full.'; break; }
       leave_room($state,$cid,'changed rooms');
       $client['roomId']=$rid; $client['spectating']=true; $client['lateQueued']=true;
       $room['spectators']=$room['spectators']??[];
       $room['lateJoiners']=$room['lateJoiners']??[];
-      $room['spectators'][$cid]=['id'=>$cid,'name'=>$client['name'],'at'=>time(),'lateJoin'=>true,'queued'=>true];
-      $room['lateJoiners'][$cid]=['id'=>$cid,'clientId'=>$cid,'name'=>$client['name'],'at'=>time()];
-      $room['chat'][]=['system'=>true,'text'=>$client['name'].' has joined late and is queued for the next turn cycle.','at'=>time()];
+      $room['spectators'][$cid]=['id'=>$cid,'name'=>$client['name'],'at'=>time(),'lateJoin'=>true,'queued'=>true,'packChoice'=>$client['packChoice']??'gold','packLabel'=>$client['packLabel']??'Default + My Weapons'];
+      $room['lateJoiners'][$cid]=['id'=>$cid,'clientId'=>$cid,'name'=>$client['name'],'at'=>time(),'packChoice'=>$client['packChoice']??'gold','packLabel'=>$client['packLabel']??'Default + My Weapons'];
+      $room['chat'][]=['system'=>true,'text'=>$client['name'].' has joined late and will enter after this turn, then skip their first turn.','at'=>time()];
       $room['chat']=array_slice($room['chat'],-$MAX_ROOM_CHAT);
       add_event($state,$room,'lateJoinQueued',['room'=>public_room($room),'chat'=>$room['chat'],'name'=>$client['name']]);
       break;
@@ -306,7 +436,7 @@ switch($action){
     if(count($room['players']) >= $room['maxPlayers']) { $message='That game is full.'; break; }
     leave_room($state,$cid,'changed rooms');
     $client['roomId']=$rid; $client['spectating']=false;
-    $newPlayer=['clientId'=>$cid,'name'=>$client['name'],'slot'=>count($room['players']),'ready'=>false,'bot'=>false];
+    $newPlayer=['clientId'=>$cid,'name'=>$client['name'],'slot'=>count($room['players']),'ready'=>false,'bot'=>false,'packChoice'=>$client['packChoice']??'gold','packLabel'=>$client['packLabel']??'Default + My Weapons'];
     $room['players'][]=$newPlayer;
     $room['chat'][]=['system'=>true,'text'=>$client['name'].' joined.','at'=>time()]; $room['chat']=array_slice($room['chat'],-$MAX_ROOM_CHAT);
     add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]);
@@ -317,6 +447,29 @@ switch($action){
     break;
   case 'setReady':
     $rid=$client['roomId']??''; if(!empty($state['rooms'][$rid])){ $room=&$state['rooms'][$rid]; foreach($room['players'] as &$p){ if($p['clientId']===$cid) $p['ready']=!empty($in['ready']); } unset($p); add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]); }
+    break;
+  case 'setPlayerPack':
+    $choice=clean_pack_choice($in['packChoice']??($client['packChoice']??'gold'));
+    $label=clean_pack_label($in['packLabel']??($client['packLabel']??''), $choice);
+    $client['packChoice']=$choice; $client['packLabel']=$label;
+    $rid=$client['roomId']??'';
+    if(!empty($state['rooms'][$rid])){
+      $room=&$state['rooms'][$rid];
+      foreach(['players','participants'] as $bucket){
+        if(!empty($room[$bucket]) && is_array($room[$bucket])){
+          foreach($room[$bucket] as &$p){
+            if(empty($p['bot']) && ($p['clientId']??'')===$cid){ $p['packChoice']=$choice; $p['packLabel']=$label; }
+          }
+          unset($p);
+        }
+      }
+      if(!empty($room['spectators'][$cid])){ $room['spectators'][$cid]['packChoice']=$choice; $room['spectators'][$cid]['packLabel']=$label; }
+      if(!empty($room['lateJoiners'][$cid])){ $room['lateJoiners'][$cid]['packChoice']=$choice; $room['lateJoiners'][$cid]['packLabel']=$label; }
+      $room['chat'][]=['system'=>true,'text'=>($client['name']?:'Pilot').' set weapon pack: '.$label.'.','at'=>time()];
+      $room['chat']=array_slice($room['chat'],-$MAX_ROOM_CHAT);
+      add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]);
+    }
+    $message='Weapon pack set to '.$label.'.';
     break;
   case 'roomConfig':
     $rid=$client['roomId']??'';
@@ -335,10 +488,10 @@ switch($action){
     }
     break;
   case 'startRoom':
-    $rid=$client['roomId']??''; if(!empty($state['rooms'][$rid])){ $room=&$state['rooms'][$rid]; if($room['hostId']!==$cid) $message='Only the host can start.'; else if(count($room['players']) + intval($room['bots']) < 2) $message='Need at least 2 total players/bots.'; else { $room['participants']=build_participants($room); $room['state']='running'; $room['locked']=true; $room['turn']=random_int(0, max(0,count($room['participants'])-1)); $room['turnPhase']='idle'; $room['turnToken']=0; $room['turnStartedAt']=time(); $room['seed']=safe_id('seed'); $room['latestState']=null; add_event($state,$room,'startGame',['room'=>public_room($room),'warning'=>'Never share personal information or private contact details.']); } }
+    $rid=$client['roomId']??''; if(!empty($state['rooms'][$rid])){ $room=&$state['rooms'][$rid]; if($room['hostId']!==$cid) $message='Only the host can start.'; else if(count($room['players']) + intval($room['bots']) < 2) $message='Need at least 2 total players/bots.'; else { $room['participants']=build_participants($room); $room['state']='running'; $room['locked']=true; $room['turn']=random_int(0, max(0,count($room['participants'])-1)); $room['turnPhase']='idle'; $room['turnToken']=0; $room['lastFinishedTurnToken']=-1; $room['turnStartedAt']=time(); $room['seed']=safe_id('seed'); $room['latestState']=null; add_event($state,$room,'startGame',['room'=>public_room($room),'warning'=>'Never share personal information or private contact details.']); } }
     break;
   case 'shot':
-    $rid=$client['roomId']??''; if(!empty($state['rooms'][$rid])){ $room=&$state['rooms'][$rid]; $parts=room_participants($room); $active=$parts[$room['turn']]??null; if($room['state']!=='running') $message='Room is not running.'; else if(!$active || !empty($active['bot']) || ($active['clientId']??'')!==$cid) $message='It is not your turn.'; else if(($room['turnPhase']??'idle')==='shot') $message='Shot already in flight.'; else { $room['turnPhase']='shot'; $room['turnToken']=intval($room['turnToken']??0)+1; add_event($state,$room,'shot',['from'=>$cid,'slot'=>$room['turn'],'turnToken'=>$room['turnToken'],'input'=>$in['input']??new stdClass()]); } }
+    $rid=$client['roomId']??''; if(!empty($state['rooms'][$rid])){ $room=&$state['rooms'][$rid]; $parts=room_participants($room); $active=$parts[$room['turn']]??null; if($room['state']!=='running') $message='Room is not running.'; else if(!$active || !empty($active['bot']) || ($active['clientId']??'')!==$cid) $message='It is not your turn.'; else if(($room['turnPhase']??'idle')==='shot') $message='Shot already in flight.'; else { $room['turnPhase']='shot'; $room['turnToken']=intval($room['turnToken']??0)+1; $room['lastFinishedTurnToken']=-1; add_event($state,$room,'shot',['from'=>$cid,'slot'=>$room['turn'],'turnToken'=>$room['turnToken'],'room'=>public_room($room),'input'=>$in['input']??new stdClass()]); } }
     break;
   case 'turnFinished':
     $rid=$client['roomId']??'';
@@ -349,6 +502,13 @@ switch($action){
       $allowed=false;
       if($active){ $allowed=(!empty($active['bot']) && $room['hostId']===$cid) || (empty($active['bot']) && ($active['clientId']??'')===$cid); }
       if($room['state']==='running' && $allowed && (($room['turnPhase']??'idle')==='shot' || !empty($active['bot']))){
+        // v0.7.58: turn finish is server-authoritative.  Clients may lag, tab out, or disagree
+        // about their local next turn, so only the server's current turn/shot token can advance.
+        $finishToken = (isset($in['turnToken']) && is_numeric($in['turnToken'])) ? intval($in['turnToken']) : intval($room['turnToken']??0);
+        $currentToken = intval($room['turnToken']??0);
+        if($finishToken !== $currentToken){ $message='Stale turn finish ignored.'; break; }
+        if(intval($room['lastFinishedTurnToken']??-1) === $currentToken){ $message='Duplicate turn finish ignored.'; break; }
+        $room['lastFinishedTurnToken']=$currentToken;
         $room['latestState']=$in['state']??null;
         $room['turnPhase']='idle';
         $room['turnToken']=intval($room['turnToken']??0)+1;
@@ -363,17 +523,26 @@ switch($action){
           if($hp>0) break;
           $next=($next+1)%$count;
         }
-        $wrapped=($next <= $oldTurn);
+        // v0.7.49: late joiners enter on the NEXT available turn update, not the next full cycle.
+        // They are appended to the roster after the current shot resolves, while $next keeps pointing to
+        // the already-scheduled existing player. Because new players are appended after $next is chosen,
+        // their first possible turn is skipped and they join the following rotation cleanly.
         $lateText='';
-        if($wrapped && !empty($room['lateJoiners'])){
+        if(!empty($room['lateJoiners'])){
           $added=commit_late_joiners($state,$room,$lateText);
           if(count($added)){
-            $next=0; // New players wait through the fresh cycle instead of shooting immediately.
             add_event($state,$room,'lateJoinCommit',['room'=>public_room($room),'chat'=>$room['chat'],'added'=>array_map('public_participant',$added),'message'=>$lateText]);
           }
         }
         $parts=room_participants($room);
+        if($next>=count($parts)) $next=0;
         $room['turn']=$next;
+        if(is_array($room['latestState'])){
+          $room['latestState']['turn']=$room['turn'];
+          $room['latestState']['roundLeft']=intval($room['turnLength']??120);
+          $room['latestState']['busy']=false;
+          $room['latestState']['ended']=!empty($room['latestState']['ended']);
+        }
         $room['turnStartedAt']=time();
         add_event($state,$room,'stateSync',['state'=>$room['latestState'],'turn'=>$room['turn'],'turnToken'=>$room['turnToken'],'room'=>public_room($room),'activeClientId'=>($parts[$room['turn']]['clientId']??null)]);
       }
@@ -383,13 +552,51 @@ switch($action){
     $rid=$client['roomId']??''; if(!empty($state['rooms'][$rid])){ $room=&$state['rooms'][$rid]; add_event($state,$room,'roomEnded',['message'=>clean_text($in['title']??'Game over. Room closed.',80)]); clear_room_clients($state,$room); unset($state['rooms'][$rid]); }
     break;
   case 'kickPlayer':
-    $rid=$client['roomId']??''; $target=clean_id($in['targetId']??''); if(!empty($state['rooms'][$rid])){ $room=&$state['rooms'][$rid]; if($room['hostId']!==$cid){$message='Only the host can kick players.';} else { $tname='Pilot'; foreach(($room['players']??[]) as $p){ if(($p['clientId']??'')===$target)$tname=$p['name']??'Pilot'; } if(isset($state['clients'][$target])) $state['clients'][$target]['roomId']=null; $room['players']=array_values(array_filter($room['players']??[],function($p)use($target){return ($p['clientId']??'')!==$target;})); $room['participants']=array_values(array_filter($room['participants']??[],function($p)use($target){return ($p['clientId']??'')!==$target;})); reindex_players($room); $room['chat'][]=['system'=>true,'text'=>$tname.' was removed by the host.','at'=>time()]; add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]); } }
+    $rid=$client['roomId']??''; $target=clean_id($in['targetId']??'');
+    if(!empty($state['rooms'][$rid])){
+      $room=&$state['rooms'][$rid];
+      if($room['hostId']!==$cid){ $message='Only the host can kick players.'; }
+      else {
+        $tname='Pilot'; $wasActive=false;
+        $active=room_participants($room)[intval($room['turn']??0)]??null;
+        if($active && ($active['clientId']??'')===$target) $wasActive=true;
+        foreach(($room['players']??[]) as $p){ if(($p['clientId']??'')===$target) $tname=$p['name']??'Pilot'; }
+        if(isset($state['clients'][$target])){ $state['clients'][$target]['roomId']=null; $state['clients'][$target]['spectating']=false; $state['clients'][$target]['lateQueued']=false; }
+        $room['players']=array_values(array_filter($room['players']??[],function($p)use($target){return ($p['clientId']??'')!==$target;}));
+        $room['participants']=array_values(array_filter($room['participants']??[],function($p)use($target){return ($p['clientId']??'')!==$target;}));
+        if(isset($room['spectators'][$target])) unset($room['spectators'][$target]);
+        if(isset($room['lateJoiners'][$target])) unset($room['lateJoiners'][$target]);
+        reindex_players($room);
+        if(($room['state']??'')==='running' && count(room_participants($room))>0){ normalize_running_turn($state,$room,$wasActive,'player kicked'); }
+        $room['chat'][]=['system'=>true,'text'=>$tname.' was removed by the host.','at'=>time()];
+        $room['chat']=array_slice($room['chat'],-$MAX_ROOM_CHAT);
+        add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]);
+      }
+    }
     break;
   case 'banPlayer':
-    $rid=$client['roomId']??''; $target=clean_id($in['targetId']??''); if(!empty($state['rooms'][$rid])){ $room=&$state['rooms'][$rid]; if($room['hostId']!==$cid){$message='Only the host can ban players.';} else { $room['banned']=$room['banned']??[]; if($target) $room['banned'][$target]=time(); if(isset($state['clients'][$target])) $state['clients'][$target]['roomId']=null; $room['players']=array_values(array_filter($room['players']??[],function($p)use($target){return ($p['clientId']??'')!==$target;})); $room['participants']=array_values(array_filter($room['participants']??[],function($p)use($target){return ($p['clientId']??'')!==$target;})); reindex_players($room); $room['chat'][]=['system'=>true,'text'=>'A player was banned by the host.','at'=>time()]; add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]); } }
+    $rid=$client['roomId']??''; $target=clean_id($in['targetId']??'');
+    if(!empty($state['rooms'][$rid])){
+      $room=&$state['rooms'][$rid];
+      if($room['hostId']!==$cid){ $message='Only the host can ban players.'; }
+      else {
+        $room['banned']=$room['banned']??[]; if($target) $room['banned'][$target]=time();
+        $wasActive=false; $active=room_participants($room)[intval($room['turn']??0)]??null; if($active && ($active['clientId']??'')===$target) $wasActive=true;
+        if(isset($state['clients'][$target])){ $state['clients'][$target]['roomId']=null; $state['clients'][$target]['spectating']=false; $state['clients'][$target]['lateQueued']=false; }
+        $room['players']=array_values(array_filter($room['players']??[],function($p)use($target){return ($p['clientId']??'')!==$target;}));
+        $room['participants']=array_values(array_filter($room['participants']??[],function($p)use($target){return ($p['clientId']??'')!==$target;}));
+        if(isset($room['spectators'][$target])) unset($room['spectators'][$target]);
+        if(isset($room['lateJoiners'][$target])) unset($room['lateJoiners'][$target]);
+        reindex_players($room);
+        if(($room['state']??'')==='running' && count(room_participants($room))>0){ normalize_running_turn($state,$room,$wasActive,'player banned'); }
+        $room['chat'][]=['system'=>true,'text'=>'A player was banned by the host.','at'=>time()];
+        $room['chat']=array_slice($room['chat'],-$MAX_ROOM_CHAT);
+        add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]);
+      }
+    }
     break;
   case 'hostTerrain':
-    $rid=$client['roomId']??''; $kind=clean_text($in['kind']??'clear',20); if(!empty($state['rooms'][$rid])){ $room=&$state['rooms'][$rid]; if($room['hostId']!==$cid){$message='Only the host can change terrain.';} else { if(isset($in['state'])) $room['latestState']=$in['state']; $room['turnToken']=intval($room['turnToken']??0)+1; $room['chat'][]=['system'=>true,'text'=>'Host terrain action: '.$kind.'.','at'=>time()]; add_event($state,$room,'stateSync',['state'=>$room['latestState'],'turn'=>$room['turn'],'turnToken'=>$room['turnToken'],'room'=>public_room($room),'activeClientId'=>($room['participants'][$room['turn']]['clientId']??null)]); } }
+    $rid=$client['roomId']??''; $kind=clean_text($in['kind']??'clear',20); $count=clamp_int($in['count']??8,1,20); if(!empty($state['rooms'][$rid])){ $room=&$state['rooms'][$rid]; if($room['hostId']!==$cid){$message='Only the host can change terrain.';} else { if(isset($in['state'])) $room['latestState']=$in['state']; if(is_array($room['latestState'])){ $room['latestState']['turn']=intval($room['turn']??0); $room['latestState']['busy']=false; } $room['turnToken']=intval($room['turnToken']??0)+1; $room['chat'][]=['system'=>true,'text'=>'Host terrain action: '.$kind.($kind==='generate'?' x'.$count:'').'.','at'=>time()]; add_event($state,$room,'stateSync',['state'=>$room['latestState'],'turn'=>$room['turn'],'turnToken'=>$room['turnToken'],'room'=>public_room($room),'activeClientId'=>($room['participants'][$room['turn']]['clientId']??null),'terrainKind'=>$kind,'terrainCount'=>$count]); } }
     break;
   case 'spectateRoom':
     $rid=clean_id($in['roomId'] ?? ''); if(empty($client['name'])) { $message='Set a name first.'; break; } if(empty($state['rooms'][$rid])) { $message='Room not found.'; break; } $room=&$state['rooms'][$rid]; if(empty($room['allowSpectators'])){ $message='Spectating is disabled for this room.'; break; } leave_room($state,$cid,'changed rooms'); $client['roomId']=$rid; $client['spectating']=true; $room['spectators']=$room['spectators']??[]; $room['spectators'][$cid]=['id'=>$cid,'name'=>$client['name'],'at'=>time()]; $room['chat'][]=['system'=>true,'text'=>$client['name'].' is spectating.','at'=>time()]; add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]);

@@ -60,7 +60,7 @@ WarHeads Classic Enhanced is an ultra early-access reboot of the classic turn-ba
 
 ## Current Build Notes
 
-- Version shown in-game: `v0.5.2 stable splitter`.
+- Version shown in-game: `v0.7.43`.
 - Project name shown in-game: `WarHeads Classic Enhanced`.
 - Announcement image title: `WarHeads Classic Enhanced`.
 - This is ultra early-access and gameplay values are expected to change.
@@ -76,3 +76,11 @@ WarHeads Classic Enhanced is an ultra early-access reboot of the classic turn-ba
 ## Advanced Mod Options
 
 Options now includes an ADVANCED panel for local modding: gameplay variables, physics, planet rules, chaos caps, VFX/audio caps, asset folders, and import/exportable mod settings.
+
+## v0.7.43 Additions
+- Performance cleanup routine for leftover shots, debris, VFX, physics helpers, and old planet damage data.
+- OAT / One At A Time weapon type beside STAGED and SNIPER.
+- Experimental pack with 10 procedural 10-stage OAT weapons plus Terrain Mass Maker.
+- MOBILE menu style and improved small-screen options/editor panels.
+- Ten selectable graphical planet styles.
+- Multiplayer host EDIT SERVER controls for cleanup, planet style, OAT, shots, particles, and planet cap.

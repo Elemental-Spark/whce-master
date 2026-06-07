@@ -1,1 +1,8 @@
-{"version":"0.7.40-php-mp","clients":[],"rooms":[],"lobbyChat":[],"seq":1,"updatedAt":0}
+{
+  "version": "0.7.67-php-mp",
+  "clients": {},
+  "rooms": {},
+  "lobbyChat": [],
+  "seq": 1,
+  "updatedAt": 0
+}

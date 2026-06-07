@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover, user-scalable=yes">
   <title>WarHeads Classic Enhanced</title>
   <style>
     :root { color-scheme: dark; --gold:#ffd21a; --ink:#020604; --panel:rgba(0,12,6,.86); --line:#39ff14; --text:#b9ff7a; --muted:#63c86c; --hot:#ff7b00; --good:#72ff20; --blue:#25f7ff; --mag:#ff4dff; }
@@ -131,7 +131,7 @@
     @media (max-width:760px){ .advancedPage { grid-template-columns:1fr; max-height:54vh; } .advancedTabs { grid-template-columns:repeat(2,1fr); } .folderList { grid-template-columns:1fr; } }
 
 
-    /* v0.7.40 Weapon Editor Modding UX */
+    /* v0.7.67 Weapon Editor Modding UX */
     .lab.modWeaponEditor { grid-template-rows:auto 1fr auto; }
     .labHeaderTitle { display:grid; gap:2px; }
     .labSub { color:var(--muted); font-size:11px; font-weight:800; }
@@ -159,7 +159,7 @@
 
   
 
-    /* v0.7.40 clean-menu / simple-deep-editor recovery */
+    /* v0.7.67 clean-menu / simple-deep-editor recovery */
     :root { --ui-accent:#35c8ff; --ui-panel:rgba(0,18,28,.92); --ui-line:#35c8ff; --ui-glow:rgba(53,200,255,.28); }
     body.theme-classic-green { --ui-accent:#39ff14; --ui-panel:rgba(0,12,6,.92); --ui-line:#39ff14; --ui-glow:rgba(57,255,20,.26); }
     body.theme-deep-blue { --ui-accent:#35c8ff; --ui-panel:rgba(0,18,36,.93); --ui-line:#35c8ff; --ui-glow:rgba(53,200,255,.28); }
@@ -214,7 +214,7 @@
 
   
 
-/* v0.7.40 ship library / LAN assignment cleanup */
+/* v0.7.67 ship library / LAN assignment cleanup */
 .shipManagerPanel{display:grid;gap:8px;border:1px dashed var(--line);background:rgba(0,18,8,.55);padding:9px;margin:6px 0;}
 .shipManagerPanel .shipManagerRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
 .shipManagerPanel select,.shipManagerPanel button{min-height:42px;}
@@ -224,7 +224,7 @@
 
 
 
-/* v0.7.40 sci-fi holo visual pass */
+/* v0.7.67 sci-fi holo visual pass */
 body.theme-holo-blue{
   --ui-accent:#28f7ff; --ui-panel:rgba(3,24,40,.88); --ui-line:#2af2ff; --ui-glow:rgba(40,247,255,.36);
   --panel:rgba(3,18,33,.88); --line:#2af2ff; --text:#e9fbff; --muted:#8de8ff; --gold:#72ecff; --good:#8effd4;
@@ -274,7 +274,7 @@ body.theme-holo-blue .gameCredit a{color:#ffffff;text-shadow:0 0 8px #28f7ff;}
 
 
 
-/* v0.7.40 release-candidate UI fix: Holo select/highlight consistency */
+/* v0.7.67 release-candidate UI fix: Holo select/highlight consistency */
 :root{ color-scheme:dark; }
 button, select, input, textarea { transition: border-color .14s ease, box-shadow .14s ease, background .14s ease, color .14s ease, transform .08s ease; }
 button:hover:not(:disabled), select:hover, input:hover, textarea:hover { filter: brightness(1.08); }
@@ -311,7 +311,7 @@ body.theme-holo-blue .panelX, body.theme-holo-blue .alwaysClose { min-width:46px
 body.theme-holo-blue .menuPanel .menuActions button[disabled], body.theme-holo-blue button:disabled { opacity:.45; filter:grayscale(.45); }
 
 
-/* v0.7.40 overlay stacking hotfix: Bot Config must appear above menu/game */
+/* v0.7.67 overlay stacking hotfix: Bot Config must appear above menu/game */
 #botPackLab {
   position: fixed !important;
   inset: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)) !important;
@@ -348,7 +348,7 @@ body.theme-holo-blue #botPackLab .row b {
 }
 
 
-/* v0.7.40 premium UI theme expansion */
+/* v0.7.67 premium UI theme expansion */
 body.theme-holo-horror{--panel:rgba(18,0,12,.92);--panel2:rgba(48,0,34,.74);--line:#ff477f;--good:#ff89b0;--accent:#ff174e;--muted:#d18aa2;background:radial-gradient(circle at 50% 18%,#240012,#030006 62%,#000)}
 body.theme-holo-film{--panel:rgba(12,12,16,.92);--panel2:rgba(42,42,52,.72);--line:#f2f2f2;--good:#ffffff;--accent:#b6b6b6;--muted:#b9c0c8;background:linear-gradient(180deg,#10131a,#010204)}
 body.theme-holo-pretty{--panel:rgba(5,14,34,.9);--panel2:rgba(30,6,70,.62);--line:#a7f7ff;--good:#ffd9ff;--accent:#ff9dff;--muted:#b8d7ff;background:radial-gradient(circle at 30% 12%,#1a3d6a,#080527 58%,#010107)}
@@ -357,9 +357,104 @@ body.theme-holo-horror .menuPanel,body.theme-holo-film .menuPanel,body.theme-hol
 body.theme-holo-horror .lab,body.theme-holo-film .lab,body.theme-holo-pretty .lab,body.theme-holo-clean .lab,
 body.theme-holo-horror .advancedPanel,body.theme-holo-film .advancedPanel,body.theme-holo-pretty .advancedPanel,body.theme-holo-clean .advancedPanel{box-shadow:0 0 34px color-mix(in srgb,var(--line) 35%,transparent),0 22px 90px rgba(0,0,0,.65);backdrop-filter:blur(8px)}
 
+
+
+/* v0.7.67 HUD safe-zone: keep status/buttons out of the top play/title lane. */
+body.wce-v0745-hud #gameMenu{
+  position:fixed!important;
+  left:max(12px,env(safe-area-inset-left))!important;
+  bottom:calc(max(116px,env(safe-area-inset-bottom)) + 58px)!important;
+  z-index:2147482500!important;
+  width:auto!important;
+  min-width:106px!important;
+  min-height:44px!important;
+  padding:0 16px!important;
+  border-radius:12px!important;
+  border-color:var(--blue)!important;
+  background:linear-gradient(180deg,rgba(36,214,255,.22),rgba(0,36,56,.86))!important;
+  color:#eaffff!important;
+  text-shadow:0 0 8px rgba(37,247,255,.55)!important;
+  box-shadow:0 0 18px rgba(37,247,255,.28),0 9px 28px rgba(0,0,0,.55)!important;
+  pointer-events:auto!important;
+}
+body.wce-v0745-hud .top .row #gameMenu{margin-left:0!important;}
+body.wce-v0745-hud .top{
+  pointer-events:none!important;
+  padding-right:max(12px,env(safe-area-inset-right))!important;
+  min-height:74px!important;
+}
+body.wce-v0745-hud .top button, body.wce-v0745-hud .top select, body.wce-v0745-hud .top input{pointer-events:auto!important;}
+body.wce-v0745-hud .top .row{
+  display:grid!important;
+  grid-template-columns:1fr auto!important;
+  gap:10px!important;
+  align-items:start!important;
+}
+body.wce-v0745-hud .brand{max-width:calc(100vw - 170px)!important;min-width:0!important;}
+body.wce-v0745-hud .brand .tagline{display:inline-block!important;max-width:min(520px,45vw)!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;vertical-align:bottom!important;}
+body.wce-v0745-hud .turn{justify-self:end!important;max-width:min(42vw,520px)!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;}
+body.wce-v0745-hud .version{top:auto!important;left:max(12px,env(safe-area-inset-left))!important;bottom:calc(max(10px,env(safe-area-inset-bottom)) + 4px)!important;opacity:.92!important;z-index:2147482400!important;}
+@media(max-width:820px){
+  body.wce-v0745-hud #gameMenu{bottom:calc(max(128px,env(safe-area-inset-bottom)) + 58px)!important;min-width:92px!important;min-height:42px!important;font-size:13px!important;}
+  body.wce-v0745-hud .brand .tagline{display:none!important;}
+  body.wce-v0745-hud .mark{display:none!important;}
+  body.wce-v0745-hud .brand{font-size:12px!important;max-width:50vw!important;}
+  body.wce-v0745-hud .turn{font-size:11px!important;max-width:44vw!important;}
+}
+
+
+
+/* v0.7.67 HUD safe-line placement + previous-menu return */
+body.wce-v0745-hud #gameMenu{
+  position:fixed!important;
+  left:max(12px,env(safe-area-inset-left))!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:calc(max(10px,env(safe-area-inset-bottom)) + clamp(190px,23dvh,268px))!important;
+  z-index:2147483500!important;
+  min-width:98px!important;
+  width:auto!important;
+  min-height:40px!important;
+  padding:0 14px!important;
+  opacity:.82!important;
+  border-radius:12px!important;
+  backdrop-filter:blur(4px)!important;
+  background:linear-gradient(180deg,rgba(42,224,255,.34),rgba(0,36,56,.74))!important;
+  border-color:rgba(62,235,255,.92)!important;
+  color:#eaffff!important;
+  pointer-events:auto!important;
+}
+body.wce-v0745-hud #testBackEditor{
+  position:fixed!important;
+  left:max(122px,calc(env(safe-area-inset-left) + 122px))!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:calc(max(10px,env(safe-area-inset-bottom)) + clamp(190px,23dvh,268px))!important;
+  z-index:2147483500!important;
+  opacity:.82!important;
+  min-height:40px!important;
+  width:auto!important;
+  min-width:128px!important;
+}
+body.wce-v0745-hud .top{min-height:72px!important;}
+body.wce-v0745-hud #menuReturnGame{
+  display:none;
+  grid-column:1/-1;
+  border-color:var(--blue)!important;
+  color:#eaffff!important;
+  background:linear-gradient(180deg,rgba(42,224,255,.24),rgba(0,36,56,.82))!important;
+  text-shadow:0 0 8px rgba(37,247,255,.45)!important;
+}
+body.wce-v0745-hud #menuReturnGame.inGameVisible{display:block!important;}
+body.wce-v0745-hud .menu.inGameMenu .menuPanel{width:min(920px,94vw)!important;}
+@media(max-width:820px){
+  body.wce-v0745-hud #gameMenu{bottom:calc(max(10px,env(safe-area-inset-bottom)) + clamp(176px,28dvh,250px))!important;min-width:86px!important;min-height:38px!important;font-size:13px!important;}
+  body.wce-v0745-hud #testBackEditor{bottom:calc(max(10px,env(safe-area-inset-bottom)) + clamp(176px,28dvh,250px))!important;left:max(104px,calc(env(safe-area-inset-left) + 104px))!important;min-height:38px!important;font-size:12px!important;}
+}
+
 </style>
 </head>
-<body>
+<body class="wce-v0745-hud">
 <div id="app" class="preGame">
   <canvas id="game"></canvas>
   <div class="hud">
@@ -375,7 +470,7 @@ body.theme-holo-horror .advancedPanel,body.theme-holo-film .advancedPanel,body.t
         <div class="team right"><span>Enemy</span><div class="bar"><span id="eHealth"></span></div></div>
       </div>
       <div class="damage"><div id="pDmg">Damage dealt 0</div><div style="text-align:right" id="eDmg">Damage taken 0</div></div>
-      <div class="version" id="versionText">v0.7.40</div>
+      <div class="version" id="versionText">v0.7.67</div>
     </div>
     <div><div class="toast" id="toast"></div><div class="centerBanner" id="centerBanner"><div class="centerTitle" id="centerTitle"></div><div class="centerSub" id="centerSub"></div><button id="centerButton">MAIN MENU</button></div></div>
     <div class="bottom">
@@ -569,7 +664,7 @@ body.theme-holo-horror .advancedPanel,body.theme-holo-film .advancedPanel,body.t
         <button class="primary panelWide" id="localStart">START LOCAL MATCH</button>
         <button class="panelWide" id="localBack">Main Menu</button>
       </div>
-      <div class="menuNote gameCredit">WarHeads Classic Enhanced v0.7.40 &nbsp;|&nbsp; Developed By: Elemental Spark &nbsp;|&nbsp; <a href="https://www.elementalspark.com" target="_blank" rel="noopener">www.elementalspark.com</a></div>
+      <div class="menuNote gameCredit">WarHeads Classic Enhanced v0.7.67 &nbsp;|&nbsp; Developed By: Elemental Spark &nbsp;|&nbsp; <a href="https://www.elementalspark.com" target="_blank" rel="noopener">www.elementalspark.com</a></div>
     </div>
   </section>
 </div>
@@ -1131,8 +1226,8 @@ const advFieldMap={
 function fillAdvancedOptions(){Object.entries(advFieldMap).forEach(([id,key])=>{let el=$(id);if(el&&modSettings[key]!=null)el.value=modSettings[key]});let asset=$('advAssetStatus');if(asset)asset.value=localStorage.getItem('warheads.assetManifest')||''}
 function readAdvancedOptions(){Object.entries(advFieldMap).forEach(([id,key])=>{let el=$(id);if(el){let v=+el.value;modSettings[key]=Number.isFinite(v)?v:DEFAULT_MOD_SETTINGS[key]}});applyModSettings();saveModSettings();if(ships.length){ships.forEach(s=>{s.maxHp=Math.max(s.maxHp||MAX_HEALTH,MAX_HEALTH);s.hp=clamp(s.hp,0,s.maxHp)});syncUI()}return modSettings}
 function showAdvancedPage(name){document.querySelectorAll('.advancedPage').forEach(p=>p.classList.toggle('open',p.id==='advPage_'+name));document.querySelectorAll('[data-advtab]').forEach(b=>b.classList.toggle('active',b.dataset.advtab===name))}
-function exportAdvancedSettings(){let data={version:'v0.7.40',name:'WarHeads Classic Enhanced Mod Settings',settings:readAdvancedOptions()};downloadJsonFile('WarHeads-MOD_SETTINGS-v0.7.40.json',data)}
-function downloadFolderGuide(){let guide=`WarHeads Classic Enhanced v0.7.40 Mod Folders\n\nMUSIC/ - playlist.json and custom music files\nSOUNDS/ - custom launch/impact/UI sounds\nTEXTURES/ - planet, ship, UI and border art\nPARTICLES/ - particle and VFX presets\nSCRIPTS/ - local experimental scripts/presets\nOTHER/ - notes or uncategorized mod assets\n\nExport Advanced Settings from Options > Advanced and place shared presets beside these folders.`;try{let blob=new Blob([guide],{type:'text/plain'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='WarHeads_Mod_Folder_Guide_v0.7.40.txt';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},800)}catch(e){}}
+function exportAdvancedSettings(){let data={version:'v0.7.67',name:'WarHeads Classic Enhanced Mod Settings',settings:readAdvancedOptions()};downloadJsonFile('WarHeads-MOD_SETTINGS-v0.7.67.json',data)}
+function downloadFolderGuide(){let guide=`WarHeads Classic Enhanced v0.7.67 Mod Folders\n\nMUSIC/ - playlist.json and custom music files\nSOUNDS/ - custom launch/impact/UI sounds\nTEXTURES/ - planet, ship, UI and border art\nPARTICLES/ - particle and VFX presets\nSCRIPTS/ - local experimental scripts/presets\nOTHER/ - notes or uncategorized mod assets\n\nExport Advanced Settings from Options > Advanced and place shared presets beside these folders.`;try{let blob=new Blob([guide],{type:'text/plain'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='WarHeads_Mod_Folder_Guide_v0.7.67.txt';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},800)}catch(e){}}
 function importAdvancedSettingsFile(file){if(!file)return;let r=new FileReader();r.onload=()=>{try{let data=JSON.parse(r.result),incoming=data.settings||data;modSettings={...DEFAULT_MOD_SETTINGS,...incoming};applyModSettings();saveModSettings();fillAdvancedOptions();toast('Advanced mod settings imported.',1400)}catch(e){toast('Invalid mod settings JSON.',1600)}};r.readAsText(file)}
 function registerAssetFiles(files){let names=[...files].map(f=>f.name);let text='Registered local assets for notes only:\n'+names.join('\n');localStorage.setItem('warheads.assetManifest',text);if($('advAssetStatus'))$('advAssetStatus').value=text;toast(`${names.length} asset file name${names.length===1?'':'s'} registered.`,1200)}
 if($('optionsAdvanced'))$('optionsAdvanced').onclick=()=>{fillAdvancedOptions();showMenuPanel('advancedPanel')};
@@ -1150,9 +1245,9 @@ fillAdvancedOptions();
 addEventListener('beforeunload',e=>{if(isWeaponEditorDirty()||isShipEditorDirty()){e.preventDefault();e.returnValue=''}});
 
 
-/* v0.7.40 Weapon Editor / Pack Modding Overhaul */
-const WCE_VERSION='v0.7.40';
-if($('versionText'))$('versionText').textContent='v0.7.40';
+/* v0.7.67 Weapon Editor / Pack Modding Overhaul */
+const WCE_VERSION='v0.7.67';
+if($('versionText'))$('versionText').textContent='v0.7.67';
 const SHOT_ACTIONS={
   Impact:[['explode','Explode / Crater'],['dig','DIG - Direct Tunneling Line'],['laser','Laser Beam'],['napalm','Napalm Carve'],['magnet','Magnet / Vortex']],
   Splitters:[['splitter','Tunneling Splitter'],['split','Simple Split'],['burst','Burst Ring'],['cluster','Cluster'],['warburst','Warburst']],
@@ -1248,12 +1343,12 @@ setTimeout(installEditorModEvents,0);
 
 
 
-/* v0.7.40 clean UI / simple weapon editor / pack + LAN pack recovery */
+/* v0.7.67 clean UI / simple weapon editor / pack + LAN pack recovery */
 function WCE716_installCleanRecovery(){
   try{
     document.body.classList.add(localStorage.getItem('warheads.uiTheme')||'theme-deep-blue');
     document.documentElement.style.setProperty('--custom-menu-color', localStorage.getItem('warheads.uiColor')||'#35c8ff');
-    if($('versionText')) $('versionText').textContent='v0.7.40';
+    if($('versionText')) $('versionText').textContent='v0.7.67';
     ui.lab.classList.add('cleanWeaponEditor');
     let title=document.querySelector('#lab .labHeaderTitle');
     if(title){ title.innerHTML='<b>Weapon Editor</b><span class="labSub">Quick weapon building first. Deep stage JSON, pack editing, and mod controls live behind buttons.</span>'; }
@@ -1340,7 +1435,7 @@ function WCE716_installCleanRecovery(){
     if($('menuEditor')) $('menuEditor').onclick=()=>{clearGameSession();setGameLoaded(false);showMenuPanel(null);ui.menu.classList.add('hidden');openLab();};
     if($('menuOptions')) $('menuOptions').onclick=()=>{let opening=ui.optionsPanel.classList.contains('hidden');showMenuPanel(opening?'optionsPanel':null);startMusic();};
     if($('menuLan')) $('menuLan').onclick=()=>{openLocalLanSetup(); WCE716_populateLocalPackDropdowns(); WCE716_syncLocalPacks();};
-  }catch(e){console.warn('v0.7.40 clean recovery install failed',e)}
+  }catch(e){console.warn('v0.7.67 clean recovery install failed',e)}
 }
 function WCE716_populateLocalPackDropdowns(){
   try{
@@ -1383,9 +1478,9 @@ function openLab(){let load=(inGame&&ships.length?currentLoadout():(playerWeapon
 function makeHumanLoadoutForSlot(slot=0){let id=($('localHumanPack'+(slot+1))?.value)||($('humanDefaultPack')?.value)||settings.playerPackChoice||'gold';return String(id).startsWith('pack:')?loadoutFromPackId(id):(id==='all'?[...allWeaponMap().values()]:makeSelectedPlayerLoadout())}
 
 
-/* v0.7.40 startup-safe overrides + ship library / LAN ship assignment */
+/* v0.7.67 startup-safe overrides + ship library / LAN ship assignment */
 (function(){
-  const VERSION_0719='v0.7.40';
+  const VERSION_0719='v0.7.67';
   function safeNum(v,d){v=+v;return Number.isFinite(v)?v:d}
   function safeUniqueWeapons(list){return uniqueWeapons(list||[])}
 
@@ -1465,7 +1560,7 @@ function makeHumanLoadoutForSlot(slot=0){let id=($('localHumanPack'+(slot+1))?.v
   readShipEditor = function(id=null){let existing=null;try{existing=JSON.parse($('shipJson').value||'null')}catch(e){}let botMade=!!existing?.botMade||String(existing?.id||id||'').startsWith('botship-');return normShipSprite({id:id||existing?.id||((botMade?'botship-edit-':'ship-')+Date.now()),name:$('shipName').value||(botMade?'Bot Ship':'My Ship'),w:16,h:16,userMade:!botMade,botMade,custom:true,cells:shipEditorCells,created:existing?.created||Date.now(),genIndex:existing?.genIndex||0})}
   syncShipJson = function(id=null){let existing=null;try{existing=JSON.parse($('shipJson').value||'null')}catch(e){}let sp=readShipEditor(id||existing?.id||null);$('shipJson').value=JSON.stringify(sp,null,2);$('shipStatus').textContent=''}
   saveShipFromEditor = function(){let raw=null;try{raw=JSON.parse($('shipJson').value)}catch(e){}let sp=normShipSprite({...readShipEditor(raw?.id||null),...(raw||{}),cells:shipEditorCells});if(!sp.botMade){sp.userMade=true;sp.botMade=false}let idx=shipDefs.findIndex(x=>x.id===sp.id);if(idx>=0)shipDefs[idx]=sp;else shipDefs.push(sp);if(!sp.botMade){playerShipId=sp.id;localStorage.setItem('warheads.playerShip',sp.id)}saveShips();renderShipLibraryList();if(ships[0]&&!sp.botMade)ships[0].sprite=cloneShipSprite(sp);markShipEditorClean();shipPainting=false;$('shipStatus').textContent=`Saved "${sp.name}" ${sp.botMade?'as BOT ship':'and assigned it to PLAYER'}.`;toast(sp.botMade?'Bot ship saved.':'Ship saved and assigned to PLAYER.',1500)}
-  exportShipsFromEditor = function(){let current=null;try{current=readShipEditor(JSON.parse($('shipJson').value||'null')?.id||null)}catch(e){current=readShipEditor()}if(current&&current.cells&&current.cells.length){let idx=shipDefs.findIndex(s=>s.id===current.id);if(idx>=0)shipDefs[idx]=current;else shipDefs.push(current);saveShips()}let pack={version:VERSION_0719,folder:'SHIPS',playerShips:playerShipSprites().map(cloneShipSprite),botShips:botShipSprites().map(cloneShipSprite),defaultPlayerShipId:localStorage.getItem('warheads.playerShip')||''};$('shipJson').value=JSON.stringify(pack,null,2);downloadJsonFile('SHIPS/WarHeads-SHIPS-v0.7.40-'+Date.now()+'.json',pack);$('shipStatus').textContent='Exported SHIPS library JSON. Place/share it from the SHIPS folder.';toast('SHIPS library exported.',1400)}
+  exportShipsFromEditor = function(){let current=null;try{current=readShipEditor(JSON.parse($('shipJson').value||'null')?.id||null)}catch(e){current=readShipEditor()}if(current&&current.cells&&current.cells.length){let idx=shipDefs.findIndex(s=>s.id===current.id);if(idx>=0)shipDefs[idx]=current;else shipDefs.push(current);saveShips()}let pack={version:VERSION_0719,folder:'SHIPS',playerShips:playerShipSprites().map(cloneShipSprite),botShips:botShipSprites().map(cloneShipSprite),defaultPlayerShipId:localStorage.getItem('warheads.playerShip')||''};$('shipJson').value=JSON.stringify(pack,null,2);downloadJsonFile('SHIPS/WarHeads-SHIPS-v0.7.67-'+Date.now()+'.json',pack);$('shipStatus').textContent='Exported SHIPS library JSON. Place/share it from the SHIPS folder.';toast('SHIPS library exported.',1400)}
   openShipEditor = function(){installShipManagerPanel();shipPainting=false;let saved=savedPlayerShip(0)||playerShipSprites()[0]||{id:'ship-'+Date.now(),name:'My Ship',w:16,h:16,cells:makeRandomShipCells(),userMade:true,custom:true};loadShipEditor(saved);$('shipLab').classList.add('open')}
   // Re-wire ship buttons safely after the original handlers.
   setTimeout(()=>{try{installShipManagerPanel();if($('shipSave'))$('shipSave').onclick=saveShipFromEditor;if($('shipExport'))$('shipExport').onclick=exportShipsFromEditor;if($('shipNew'))$('shipNew').onclick=()=>loadShipEditor({id:'ship-'+Date.now(),name:'My Ship',w:16,h:16,cells:[],userMade:true,botMade:false,custom:true});if($('shipRandom'))$('shipRandom').onclick=()=>loadShipEditor({id:'ship-'+Date.now(),name:'Random Ship',w:16,h:16,cells:makeRandomShipCells(),userMade:true,botMade:false,custom:true});if($('shipLoadJson'))$('shipLoadJson').onclick=()=>{try{let data=JSON.parse($('shipJson').value);let arr=Array.isArray(data)?data:[...(data.playerShips||[]),...(data.botShips||[])];if(arr.length){shipDefs=[...shipDefs.filter(s=>!s.userMade&&!s.botMade),...arr.map(normShipSprite)];saveShips();renderShipLibraryList();loadShipEditor(playerShipSprites()[0]||botShipSprites()[0]||{cells:[]});toast('Ship JSON library loaded.')}else loadShipEditor(normShipSprite({...data,userMade:!data.botMade,custom:true}))}catch(e){toast('Invalid ship JSON.')}};}catch(e){console.warn('ship manager install failed',e)}},0);
@@ -1493,7 +1588,7 @@ function makeHumanLoadoutForSlot(slot=0){let id=($('localHumanPack'+(slot+1))?.v
   };
 
   // Ensure buttons use final safe handlers.
-  setTimeout(()=>{try{if($('menuShipEditor'))$('menuShipEditor').onclick=()=>{clearGameSession();setGameLoaded(false);showMenuPanel(null);ui.menu.classList.add('hidden');openShipEditor()};if($('menuLan'))$('menuLan').onclick=()=>{openLocalLanSetup();installLanShipAssignmentUI();populateShipAssignmentDropdowns();syncLanShipVisibility();};if($('versionText'))$('versionText').textContent=VERSION_0719;}catch(e){console.warn('v0.7.40 final hook failed',e)}},0);
+  setTimeout(()=>{try{if($('menuShipEditor'))$('menuShipEditor').onclick=()=>{clearGameSession();setGameLoaded(false);showMenuPanel(null);ui.menu.classList.add('hidden');openShipEditor()};if($('menuLan'))$('menuLan').onclick=()=>{openLocalLanSetup();installLanShipAssignmentUI();populateShipAssignmentDropdowns();syncLanShipVisibility();};if($('versionText'))$('versionText').textContent=VERSION_0719;}catch(e){console.warn('v0.7.67 final hook failed',e)}},0);
 })();
 
 WCE716_installCleanRecovery();
@@ -1501,9 +1596,9 @@ WCE716_installCleanRecovery();
 addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPack.value=settings.playerPackChoice||'gold';ui.menuPlayerPack.onchange=()=>{settings.playerPackChoice=ui.menuPlayerPack.value;settings.packMode=settings.playerPackChoice;localStorage.setItem('warheads.playerPackChoice',settings.playerPackChoice);if(!ships.length){playerWeapons[0]=makeSelectedPlayerLoadout();selected=0;renderWeaponSelect();}}}renderWeaponSelect();setGameLoaded(false);requestAnimationFrame(loop);
 
 
-/* v0.7.40 sci-fi visuals + mod menu cleanup + chunk planet damage */
+/* v0.7.67 sci-fi visuals + mod menu cleanup + chunk planet damage */
 (function WCE718_visualModPass(){
-  const V='v0.7.40';
+  const V='v0.7.67';
   try{
     if(typeof WCE_VERSION!=='undefined') window.WCE_VERSION=V;
     const vt=document.getElementById('versionText'); if(vt) vt.textContent=V;
@@ -1653,9 +1748,9 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
 
 
 
-/* v0.7.40 release-candidate UI/bot-config/icon/filename fix */
+/* v0.7.67 release-candidate UI/bot-config/icon/filename fix */
 (function WCE719_releaseCandidateUiFix(){
-  const V='v0.7.40';
+  const V='v0.7.67';
   function el(id){return document.getElementById(id)}
   function removeThemeClasses(){
     const cls=['theme-holo-blue','theme-deep-blue','theme-classic-green','theme-nebula-purple','theme-alien-amber','theme-crimson-alert','theme-ice-terminal','theme-retro-gold','theme-stealth-gray','theme-plasma-pink','theme-ocean-cyan','theme-custom'];
@@ -1674,7 +1769,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       document.querySelectorAll('select').forEach(s=>{ s.dataset.wce719Styled='1'; });
       document.querySelectorAll('.advancedTabs button').forEach(b=>b.addEventListener('click',()=>setTimeout(applySelectedHighlights,0),{once:false}));
       applySelectedHighlights();
-    }catch(e){console.warn('v0.7.40 theme apply failed',e)}
+    }catch(e){console.warn('v0.7.67 theme apply failed',e)}
   }
   function applySelectedHighlights(){
     try{
@@ -1707,7 +1802,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       if(el('openBotPackEditor')) el('openBotPackEditor').onclick=open;
       if(el('localOpenBotPacks')) el('localOpenBotPacks').onclick=open;
       ['botPackLabX','botPackLabClose'].forEach(id=>{ if(el(id)) el(id).onclick=()=>{ const lab=el('botPackLab'); if(lab){ lab.classList.remove('open'); lab.style.display=''; } }; });
-    }catch(e){console.warn('v0.7.40 bot config repair failed',e)}
+    }catch(e){console.warn('v0.7.67 bot config repair failed',e)}
   }
   function patchThemeControl(){
     try{
@@ -1733,20 +1828,20 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       ensureBotConfigPanel(); patchThemeControl(); patchModalOpeners(); applyThemeEverywhere();
       const note=document.querySelector('.gameCredit');
       if(note) note.innerHTML='WarHeads Classic Enhanced '+V+' &nbsp;|&nbsp; Developed By: Elemental Spark &nbsp;|&nbsp; <a href="https://www.elementalspark.com" target="_blank" rel="noopener">www.elementalspark.com</a>';
-    }catch(e){console.warn('v0.7.40 install failed',e)}
+    }catch(e){console.warn('v0.7.67 install failed',e)}
   },0);
 })();
 
 
 
-/* v0.7.40 in-game weapon selection/editor hotfix
+/* v0.7.67 in-game weapon selection/editor hotfix
    Keeps the selected weapon per player stable:
    - pack default is used only for that player's first shot
    - after firing/changing, that player's last-used weapon is restored on later turns
    - editing/saving during a game edits the currently selected weapon and equips it back to that player
 */
 (function WCE721_weaponTurnMemoryHotfix(){
-  const V='v0.7.40';
+  const V='v0.7.67';
   let weaponEditorOwnerSlot=0;
 
   function setVersionLabel(){
@@ -1817,7 +1912,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
         s.hasFiredWeapon=!!s.hasFiredWeapon;
       });
       selectWeaponForCurrentTurn(true);
-    }catch(e){ console.warn('v0.7.40 weapon memory init failed',e); }
+    }catch(e){ console.warn('v0.7.67 weapon memory init failed',e); }
   }
 
   const _WCE721_newMatch = newMatch;
@@ -1993,9 +2088,9 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
 
 
 
-/* v0.7.40 terrain/aim/export cleanup hotfix */
+/* v0.7.67 terrain/aim/export cleanup hotfix */
 (function WCE722_terrainAimExportCleanup(){
-  const VERSION='v0.7.40';
+  const VERSION='v0.7.67';
   function el(id){return document.getElementById(id)}
   try{
     // Add a real Aim Assist Line toggle into Options without disturbing the existing layout.
@@ -2011,7 +2106,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       aimLine.value=settings.showAimAssist?'on':'off';
       aimLine.onchange=()=>{settings.showAimAssist=aimLine.value!=='off';localStorage.setItem('warheads.showAimAssist',settings.showAimAssist?'on':'off')};
     }
-  }catch(e){console.warn('v0.7.40 aim option init failed',e)}
+  }catch(e){console.warn('v0.7.67 aim option init failed',e)}
 
   // Remove the old angular crater deformation from the silhouette. Real cuts now come from clean round hole masks.
   try{
@@ -2022,7 +2117,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       try{ bump=(p.bumps||[]).reduce((sum,b)=>sum+Math.cos(a-b.a)*b.off*b.w,0)/Math.max(1,(p.bumps||[]).length)*5; }catch(e){ bump=0; }
       return clamp(p.r*(1+bump), p.r*.30, p.r*1.32);
     };
-  }catch(e){console.warn('v0.7.40 planet radius override failed',e)}
+  }catch(e){console.warn('v0.7.67 planet radius override failed',e)}
 
   // Hide dotted crater/ring leftovers and replace them with clean cutouts plus a soft scorched rim.
   try{
@@ -2050,7 +2145,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       });
       ctx.restore();
     };
-  }catch(e){console.warn('v0.7.40 planet draw cleanup failed',e)}
+  }catch(e){console.warn('v0.7.67 planet draw cleanup failed',e)}
 
   // Clean build/repair: remove overlapping hole masks in the built/repaired area so terrain grows back cleanly.
   try{
@@ -2063,7 +2158,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
         planets.forEach(p=>{ if(p&&p.holes){ p.holes=p.holes.filter(h=>Math.hypot(h.x-x,h.y-y)>rad+(h.r||0)*.55); p.texture=null; }});
       }
     };
-  }catch(e){console.warn('v0.7.40 build cleanup failed',e)}
+  }catch(e){console.warn('v0.7.67 build cleanup failed',e)}
 
   // Aim line uses the same core forces as real shots: wind, planet gravity, speed cap, wall bounce/wrap, and soft enemy guidance.
   try{
@@ -2114,7 +2209,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
       ctx.setLineDash([]);
       ctx.restore();
     };
-  }catch(e){console.warn('v0.7.40 draw aim override failed',e)}
+  }catch(e){console.warn('v0.7.67 draw aim override failed',e)}
 })();
 </script>
 
@@ -2146,7 +2241,7 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
   'use strict';
   if(window.WCE_CAMERA_0739) return;
   window.WCE_CAMERA_0739 = true;
-  const VERSION='v0.7.40';
+  const VERSION='v0.7.67';
   let cameraZoomLocked=false;
   let cameraFollowPaused=false;
   let cameraManualPan=false;
@@ -2330,6 +2425,1041 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
 })();
 </script>
 
+<script id="wce-v0741-performance-oat-mobile-planets-hotfix">
+(function(){
+  'use strict';
+  if(window.WCE_0741_HOTFIX) return;
+  window.WCE_0741_HOTFIX = true;
+  const V='v0.7.67';
+  const $id = id => document.getElementById(id);
+  const can = typeof clamp === 'function';
+  const cap = (v,a,b) => can ? clamp(v,a,b) : Math.max(a, Math.min(b, v));
+  const now = () => (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+
+  const PLANET_STYLES = [
+    ['random','Random Mix'],['8bit','8-Bit Arcade'],['16bit','16-Bit Terra'],['cyber','Cyber Neon'],['future','Futuristic Alloy'],
+    ['alien','Alien Purple'],['lava','Lava Crust'],['ice','Ice Crystal'],['desert','Desert Gold'],['ocean','Ocean World'],['void','Void Mono']
+  ];
+  const STYLE_PALETTES = {
+    '8bit':[['#2d7d36','#17441c','#78d65b','#071108','#b7ff90']],
+    '16bit':[['#587246','#334527','#97b86c','#151b10','#d0df91']],
+    cyber:[['#112d3b','#06131c','#00e5ff','#02050a','#ff4dff']],
+    future:[['#5d6b78','#273441','#9ee9ff','#0b1018','#ffffff']],
+    alien:[['#5f3d82','#2a1642','#a369ff','#12081b','#d6b3ff']],
+    lava:[['#742b1e','#2b0a07','#ff7035','#090101','#ffd05f']],
+    ice:[['#6faebd','#1b3d4c','#c8fbff','#07141c','#ffffff']],
+    desert:[['#9a7640','#4b3520','#e7bd66','#1e1409','#fff0a6']],
+    ocean:[['#166b83','#083143','#5ee7ff','#03131b','#bffaff']],
+    void:[['#4e535f','#16181d','#9aa3b5','#020204','#f0f2ff']]
+  };
+  function selectedPlanetStyle(){
+    try{ return (modSettings && modSettings.planetStyle) || localStorage.getItem('warheads.planetStyle') || 'random'; }catch(e){ return 'random'; }
+  }
+  function stylePalette(style){
+    if(style==='random'){
+      const choices=Object.keys(STYLE_PALETTES);
+      style=choices[Math.floor(Math.random()*choices.length)] || '16bit';
+    }
+    const p=STYLE_PALETTES[style] || STYLE_PALETTES['16bit'];
+    return p[Math.floor(Math.random()*p.length)].slice();
+  }
+
+  function installCss(){
+    if($id('wce0741Style')) return;
+    const st=document.createElement('style'); st.id='wce0741Style';
+    st.textContent = `
+      .typeButtons.wce0741TypeButtons{grid-template-columns:1fr 1fr 1fr!important;}
+      .wce-oat-options{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px;border:1px dashed rgba(255,210,26,.45);padding:8px;background:rgba(255,210,26,.055);}
+      .wce-oat-options label{min-width:0;}
+      .wce-cleanup-note{grid-column:1/-1;color:var(--muted);font-size:11px;line-height:1.35;}
+      body.theme-mobile{--panel:rgba(0,15,25,.95);--line:#7cf7ff;--text:#effcff;--muted:#9eeeff;--gold:#ffe56e;}
+      body.theme-mobile .menuPanel, body.theme-mobile .modalPanel, body.theme-mobile .lab{border-radius:18px!important;border-color:#7cf7ff!important;box-shadow:0 0 28px rgba(124,247,255,.22),0 18px 70px rgba(0,0,0,.6)!important;}
+      body.theme-mobile button, body.theme-mobile select, body.theme-mobile input{min-height:54px!important;font-size:16px!important;}
+      body.theme-mobile .menuActions button{font-size:20px!important;padding:18px 14px!important;}
+      body.theme-mobile .panelTitle, body.theme-mobile .menuTitle, body.theme-mobile .menuLogo .logoMain{letter-spacing:.03em!important;}
+      @media(max-width:820px){
+        #optionsPanel,#advancedPanel,#localLanPanel{width:calc(100vw - 10px)!important;max-width:calc(100vw - 10px)!important;max-height:calc(100dvh - 10px)!important;overflow:auto!important;grid-template-columns:1fr!important;padding:12px!important;}
+        #lab.open,#shipLab.open,#botPackLab.open{width:calc(100vw - 10px)!important;max-width:calc(100vw - 10px)!important;max-height:calc(100dvh - 10px)!important;overflow:auto!important;left:5px!important;right:5px!important;top:5px!important;}
+        .menuGrid,.advancedPage.open,.editorTopGrid,.packTools,.stage.modStage,.botPackGrid,.uiThemeBlock,.localPackBlock,.wce-oat-options{grid-template-columns:1fr!important;}
+        .advancedTabs{grid-template-columns:1fr 1fr!important;}
+        .labActions{grid-template-columns:1fr 1fr!important;}
+        button,select,input,textarea{font-size:16px!important;}
+      }
+    `;
+    document.head.appendChild(st);
+  }
+
+  function patchDefaults(){
+    try{
+      Object.assign(DEFAULT_MOD_SETTINGS, {
+        cleanupIntervalMs: 4500,
+        cleanupMaxPlanetHoles: 54,
+        cleanupMaxPlanetChunks: 36,
+        oatDelayMs: 220,
+        oatPayloadStage: 1,
+        planetStyle: selectedPlanetStyle()
+      });
+      modSettings = Object.assign({}, DEFAULT_MOD_SETTINGS, modSettings || {});
+      if(!modSettings.planetStyle) modSettings.planetStyle=selectedPlanetStyle();
+      if(typeof applyModSettings==='function') applyModSettings();
+      if(typeof saveModSettings==='function') saveModSettings();
+    }catch(e){}
+  }
+
+  function makeExperimentalWeapons(){
+    const actions=['explode','dig','napalm','magnet','cluster','warburst','spread','shotgun','wave','laser','splitter','walker','machine','sequence'];
+    const colors=['#76d8ff','#ff86cf','#ffd15f','#79e39d','#ffffff','#ff7b55','#cba6ff','#66d9ff','#d8ff76','#ff4dff'];
+    const names=['Chain Hydra','Neon Bore','Star Needle','Magma Courier','Ion Garden','Ice Ladder','Orbit Saw','Prism Rain','Thunder Drill','Rift Parade'];
+    const modes=['staged','sniper','oat'];
+    const modeOrder=Array.from({length:10},(_,i)=>modes[i%modes.length]).sort(()=>Math.random()-.5);
+    let out=[];
+    for(let i=0;i<10;i++){
+      const mode=modeOrder[i] || modes[i%modes.length];
+      let stages=[{delay:0,action:'fly',radius:24+i*2,damage:14+i,count:1,flight:'yes',speed:5+i*.2}];
+      for(let j=1;j<9;j++){
+        let a=actions[(i+j*2+Math.floor(Math.random()*3))%actions.length];
+        stages.push({delay:j*80,action:a,radius:cap(20+i*3+j*4,12,120),damage:a==='build'?0:cap(16+i*2+j*3,4,90),count:cap(1+(j%4),1,6),flight:'yes',speed:cap(4+j*.5,0,18)});
+      }
+      stages.push({delay:900,action:i%3===0?'napalm':'explode',radius:70+i*3,damage:65+i*4,count:1,flight:'yes'});
+      out.push({id:'exp-mixed-'+(i+1),name:(mode==='oat'?'OAT ':mode==='sniper'?'Sniper ':'Staged ')+names[i],type:mode,color:colors[i%colors.length],playerMade:false,oatDelayMs:190+i*20,oatPayloadStage:1+(i%10),stages});
+    }
+    out.push({id:'exp-terrain-mass-maker',name:'Terrain Mass Maker',type:(Math.random()<.5?'staged':'oat'),color:'#79e39d',playerMade:false,oatDelayMs:170,oatPayloadStage:10,stages:[
+      {delay:0,action:'fly',radius:18,damage:0,count:1,flight:'yes',speed:5},
+      {delay:120,action:'build',radius:42,damage:0,count:1,flight:'yes'},
+      {delay:240,action:'build',radius:54,damage:0,count:1,flight:'yes'},
+      {delay:360,action:'build',radius:64,damage:0,count:1,flight:'yes'},
+      {delay:480,action:'magnet',radius:120,damage:2,count:1,flight:'yes'},
+      {delay:600,action:'build',radius:70,damage:0,count:1,flight:'yes'},
+      {delay:720,action:'build',radius:58,damage:0,count:1,flight:'yes'},
+      {delay:840,action:'dig',radius:26,damage:16,count:1,flight:'yes'},
+      {delay:960,action:'build',radius:44,damage:0,count:1,flight:'yes'},
+      {delay:1080,action:'explode',radius:28,damage:18,count:1,flight:'yes'}
+    ]});
+    return out;
+  }
+  const EXP_WEAPONS = makeExperimentalWeapons();
+  function installExperimentalPack(){
+    try{
+      const isExperimentalId = w => w && typeof w.id==='string' && (w.id.indexOf('exp-oat-')===0 || w.id.indexOf('exp-mixed-')===0 || w.id==='exp-terrain-mass-maker');
+      defaultWeapons = (defaultWeapons||[]).filter(w=>!isExperimentalId(w));
+      EXP_WEAPONS.forEach(w=>defaultWeapons.push(normWeapon(w)));
+      weaponDefs = uniqueWeapons([...(weaponDefs||[]).filter(w=>!isExperimentalId(w)), ...EXP_WEAPONS.map(normWeapon)]);
+      try{
+        if(Array.isArray(weaponPacks)){
+          weaponPacks = weaponPacks.filter(p=>p && p.id!=='pack:experimental');
+        }
+      }catch(e){}
+      if(typeof saveWeapons==='function') saveWeapons();
+    }catch(e){ console.warn('v0.7.67 experimental pack failed', e); }
+  }
+
+  function patchNormalizers(){
+    try{
+      normStage = function(s={}){
+        const acts=['explode','burst','split','dig','laser','build','napalm','magnet','orbit','splitter','walker','fly','whiteout','homing','spread','shotgun','warburst','cluster','wave','machine','sequence'];
+        const action=acts.includes(s.action)?s.action:'explode';
+        let count=cap(Math.round(+s.count||1),1,Math.round(+((modSettings||{}).stageCountCap)||8));
+        if(action==='orbit') count=cap(Math.round(+s.count||1),1,4);
+        return {
+          delay:cap(+s.delay||(action==='orbit'?15000:0),0,20000), action,
+          radius:cap(+s.radius||30,4,+((modSettings||{}).stageRadiusCap)||260),
+          damage:cap(+s.damage||0,0,+((modSettings||{}).stageDamageCap)||160), count,
+          flight:(s.flight==='no'?'no':'yes'),
+          splitDepth:cap(Math.round(+s.splitDepth||0),0,5),
+          digTime:cap(+s.digTime||0,0,6000),
+          speed:cap(+s.speed||0,0,40),
+          homing:cap(+s.homing||0,0,300)
+        };
+      };
+      normWeapon = function(w={}){
+        const stages=Array.isArray(w.stages)?w.stages.slice(0,10).map(normStage):[normStage({action:'explode',damage:20})];
+        const raw=String(w.name||'').trim(), player=!!(w.playerMade||raw.startsWith('(P)'));
+        let name=raw||procName(stages,player?'(P) ':''); if(player&&!name.startsWith('(P)')) name='(P) '+name;
+        const type=(w.type==='sniper'||w.type==='oat')?w.type:'staged';
+        return {id:String(w.id||'custom-'+Date.now()),name:name.slice(0,24),type,color:/^#[0-9a-f]{6}$/i.test(w.color||'')?w.color:'#ffd15f',playerMade:!!player,stages,
+          oatDelayMs:cap(+w.oatDelayMs||+((modSettings||{}).oatDelayMs)||220,40,2500),
+          oatPayloadStage:cap(Math.round(+w.oatPayloadStage||+((modSettings||{}).oatPayloadStage)||1),1,10)
+        };
+      };
+    }catch(e){ console.warn('v0.7.67 normalizer patch failed', e); }
+  }
+
+  function patchPacks(){
+    try{
+      const oldGet = typeof getWeaponPacks==='function' ? getWeaponPacks : null;
+      getWeaponPacks = function(){
+        const base = oldGet ? oldGet() : [];
+        const pack={id:'pack:experimental',name:'Experimental',defaultWeaponId:'exp-mixed-1',weaponIds:EXP_WEAPONS.map(w=>w.id)};
+        const out=[...base.filter(p=>p&&p.id!==pack.id), pack];
+        return out;
+      };
+      const oldPopulate = typeof populatePackDropdowns==='function' ? populatePackDropdowns : null;
+      populatePackDropdowns = function(){
+        if(oldPopulate) oldPopulate();
+        try{
+          const packs=getWeaponPacks();
+          if(ui && ui.menuPlayerPack){
+            const old=ui.menuPlayerPack.value || localStorage.getItem('warheads.playerPackChoice') || 'gold';
+            ui.menuPlayerPack.innerHTML='<option value="gold">Default + My Weapons</option><option value="pack:experimental">Experimental</option><option value="generated">Generated Chaos + My Weapons</option><option value="saved">My Weapons Only</option>'+packs.filter(p=>p.id!=='pack:experimental').map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+            ui.menuPlayerPack.value=[...ui.menuPlayerPack.options].some(o=>o.value===old)?old:'gold';
+          }
+        }catch(e){}
+      };
+      const oldLoadout = typeof makeSelectedPlayerLoadout==='function' ? makeSelectedPlayerLoadout : null;
+      makeSelectedPlayerLoadout = function(){
+        let choice=(settings&& (settings.playerPackChoice||settings.packMode)) || 'gold';
+        if(choice==='pack:experimental') return EXP_WEAPONS.map(normWeapon);
+        return oldLoadout ? oldLoadout() : (defaultWeapons||[]).map(normWeapon);
+      };
+      const oldMap = typeof allWeaponMap==='function' ? allWeaponMap : null;
+      allWeaponMap = function(){
+        const m=oldMap ? oldMap() : new Map();
+        EXP_WEAPONS.map(normWeapon).forEach(w=>m.set(w.id,w));
+        return m;
+      };
+      if(typeof populatePackDropdowns==='function') populatePackDropdowns();
+    }catch(e){ console.warn('v0.7.67 pack patch failed', e); }
+  }
+
+  function addOatEditorControls(){
+    try{
+      const box=document.querySelector('.typeButtons');
+      if(box && !$id('typeOat')){
+        box.classList.add('wce0741TypeButtons');
+        const b=document.createElement('button'); b.id='typeOat'; b.type='button'; b.title='One At A Time: launches each stage as its own warhead in a single-file line.'; b.textContent='OAT'; box.appendChild(b);
+      }
+      const parent=box && box.closest('label') && box.closest('label').parentElement;
+      if(parent && !$id('oatOptions')){
+        const opt=document.createElement('div'); opt.id='oatOptions'; opt.className='wce-oat-options';
+        opt.innerHTML='<label>Per-Weapon OAT Delay MS <input id="editOatDelay" type="number" min="40" max="2500" step="10" value="220"></label><label>Per-Weapon Payload Stage <input id="editOatPayload" type="number" min="1" max="10" step="1" value="1"></label><div class="wce-cleanup-note">OAT is saved on this weapon. It fires stage 1, then stage 2, then stage 3, in a single-file line. Payload Stage chooses which warhead delivers the full payload.</div>';
+        parent.appendChild(opt);
+      }
+      if($id('typeOat')) $id('typeOat').onclick=()=>{ if(typeof setEditorType==='function') setEditorType('oat'); };
+    }catch(e){}
+  }
+  function patchEditor(){
+    try{
+      addOatEditorControls();
+      setEditorType = function(type){
+        editorType=(type==='sniper'||type==='oat')?type:'staged';
+        if($id('typeStaged')) $id('typeStaged').classList.toggle('active',editorType==='staged');
+        if($id('typeSniper')) $id('typeSniper').classList.toggle('active',editorType==='sniper');
+        if($id('typeOat')) $id('typeOat').classList.toggle('active',editorType==='oat');
+        if($id('oatOptions')) $id('oatOptions').style.display=editorType==='oat'?'grid':'none';
+      };
+      const oldLoad = typeof loadEditor==='function' ? loadEditor : null;
+      loadEditor = function(){
+        if(oldLoad) oldLoad();
+        addOatEditorControls();
+        const w=(weaponDefs&&weaponDefs[editing])||{};
+        setEditorType(w.type||'staged');
+        if($id('editOatDelay')) $id('editOatDelay').value=String(w.oatDelayMs||((modSettings||{}).oatDelayMs)||220);
+        if($id('editOatPayload')) $id('editOatPayload').value=String(w.oatPayloadStage||((modSettings||{}).oatPayloadStage)||1);
+      };
+      const oldRead = typeof readEditor==='function' ? readEditor : null;
+      readEditor = function(){
+        const w = oldRead ? oldRead() : {id:'custom-'+Date.now(), name:($id('editName')||{}).value||'Custom Weapon', playerMade:true, type:editorType, color:'#ffd15f', stages:[]};
+        w.type=(editorType==='sniper'||editorType==='oat')?editorType:'staged';
+        w.oatDelayMs=cap(+($id('editOatDelay')?.value)||+((modSettings||{}).oatDelayMs)||220,40,2500);
+        w.oatPayloadStage=cap(Math.round(+($id('editOatPayload')?.value)||+((modSettings||{}).oatPayloadStage)||1),1,Math.max(1,(w.stages||[]).length||10));
+        return normWeapon(w);
+      };
+    }catch(e){ console.warn('v0.7.67 editor patch failed', e); }
+  }
+
+  function patchPlanets(){
+    try{
+      const oldTiles = typeof planetTiles==='function' ? planetTiles : null;
+      planetTiles = function(color,r){
+        let profile = oldTiles ? oldTiles(color,r) : {scheme:stylePalette('16bit'),patches:[],specks:[],bands:4,phase:0};
+        const style = selectedPlanetStyle();
+        const scheme = stylePalette(style);
+        profile.scheme=scheme;
+        profile.style=style;
+        profile.bands = style==='8bit' ? 2 : style==='cyber' ? 6 : style==='void' ? 3 : profile.bands;
+        if(style==='8bit') profile.patches=(profile.patches||[]).map(p=>Object.assign(p,{w:Math.max(.08,p.w),h:Math.max(.08,p.h),a:.9}));
+        if(style==='cyber'||style==='future') profile.specks=(profile.specks||[]).concat(Array.from({length:8},()=>({x:Math.random()*1.5-.75,y:Math.random()*1.5-.75,s:.018,c:scheme[2],a:.65})));
+        if(style==='lava') profile.patches=(profile.patches||[]).concat(Array.from({length:10},()=>({x:Math.random()*1.4-.7,y:Math.random()*1.4-.7,w:.05+Math.random()*.18,h:.035+Math.random()*.11,c:'#ff7b00',a:.72})));
+        if(style==='ocean') profile.bands=7;
+        return profile;
+      };
+    }catch(e){ console.warn('v0.7.67 planet style patch failed', e); }
+  }
+
+  function installMenuControls(){
+    try{
+      const mobile = (Math.min(innerWidth||9999, innerHeight||9999) < 820) || (navigator.maxTouchPoints>1);
+      if(mobile && !localStorage.getItem('warheads.uiTheme')) localStorage.setItem('warheads.uiTheme','theme-mobile');
+      const run=()=>{
+        const theme=$id('menuUiTheme');
+        if(theme && ![...theme.options].some(o=>o.value==='theme-mobile')){
+          const o=document.createElement('option'); o.value='theme-mobile'; o.textContent='MOBILE'; theme.insertBefore(o, theme.firstChild);
+        }
+        if(theme){
+          const saved=localStorage.getItem('warheads.uiTheme') || (mobile?'theme-mobile':theme.value);
+          theme.value=[...theme.options].some(o=>o.value===saved)?saved:theme.value;
+          if(theme.value==='theme-mobile') document.body.classList.add('theme-mobile');
+          const old=theme.onchange;
+          theme.onchange=function(ev){ document.body.classList.remove('theme-mobile'); if(old) old.call(this,ev); if(this.value==='theme-mobile') document.body.classList.add('theme-mobile'); localStorage.setItem('warheads.uiTheme',this.value); };
+        }
+        const block=$id('uiThemeBlock');
+        if(block && !$id('menuPlanetStyle')){
+          const label=document.createElement('label'); label.textContent='Planet Style ';
+          const sel=document.createElement('select'); sel.id='menuPlanetStyle';
+          PLANET_STYLES.forEach(([v,n])=>{ const o=document.createElement('option'); o.value=v; o.textContent=n; sel.appendChild(o); });
+          sel.value=selectedPlanetStyle();
+          sel.onchange=()=>{ localStorage.setItem('warheads.planetStyle',sel.value); try{modSettings.planetStyle=sel.value; saveModSettings&&saveModSettings();}catch(e){}; try{planets.forEach(p=>{p.texture=null;p.ansi=planetTiles('#888',p.r);p.color=p.ansi.scheme[0];});}catch(e){} };
+          label.appendChild(sel); block.appendChild(label);
+        }
+      };
+      setTimeout(run,0); setTimeout(run,300); setTimeout(run,900);
+    }catch(e){ console.warn('v0.7.67 menu controls failed', e); }
+  }
+
+  function cleanupWorld(reason){
+    try{
+      const t=now();
+      if(Array.isArray(shots)) shots=shots.filter(s=>s && !s.dead && (s.age||0) < Math.max(SHOT_MAX_LIFE||34000, 10000)+3500 && isFinite(s.x) && isFinite(s.y)).slice(-(MAX_LIVE_SHOTS||128));
+      if(Array.isArray(walkers)) walkers=walkers.filter(w=>w && !w.dead && (w.life==null || w.life>0)).slice(-(MAX_LIVE_WALKERS||20));
+      if(Array.isArray(particles)) particles=particles.filter(p=>p && p.life>0 && isFinite(p.x) && isFinite(p.y)).slice(-Math.max(80, Math.round((MAX_PARTICLES||1500)*0.78)));
+      if(Array.isArray(beams)) beams=beams.filter(b=>b && b.life>0).slice(-(MAX_BEAMS||170));
+      if(Array.isArray(shockwaves)) shockwaves=shockwaves.filter(sw=>sw && sw.life>0).slice(-(MAX_SHOCKWAVES||78));
+      if(Array.isArray(debris)) debris=debris.filter(d=>d && d.life>0 && isFinite(d.x) && isFinite(d.y)).slice(-Math.max(20, Math.round((MAX_DEBRIS||620)*0.55)));
+      if(Array.isArray(magnetFields)) magnetFields=magnetFields.filter(m=>m && m.life>0).slice(-24);
+      if(Array.isArray(ufos)) ufos=ufos.filter(u=>u && u.life>0 && u.hp>0).slice(0, Math.max(1, (settings&&settings.ufoMax)||3));
+      if(Array.isArray(damageFloaters)) damageFloaters=damageFloaters.filter(f=>f && f.life>0).slice(-80);
+      const maxHoles=cap(Math.round(+((modSettings||{}).cleanupMaxPlanetHoles)||54),18,120);
+      if(Array.isArray(planets)){
+        planets.forEach(p=>{
+          if(!p) return;
+          if(Array.isArray(p.holes)){
+            p.holes=p.holes.filter(h=>h && (t-(h.created||t)) < 240000 && isFinite(h.x) && isFinite(h.y) && h.r>2).slice(-maxHoles);
+          }
+          if(Array.isArray(p.craters)) p.craters=p.craters.slice(-maxHoles);
+          if(Array.isArray(p.bumps)) p.bumps=p.bumps.slice(-64);
+          if(p.texture && (p.dead || (p.integrity!=null && p.integrity<.02))) p.texture=null;
+        });
+        const capPlanets=(typeof planetCap==='function'?planetCap():36)+8;
+        planets=planets.filter(p=>p && !p.dead && p.r>28 && ((p.integrity==null)||p.integrity>.012)).slice(0, capPlanets);
+      }
+      if(!busy && typeof maintainPlanets==='function') maintainPlanets();
+    }catch(e){ console.warn('v0.7.67 cleanup failed', e); }
+  }
+  function patchCleanup(){
+    try{
+      let last=0;
+      const oldUpdate = typeof update==='function' ? update : null;
+      if(oldUpdate && !oldUpdate.__wce0741Cleanup){
+        update=function(dt){ const out=oldUpdate.apply(this,arguments); const interval=cap(+((modSettings||{}).cleanupIntervalMs)||4500,1000,30000); if(now()-last>interval || (turnCount>5 && !busy && now()-last>1800)){ cleanupWorld('interval'); last=now(); } return out; };
+        update.__wce0741Cleanup=true;
+      }
+      const oldFinish = typeof finishTurn==='function' ? finishTurn : null;
+      if(oldFinish && !oldFinish.__wce0741Cleanup){
+        finishTurn=function(){ cleanupWorld('preTurn'); const out=oldFinish.apply(this,arguments); cleanupWorld('postTurn'); return out; };
+        finishTurn.__wce0741Cleanup=true;
+      }
+      const oldClear = typeof clearGameSession==='function' ? clearGameSession : null;
+      if(oldClear && !oldClear.__wce0741Cleanup){
+        clearGameSession=function(){ const out=oldClear.apply(this,arguments); cleanupWorld('clear'); return out; };
+        clearGameSession.__wce0741Cleanup=true;
+      }
+      window.WCE_CLEANUP_WORLD = cleanupWorld;
+    }catch(e){ console.warn('v0.7.67 cleanup install failed', e); }
+  }
+
+  function wce0743RecordWeaponChoiceForSlot(slot, weaponOrIndex){
+    try{
+      if(!Array.isArray(playerWeapons[slot]) || !playerWeapons[slot].length){
+        playerWeapons[slot]=ships[slot]?.ai ? makeBotLoadout() : makeSelectedPlayerLoadout();
+      }
+      const load=playerWeapons[slot] || [];
+      let idx=(typeof weaponOrIndex==='number') ? weaponOrIndex : load.findIndex(w=>w && weaponOrIndex && w.id===weaponOrIndex.id);
+      idx=cap(idx||0,0,Math.max(0,load.length-1));
+      const w=load[idx];
+      if(w && ships[slot]){
+        ships[slot].lastWeaponId=w.id;
+        ships[slot].hasFiredWeapon=true;
+        try{ localStorage.setItem('warheads.lastWeaponId', w.id); }catch(e){}
+      }
+      if(slot===turn){ selected=idx; if(ui.weaponSelect) ui.weaponSelect.value=String(selected); }
+      return w;
+    }catch(e){ console.warn('v0.7.67 weapon choice memory fallback failed', e); return null; }
+  }
+
+  function stageNoFly(w){ return !!(w && Array.isArray(w.stages) && w.stages[0] && w.stages[0].flight==='no'); }
+  function launchOatWeapon(s,w,ang,pow,weaponIndex,m){
+    try{
+      const stages=(w.stages||[]).map(normStage).slice(0,10);
+      if(!stages.length){ runStages(m.x,m.y,w,turn,weaponIndex,0); return; }
+      const delay=cap(+w.oatDelayMs||+((modSettings||{}).oatDelayMs)||220,40,2500);
+      const payloadIdx=cap(Math.round(+w.oatPayloadStage||+((modSettings||{}).oatPayloadStage)||1)-1,0,stages.length-1);
+      const scale=cap(+((modSettings||{}).shotPowerScale)||.18,.05,1);
+      const speed=cap(pow*scale,2.6,cap(+((modSettings||{}).maxShotSpeed)||18,4,80));
+      const side=Math.sin(ang), dx=Math.cos(ang), dy=-Math.sin(ang);
+      stages.forEach((st,i)=>{
+        setTimeout(()=>{
+          try{
+            if(!(busy && turn===activeShotOwner)) return;
+            const x=m.x+dx*i*18, y=m.y+dy*i*18;
+            if(st.flight==='no'){
+              if(i===payloadIdx) runStages(x,y,w,turn,weaponIndex,0); else applyStage(x,y,st,w,turn,weaponIndex);
+              return;
+            }
+            sfx&&sfx('launch');
+            const shot={x,y,vx:dx*speed,vy:dy*speed,owner:turn,weapon:weaponIndex,color:w.color,trail:[],age:0,wraps:0,maxLife:SHOT_MAX_LIFE,spawnDepth:0,oat:true,oatIndex:i};
+            if(i!==payloadIdx) shot.stage=safeStageForChild(st);
+            addShot(shot,1);
+          }catch(e){ console.warn('OAT stage failed', e); }
+        }, i*delay);
+      });
+      queueFinishTurn((stages.length-1)*delay + SHOT_MAX_LIFE + POST_SHOT_PAUSE);
+      toast&&toast('OAT firing one warhead at a time.', 1200);
+    }catch(e){ console.warn('v0.7.67 OAT launch failed', e); }
+  }
+  function patchWeaponFlight(){
+    try{
+      const oldApply = typeof applyStage==='function' ? applyStage : null;
+      if(oldApply && !oldApply.__wce0741NoFly){
+        applyStage=function(x,y,st,w,owner,weaponIndex=selected){
+          st=normStage(st);
+          if(st.flight==='no' && ['fly','homing','spread','shotgun','wave','machine','sequence','cluster','warburst','split','orbit','walker'].includes(st.action)){
+            const grounded = st.action==='build' ? st : {...st, action:'explode', count:1};
+            return blast(x,y,grounded,w,owner);
+          }
+          return oldApply.call(this,x,y,st,w,owner,weaponIndex);
+        };
+        applyStage.__wce0741NoFly=true;
+      }
+      launchShot = function(){
+        let s=ships[turn]; if(!s||s.hp<=0){busy=false;return;}
+        let load=currentLoadout(),target=chooseTarget(turn),ang=cap((+ui.angle.value)*Math.PI/180,(settings.aimArcMin||0)*Math.PI/180,(settings.aimArcMax||180)*Math.PI/180),pow=(+ui.power.value),weaponIndex=cap(selected,0,Math.max(0,load.length-1)),w=load[weaponIndex]||load[0]||weaponDefs[0];
+        pendingDamage=Array(ships.length).fill(0);pendingDeathNotices=[];pendingTurnFinishAt=0;endPauseActive=false;turnStartHp=ships.map(s=>s.hp);
+        if(s.ai&&target){
+          let blocked=lineBlocker(s,target),ownBlocked=rayHitsPlanet(s,target,s.planet,.02,.42),aim=blocked?blocked:target,dx=aim.x-s.x,dy=aim.y-s.y,adx=Math.max(1,Math.abs(dx)),elev=cap(Math.atan2(Math.max(55,-dy)+Math.abs(dy)*.24,adx)+rand(-.14,.22),.18,Math.PI*.49);
+          ang=dx<0?Math.PI-elev:elev; if(ownBlocked||shotWouldHitOwnPlanet(s,ang,260))ang=saferBotAngle(s,ang,target);
+          pow=cap(adx/11+Math.abs(dy)/25+rand(blocked?14:-2,blocked?36:26)+(ownBlocked?16:0),42,150);
+          weaponIndex=(s.queuedBotWeapon!=null&&!blocked&&!ownBlocked&&!isSniperOnlyWeapon(load[cap(s.queuedBotWeapon,0,Math.max(0,load.length-1))]))?cap(s.queuedBotWeapon,0,Math.max(0,load.length-1)):chooseBotWeaponIndex(load,!!blocked,ownBlocked,s.lastBotWeaponIndex);
+          s.queuedBotWeapon=null; w=load[weaponIndex]||nonSniperPool(load)[0]?.w||load[0]||weaponDefs[0]; s.lastBotWeaponIndex=weaponIndex;
+          if(blocked)toast(`${s.name} is carving a path with ${w.name}.`,900); else if(ownBlocked)toast(`${s.name} is arcing around home terrain with ${w.name}.`,900); else toast(`${s.name} selected ${w.name}.`,900);
+        } else { wce0743RecordWeaponChoiceForSlot(turn, weaponIndex); }
+        if(!w){queueFinishTurn(650);return;}
+        if(w.id==='whiteout'){ if(s.whiteoutUsed){spark(s.x,s.y,55,'#c8c8c8','smoke');toast('Whiteout fizzled.',900);queueFinishTurn(650);return;} s.whiteoutUsed=true; }
+        let m=muzzlePoint(s,ang);
+        sfx(shotSfxType(w));
+        if(stageNoFly(w)){
+          toast('NO FLY: payload detonated at the muzzle.', 1100);
+          runStages(m.x,m.y,w,turn,weaponIndex,0);
+          syncUI(); return;
+        }
+        if(w.type==='oat'){
+          launchOatWeapon(s,w,ang,pow,weaponIndex,m); syncUI(); return;
+        }
+        let scale=w.type==='sniper'?cap((+modSettings.shotPowerScale||.18)*1.22,.05,1):cap(+modSettings.shotPowerScale||.18,.05,1);
+        let fired=addShot({x:m.x,y:m.y,vx:Math.cos(ang)*pow*scale,vy:-Math.sin(ang)*pow*scale,owner:turn,weapon:weaponIndex,color:w.color,trail:[],age:0,wraps:0,sniper:w.type==='sniper',maxLife:SHOT_MAX_LIFE},1);
+        if(fired)cam.target=fired; syncUI();
+      };
+      isSniperOnlyWeapon=function(w){return !w||w.id==='sniper'||w.type==='sniper'};
+    }catch(e){ console.warn('v0.7.67 flight patch failed', e); }
+  }
+
+  function syncVersion(){
+    try{ window.WCE_VERSION=V; }catch(e){}
+    try{ if($id('versionText')) $id('versionText').textContent=V; }catch(e){}
+    try{ document.querySelectorAll('.gameCredit').forEach(n=>{ if((n.textContent||'').includes('WarHeads Classic Enhanced')) n.innerHTML='WarHeads Classic Enhanced '+V+' &nbsp;|&nbsp; Developed By: Elemental Spark &nbsp;|&nbsp; <a href="https://www.elementalspark.com" target="_blank" rel="noopener">www.elementalspark.com</a>'; }); }catch(e){}
+  }
+
+  function install(){
+    installCss(); patchDefaults(); patchNormalizers(); installExperimentalPack(); patchPacks(); patchPlanets(); patchEditor(); installMenuControls(); patchCleanup(); patchWeaponFlight(); syncVersion();
+    try{ if(typeof renderWeaponSelect==='function') renderWeaponSelect(); }catch(e){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', install); else install();
+  setTimeout(install,100);
+})();
+</script>
+
+
+
+<style id="wce-v0742-menu-scale-shapes-style">
+/* v0.7.67 menu scaling/readability/style-shape hotfix */
+:root{--wceMenuScale:.75;--wceUiText:#f4ffed;--wceDarkText:#120900;}
+body.wce-v0742{--text:#d8ffd1;--muted:#b7f8bb;}
+body.wce-v0742 .menu{place-items:start center!important;align-items:start!important;justify-items:center!important;padding:8px!important;overflow:hidden!important;}
+body.wce-v0742 .menuPanel{
+  width:min(1280px,calc((100vw - 16px)/var(--wceMenuScale,.75)))!important;
+  max-width:none!important;
+  max-height:calc((100dvh - 16px)/var(--wceMenuScale,.75))!important;
+  transform:scale(var(--wceMenuScale,.75))!important;
+  transform-origin:top left!important;
+  overflow:auto!important;
+  padding:20px 24px!important;
+  scrollbar-width:thin;
+}
+body.wce-v0742 .menuPanel::-webkit-scrollbar, body.wce-v0742 .labBody::-webkit-scrollbar{width:10px;height:10px;}
+body.wce-v0742 .menuPanel::-webkit-scrollbar-thumb, body.wce-v0742 .labBody::-webkit-scrollbar-thumb{background:var(--ui-accent,#ffd21a);border-radius:8px;}
+body.wce-v0742 .menuLogo .logoMain{font-size:40px!important;line-height:1!important;}
+body.wce-v0742 .menuLogo .logoSub{font-size:15px!important;}
+body.wce-v0742 .menuTitle, body.wce-v0742 .panelTitle{font-size:30px!important;line-height:1.05!important;}
+body.wce-v0742 label{font-size:12px!important;color:var(--muted)!important;letter-spacing:.035em!important;}
+body.wce-v0742 button, body.wce-v0742 select, body.wce-v0742 input, body.wce-v0742 textarea{
+  font-size:17px!important;line-height:1.18!important;text-rendering:geometricPrecision;-webkit-font-smoothing:antialiased;
+}
+body.wce-v0742 select, body.wce-v0742 input, body.wce-v0742 textarea{
+  min-height:52px!important;padding:12px!important;color:var(--wceUiText)!important;background:#031208!important;
+}
+body.wce-v0742 .menuActions{grid-template-columns:repeat(2,minmax(260px,1fr))!important;gap:12px!important;}
+body.wce-v0742 .menuGrid, body.wce-v0742 .advancedPage.open, body.wce-v0742 .uiThemeBlock, body.wce-v0742 .localPackBlock, body.wce-v0742 .serverConfigGrid{gap:12px!important;}
+body.wce-v0742 .menuActions button{min-height:68px!important;font-size:22px!important;letter-spacing:.08em!important;}
+body.wce-v0742 .primary, body.wce-v0742 button.primary, body.wce-v0742 .fire, body.wce-v0742 .centerBanner.gameover button,
+body.wce-v0742 #menuCreate, body.wce-v0742 #optionsAdvanced, body.wce-v0742 #advancedSave, body.wce-v0742 #localStart, body.wce-v0742 #openBotPackEditor, body.wce-v0742 #saveWeapon{
+  background:linear-gradient(180deg,#ffe866,#ffc21c)!important;color:var(--wceDarkText)!important;border-color:#fff0a8!important;text-shadow:none!important;font-weight:1000!important;
+  box-shadow:0 0 20px rgba(255,210,26,.28), inset 0 0 0 1px rgba(255,255,255,.24)!important;
+}
+body.wce-v0742 .primary:hover, body.wce-v0742 button.primary:hover, body.wce-v0742 .fire:hover, body.wce-v0742 .menuActions .primary:hover{
+  color:#080500!important;background:linear-gradient(180deg,#fff7a8,#ffd21a)!important;text-shadow:none!important;filter:brightness(1.02)!important;
+}
+body.wce-v0742 button:not(.primary):not(.fire){color:var(--wceUiText)!important;text-shadow:0 0 6px rgba(255,255,255,.22)!important;}
+body.wce-v0742 option{font-size:16px!important;background:#061408!important;color:#eaffdf!important;}
+body.wce-v0742 .menuNote, body.wce-v0742 .uiNote, body.wce-v0742 .packNote, body.wce-v0742 .editorHint, body.wce-v0742 .stageHelp{font-size:14px!important;line-height:1.45!important;color:#e5fff0!important;}
+body.wce-v0742 .uiThemeBlock{grid-template-columns:1fr 1fr!important;}
+body.wce-v0742 #menuPlanetStyle, body.wce-v0742 #menuUiTheme{font-weight:1000!important;}
+/* bubble / shape menu skins */
+body.theme-bubble-neon{--ui-accent:#65f7ff;--ui-panel:rgba(4,28,44,.91);--ui-line:#65f7ff;--ui-glow:rgba(101,247,255,.32);--text:#edfeff;--muted:#a7f7ff;}
+body.theme-bubble-neon .menuPanel, body.theme-bubble-neon .lab, body.theme-bubble-neon .modalPanel{border-radius:30px!important;border-width:2px!important;background:radial-gradient(circle at 24% 10%,rgba(101,247,255,.14),transparent 34%),linear-gradient(180deg,rgba(4,33,52,.92),rgba(1,11,22,.96))!important;}
+body.theme-bubble-neon button, body.theme-bubble-neon select, body.theme-bubble-neon input, body.theme-bubble-neon textarea{border-radius:24px!important;}
+body.theme-hex-grid{--ui-accent:#9dff6f;--ui-panel:rgba(3,22,13,.94);--ui-line:#9dff6f;--ui-glow:rgba(157,255,111,.25);--text:#f0ffe7;--muted:#c3ffb2;}
+body.theme-hex-grid .menuPanel, body.theme-hex-grid .lab, body.theme-hex-grid .modalPanel{border-radius:10px 28px 10px 28px!important;clip-path:polygon(18px 0,calc(100% - 18px) 0,100% 18px,100% calc(100% - 18px),calc(100% - 18px) 100%,18px 100%,0 calc(100% - 18px),0 18px);background:linear-gradient(135deg,rgba(5,34,18,.96),rgba(0,12,8,.98))!important;}
+body.theme-hex-grid button, body.theme-hex-grid select, body.theme-hex-grid input{border-radius:0 14px 0 14px!important;}
+body.theme-crystal-cut{--ui-accent:#d9b7ff;--ui-panel:rgba(18,8,38,.94);--ui-line:#d9b7ff;--ui-glow:rgba(217,183,255,.28);--text:#fff6ff;--muted:#e7ccff;}
+body.theme-crystal-cut .menuPanel, body.theme-crystal-cut .lab, body.theme-crystal-cut .modalPanel{clip-path:polygon(0 22px,22px 0,calc(100% - 38px) 0,100% 38px,100% calc(100% - 22px),calc(100% - 22px) 100%,38px 100%,0 calc(100% - 38px));border-radius:0!important;background:linear-gradient(135deg,rgba(45,18,77,.94),rgba(7,5,24,.98))!important;}
+body.theme-crystal-cut button, body.theme-crystal-cut select, body.theme-crystal-cut input{clip-path:polygon(0 10px,10px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 10px),calc(100% - 10px) 100%,12px 100%,0 calc(100% - 12px));border-radius:0!important;}
+body.theme-arcade-block{--ui-accent:#ffe15f;--ui-panel:rgba(24,18,2,.95);--ui-line:#ffe15f;--ui-glow:rgba(255,225,95,.24);--text:#fff4bd;--muted:#ffe89a;}
+body.theme-arcade-block .menuPanel, body.theme-arcade-block .lab, body.theme-arcade-block .modalPanel{border-radius:0!important;border-width:3px!important;image-rendering:pixelated;background:linear-gradient(180deg,rgba(32,22,4,.96),rgba(6,5,1,.98))!important;box-shadow:0 0 0 3px rgba(0,0,0,.65),0 0 34px var(--ui-glow)!important;}
+body.theme-arcade-block button, body.theme-arcade-block select, body.theme-arcade-block input{border-radius:0!important;box-shadow:inset -3px -3px rgba(0,0,0,.35),inset 3px 3px rgba(255,255,255,.10)!important;}
+body.theme-orbit-ring{--ui-accent:#7aa7ff;--ui-panel:rgba(4,13,34,.94);--ui-line:#7aa7ff;--ui-glow:rgba(122,167,255,.28);--text:#edf4ff;--muted:#b7cfff;}
+body.theme-orbit-ring .menuPanel, body.theme-orbit-ring .lab, body.theme-orbit-ring .modalPanel{border-radius:44px 12px 44px 12px!important;background:radial-gradient(ellipse at 65% 8%,rgba(122,167,255,.18),transparent 42%),linear-gradient(180deg,rgba(6,21,54,.94),rgba(0,5,18,.98))!important;}
+body.theme-orbit-ring button, body.theme-orbit-ring select, body.theme-orbit-ring input{border-radius:40px 10px 40px 10px!important;}
+body.theme-industrial-panel{--ui-accent:#ff9964;--ui-panel:rgba(28,18,12,.95);--ui-line:#ff9964;--ui-glow:rgba(255,153,100,.24);--text:#fff0e5;--muted:#ffd0b6;}
+body.theme-industrial-panel .menuPanel, body.theme-industrial-panel .lab, body.theme-industrial-panel .modalPanel{border-radius:6px!important;background:linear-gradient(180deg,rgba(38,25,17,.96),rgba(9,7,5,.98))!important;box-shadow:inset 0 0 0 2px rgba(255,153,100,.16),0 0 34px var(--ui-glow)!important;}
+body.theme-industrial-panel button, body.theme-industrial-panel select, body.theme-industrial-panel input{border-radius:6px!important;text-transform:uppercase;}
+body.theme-bubble-neon .primary, body.theme-hex-grid .primary, body.theme-crystal-cut .primary, body.theme-arcade-block .primary, body.theme-orbit-ring .primary, body.theme-industrial-panel .primary{color:#120900!important;}
+@media(max-width:820px){
+  :root{--wceMenuScale:.78;}
+  body.wce-v0742 .menuPanel{width:calc((100vw - 10px)/var(--wceMenuScale,.78))!important;max-height:calc((100dvh - 10px)/var(--wceMenuScale,.78))!important;padding:16px!important;}
+  body.wce-v0742 .menuActions, body.wce-v0742 .menuGrid, body.wce-v0742 .uiThemeBlock, body.wce-v0742 .advancedPage.open{grid-template-columns:1fr!important;}
+  body.wce-v0742 .menuActions button{min-height:64px!important;}
+}
+@media(max-height:760px){:root{--wceMenuScale:.72;} body.wce-v0742 .menuLogo .logoMain{font-size:34px!important;} body.wce-v0742 .menuActions button{min-height:60px!important;}}
+</style>
+<script id="wce-v0742-menu-scale-shapes-hotfix">
+(function(){
+  'use strict';
+  if(window.WCE_0742_MENU_PATCH) return; window.WCE_0742_MENU_PATCH=true;
+  const V='v0.7.67';
+  const SHAPE_THEMES=[
+    ['theme-bubble-neon','Bubble Neon'],['theme-hex-grid','Hex Grid'],['theme-crystal-cut','Crystal Cut'],['theme-arcade-block','Arcade Blocks'],['theme-orbit-ring','Orbit Ring'],['theme-industrial-panel','Industrial Panels']
+  ];
+  const PLANET_STYLE_NAMES=[
+    ['random','Random Mix'],['bubble','Bubble Worlds'],['hex','Hex Grid Planets'],['crystal','Crystal Shards'],['arcade','8-Bit Block Planets'],['ringed','Orbital Ring Worlds'],['future','Futuristic Alloy'],['cyber','Cyber Neon'],['lava','Lava Crust'],['ice','Ice Crystal'],['ocean','Ocean World'],['void','Void Mono'],['16bit','16-Bit Terra'],['alien','Alien Purple'],['desert','Desert Gold']
+  ];
+  const THEME_CLASSES=SHAPE_THEMES.map(x=>x[0]);
+  function id(x){return document.getElementById(x)}
+  function selectedPlanetStyle(){try{return (window.modSettings&&modSettings.planetStyle)||localStorage.getItem('warheads.planetStyle')||'random'}catch(e){return localStorage.getItem('warheads.planetStyle')||'random'}}
+  function setVersion(){try{window.WCE_VERSION=V;if(id('versionText'))id('versionText').textContent=V;document.querySelectorAll('.gameCredit').forEach(n=>{if((n.textContent||'').includes('WarHeads Classic Enhanced'))n.innerHTML='WarHeads Classic Enhanced '+V+' &nbsp;|&nbsp; Developed By: Elemental Spark &nbsp;|&nbsp; <a href="https://www.elementalspark.com" target="_blank" rel="noopener">www.elementalspark.com</a>';});}catch(e){}}
+  function fitScale(){try{document.body.classList.add('wce-v0742');let h=innerHeight||document.documentElement.clientHeight||900,w=innerWidth||document.documentElement.clientWidth||1200;let scale=.75;if(h<740)scale=.72;if(w<760)scale=.78;document.documentElement.style.setProperty('--wceMenuScale',String(scale));}catch(e){}}
+  function installThemeOptions(){
+    const sel=id('menuUiTheme'); if(!sel) return;
+    SHAPE_THEMES.forEach(([v,n])=>{if(![...sel.options].some(o=>o.value===v)){const o=document.createElement('option');o.value=v;o.textContent=n;sel.appendChild(o);}});
+    const saved=localStorage.getItem('warheads.uiTheme'); if(saved&&[...sel.options].some(o=>o.value===saved)) sel.value=saved;
+    const old=sel.onchange;
+    sel.onchange=function(ev){document.body.classList.remove(...THEME_CLASSES); if(old) old.call(this,ev); document.body.classList.remove(...THEME_CLASSES); if(THEME_CLASSES.includes(this.value)) document.body.classList.add(this.value); localStorage.setItem('warheads.uiTheme',this.value);};
+    document.body.classList.remove(...THEME_CLASSES); if(THEME_CLASSES.includes(sel.value)) document.body.classList.add(sel.value);
+  }
+  function installPlanetOptions(){
+    const sel=id('menuPlanetStyle'); if(!sel) return;
+    const cur=selectedPlanetStyle();
+    sel.innerHTML=''; PLANET_STYLE_NAMES.forEach(([v,n])=>{const o=document.createElement('option');o.value=v;o.textContent=n;sel.appendChild(o);});
+    sel.value=[...sel.options].some(o=>o.value===cur)?cur:'random';
+    sel.onchange=function(){localStorage.setItem('warheads.planetStyle',this.value);try{modSettings.planetStyle=this.value; if(typeof saveModSettings==='function')saveModSettings();}catch(e){};try{if(Array.isArray(planets))planets.forEach((p,i)=>{if(!p)return;p.texture=null;p.ansi=typeof planetTiles==='function'?planetTiles('#888',p.r):p.ansi;if(p.ansi&&p.ansi.scheme)p.color=p.ansi.scheme[0];applyPlanetShape(p,this.value,i);});}catch(e){}};
+  }
+  function palette(style){
+    const p={bubble:['#3a91a0','#0b3542','#8ff7ff','#06151d','#e8ffff'],hex:['#527832','#203714','#b9ff83','#071006','#f2ffe8'],crystal:['#7355a4','#241442','#d6b8ff','#0b0618','#fff6ff'],arcade:['#8b6d2e','#3c2b10','#ffe45f','#100c04','#fff4a8'],ringed:['#4866a8','#131f42','#9ec0ff','#050815','#eef5ff'],future:['#5d6b78','#273441','#9ee9ff','#0b1018','#ffffff'],cyber:['#112d3b','#06131c','#00e5ff','#02050a','#ff4dff'],lava:['#742b1e','#2b0a07','#ff7035','#090101','#ffd05f'],ice:['#6faebd','#1b3d4c','#c8fbff','#07141c','#ffffff'],ocean:['#166b83','#083143','#5ee7ff','#03131b','#bffaff'],void:['#4e535f','#16181d','#9aa3b5','#020204','#f0f2ff'],'16bit':['#587246','#334527','#97b86c','#151b10','#d0df91'],alien:['#5f3d82','#2a1642','#a369ff','#12081b','#d6b3ff'],desert:['#9a7640','#4b3520','#e7bd66','#1e1409','#fff0a6']};
+    if(style==='random'){const ks=Object.keys(p);style=ks[Math.floor(Math.random()*ks.length)];}
+    return (p[style]||p['16bit']).slice();
+  }
+  function applyPlanetShape(p,style,idx){
+    try{if(!p)return; style=style||selectedPlanetStyle(); if(style==='random'){const choices=PLANET_STYLE_NAMES.map(x=>x[0]).filter(x=>x!=='random');style=choices[(idx||0)%choices.length];}
+      p.wceShape=style; const n=style==='hex'?6:style==='crystal'?9:style==='arcade'?16:style==='ringed'?48:style==='bubble'?40:32;
+      p.bumps=Array.from({length:n},(_,i)=>{let base=i/n*Math.PI*2;let off=.02,w=1;
+        if(style==='hex'){off=(i%2?-.05:.09);w=1.8;}
+        else if(style==='crystal'){off=(i%3===0?.18:-.08);w=.65;}
+        else if(style==='arcade'){off=(i%4<2?.06:-.04);w=2.4;}
+        else if(style==='ringed'){off=Math.sin(i*.7)*.035;w=1.1;p.rings=true;}
+        else if(style==='bubble'){off=Math.sin(i*1.8)*.045;w=1.25;}
+        else if(style==='future'||style==='cyber'){off=(i%5===0?.08:-.025);w=1.0;}
+        else off=(Math.sin(i*2.1+(idx||0))*.055); return {a:base,off,w};});
+      if(style==='ringed')p.rings=true; p.texture=null;
+    }catch(e){}
+  }
+  function patchPlanets(){
+    try{if(typeof planetTiles==='function'&&!planetTiles.__v0742){const old=planetTiles; planetTiles=function(color,r){let pr=old.call(this,color,r)||{};let st=selectedPlanetStyle();pr.scheme=palette(st);pr.style=st;pr.bands=st==='arcade'?1:st==='hex'?3:st==='ringed'?7:st==='cyber'?6:(pr.bands||4);if(st==='bubble')pr.specks=(pr.specks||[]).concat(Array.from({length:10},()=>({x:Math.random()*1.5-.75,y:Math.random()*1.5-.75,s:.025,c:pr.scheme[2],a:.42})));if(st==='crystal')pr.patches=(pr.patches||[]).concat(Array.from({length:8},()=>({x:Math.random()*1.4-.7,y:Math.random()*1.4-.7,w:.035+Math.random()*.12,h:.12+Math.random()*.18,c:pr.scheme[4],a:.38})));return pr};planetTiles.__v0742=true;}
+      if(typeof makePlanet==='function'&&!makePlanet.__v0742){const oldMake=makePlanet;makePlanet=function(){const p=oldMake.apply(this,arguments);try{applyPlanetShape(p,selectedPlanetStyle(),(Array.isArray(planets)?planets.indexOf(p):0));}catch(e){}return p};makePlanet.__v0742=true;}
+      if(Array.isArray(window.planets||[])){try{planets.forEach((p,i)=>applyPlanetShape(p,selectedPlanetStyle(),i));}catch(e){}}
+    }catch(e){console.warn('v0.7.67 planet style patch failed',e)}
+  }
+  function cleanupContrast(){try{document.body.classList.add('wce-v0742');document.querySelectorAll('button.primary,.primary,.fire').forEach(b=>{b.style.color='#120900';b.style.textShadow='none';});}catch(e){}}
+  function install(){fitScale();installThemeOptions();installPlanetOptions();patchPlanets();cleanupContrast();setVersion();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+  window.addEventListener('resize',fitScale,{passive:true});
+  setTimeout(install,0);setTimeout(install,250);setTimeout(install,900);setTimeout(install,1800);
+})();
+</script>
+
+
+<script id="wce-v0747-menu-return-hotfix">
+(function(){
+  'use strict';
+  const $ = id => document.getElementById(id);
+  function inRunningGame(){
+    try { return !!(window.inGame && window.ships && window.ships.length && !document.getElementById('app')?.classList.contains('preGame')); }
+    catch(e){ return false; }
+  }
+  function closeToGame(){
+    try{ if(typeof showMenuPanel==='function') showMenuPanel(null); }catch(e){}
+    const menu=$('menu'); if(menu){ menu.classList.add('hidden'); menu.classList.remove('inGameMenu'); }
+    const ret=$('menuReturnGame'); if(ret){ ret.classList.add('hidden'); ret.classList.remove('inGameVisible'); }
+    try{ if(typeof syncUI==='function') syncUI(); }catch(e){}
+  }
+  function openGameMenu(){
+    const menu=$('menu'); if(!menu) return;
+    try{ if(typeof showMenuPanel==='function') showMenuPanel(null); }catch(e){}
+    menu.classList.remove('hidden');
+    const ret=$('menuReturnGame');
+    if(inRunningGame()){
+      menu.classList.add('inGameMenu');
+      if(ret){ ret.classList.remove('hidden'); ret.classList.add('inGameVisible'); ret.textContent='RETURN TO GAME'; }
+    } else {
+      menu.classList.remove('inGameMenu');
+      if(ret){ ret.classList.add('hidden'); ret.classList.remove('inGameVisible'); }
+    }
+  }
+  function install(){
+    const btn=$('gameMenu'); if(btn && !btn.__wce0747MenuReturn){ btn.onclick=openGameMenu; btn.__wce0747MenuReturn=true; }
+    const ret=$('menuReturnGame'); if(ret && !ret.__wce0747MenuReturn){ ret.onclick=closeToGame; ret.__wce0747MenuReturn=true; }
+  }
+  install(); setTimeout(install,0); setTimeout(install,300); setTimeout(install,1000);
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape'){
+      const menu=$('menu');
+      if(menu && !menu.classList.contains('hidden') && inRunningGame()) { e.preventDefault(); closeToGame(); }
+    }
+  });
+  window.WCE_RETURN_TO_GAME = closeToGame;
+})();
+</script>
+
+
+<script id="wce-v0757-host-pack-instant-fire-hotfix">
+(function(){
+  'use strict';
+  if(window.WCE_0757_HOST_PACK_FIRE) return;
+  window.WCE_0757_HOST_PACK_FIRE = true;
+  const VERSION='v0.7.67';
+  function safe(fn,d){ try{return fn()}catch(e){return d} }
+  function savedMpChoice(){ return safe(()=>localStorage.getItem('wce.mp.playerPackChoice'), '') || safe(()=>localStorage.getItem('warheads.playerPackChoice'), '') || 'gold'; }
+  function packAvailable(id){
+    id=String(id||'gold');
+    if(['gold','generated','saved','all','pack:experimental'].includes(id)) return true;
+    if(!id.startsWith('pack:')) return true;
+    return safe(()=> (typeof getWeaponPacks==='function' ? getWeaponPacks() : []).some(p=>p&&p.id===id), false);
+  }
+  function normalizeChoice(id){ id=String(id||'').trim()||savedMpChoice()||'gold'; return packAvailable(id)?id:(packAvailable(savedMpChoice())?savedMpChoice():'gold'); }
+  function rememberChoice(id){ id=normalizeChoice(id); try{ localStorage.setItem('wce.mp.playerPackChoice', id); localStorage.setItem('warheads.playerPackChoice', id); }catch(e){} if(typeof settings==='object'&&settings){ settings.playerPackChoice=id; settings.packMode=id; } return id; }
+  function addSavedToLoadout(list){
+    let out=Array.isArray(list)?list.slice():[];
+    try{ if(typeof savedPlayerWeapons==='function') savedPlayerWeapons().forEach(w=>{ if(w&&!out.some(x=>x&&x.id===w.id)) out.push(w); }); }catch(e){}
+    try{ return typeof uniqueWeapons==='function' ? uniqueWeapons(out).slice(0,240) : out; }catch(e){ return out; }
+  }
+  try{
+    if(typeof loadoutFromPackId==='function' && !loadoutFromPackId.__v0757SavedVisible){
+      const oldLoadoutFromPackId=loadoutFromPackId;
+      loadoutFromPackId=function(id){ return addSavedToLoadout(oldLoadoutFromPackId.call(this, normalizeChoice(id))); };
+      loadoutFromPackId.__v0757SavedVisible=true;
+    }
+    makeSelectedPlayerLoadout=function(){
+      const choice=normalizeChoice((typeof settings==='object'&&settings&&(settings.playerPackChoice||settings.packMode))||savedMpChoice());
+      rememberChoice(choice);
+      if(choice==='pack:experimental') return addSavedToLoadout((typeof EXP_WEAPONS!=='undefined'?EXP_WEAPONS:[]).map(typeof normWeapon==='function'?normWeapon:(w=>w)));
+      if(String(choice).startsWith('pack:') && typeof loadoutFromPackId==='function') return loadoutFromPackId(choice);
+      const saved=(typeof savedPlayerWeapons==='function'?savedPlayerWeapons():[]);
+      if(choice==='saved') return addSavedToLoadout([typeof normWeapon==='function'?normWeapon(defaultWeapons[0]):defaultWeapons[0],...saved]);
+      if(choice==='generated' && typeof makeLoadout==='function') return addSavedToLoadout(makeLoadout((settings&&settings.addSavedPack)!==false,true));
+      if(choice==='all') return addSavedToLoadout([...(defaultWeapons||[]),...(weaponDefs||[]),...saved]);
+      return addSavedToLoadout(typeof makeLoadout==='function'?makeLoadout(true,false):(defaultWeapons||[]));
+    };
+    makeHumanLoadoutForSlot=function(slot=0){
+      let parts=window.WCE_MP_ROOM_PARTICIPANTS||[];
+      let mine=(typeof mpMySlot==='number')?mpMySlot:-999;
+      let chosen=(slot===mine && parts[slot] && parts[slot].packChoice) ? parts[slot].packChoice : ((typeof settings==='object'&&settings&&(settings.playerPackChoice||settings.packMode))||savedMpChoice());
+      chosen=rememberChoice(chosen);
+      return String(chosen).startsWith('pack:') && typeof loadoutFromPackId==='function' ? loadoutFromPackId(chosen) : makeSelectedPlayerLoadout();
+    };
+  }catch(e){ console.warn('v0.7.67 pack visibility patch failed', e); }
+  function installMpHooks(){
+    try{
+      if(window.WCE_MP && !window.WCE_MP.__v0757PackFire){
+        const oldStart=window.WCE_MP.start;
+        window.WCE_MP.start=function(room,mySlot){
+          try{
+            const parts=(room&&Array.isArray(room.participants)&&room.participants.length)?room.participants:((room&&room.players)||[]);
+            const part=parts[Number.isFinite(+mySlot)?+mySlot:0]||null;
+            window.__WCE_MP_IS_HOST=!!(room&&part&&room.hostId&&part.clientId===room.hostId);
+            if(part&&!part.bot) rememberChoice(part.packChoice||savedMpChoice());
+          }catch(e){}
+          return oldStart ? oldStart.apply(this, arguments) : undefined;
+        };
+        const oldSync=window.WCE_MP.syncRoster;
+        if(oldSync){ window.WCE_MP.syncRoster=function(room,announce){ try{ const parts=(room&&Array.isArray(room.participants)&&room.participants.length)?room.participants:((room&&room.players)||[]); const idx=(typeof mpMySlot==='number'?mpMySlot:-1); const p=parts[idx]; if(p&&!p.bot) rememberChoice(p.packChoice||savedMpChoice()); }catch(e){} return oldSync.apply(this, arguments); }; }
+        const oldClear=window.WCE_MP.clearShotLock;
+        if(oldClear){ window.WCE_MP.clearShotLock=function(){ window.__WCE_MP_0757_LOCAL_FIRE_LOCK=false; return oldClear.apply(this, arguments); }; }
+        const oldSet=window.WCE_MP.setControlLock;
+        if(oldSet){ window.WCE_MP.setControlLock=function(locked,timeLeft){ const hard=!!locked||!!window.__WCE_MP_0757_LOCAL_FIRE_LOCK; const r=oldSet.call(this, hard, timeLeft); try{ if(window.__WCE_MP_0757_LOCAL_FIRE_LOCK&&ui&&ui.fire){ui.fire.disabled=true; ui.fire.textContent='FIRING';} }catch(e){} return r; }; }
+        window.WCE_MP.__v0757PackFire=true;
+      }
+    }catch(e){ console.warn('v0.7.67 MP hook patch failed', e); }
+  }
+  installMpHooks(); setTimeout(installMpHooks,50); setTimeout(installMpHooks,500);
+  try{
+    if(typeof shoot==='function' && !shoot.__v0757InstantHost){
+      const oldShoot=shoot;
+      shoot=function(auto=false){
+        try{
+          if(matchMode==='multiplayer' && !auto && window.__WCE_MP_TURN_AUTHORITY && window.__WCE_MP_IS_HOST && !window.__WCE_MP_APPLYING_REMOTE){
+            if(window.__WCE_MP_0757_LOCAL_FIRE_LOCK){ try{ if(typeof toast==='function') toast('Shot already sent.',650); }catch(e){} return; }
+            const active=ships&&ships[turn];
+            if(active&&!active.ai&&window.WCE_MP&&window.WCE_MP.readInput){
+              window.__WCE_MP_0757_LOCAL_FIRE_LOCK=true;
+              try{ if(ui&&ui.fire){ui.fire.disabled=true; ui.fire.textContent='FIRING';} }catch(e){}
+              const input=window.WCE_MP.readInput();
+              try{ window.parent&&window.parent.postMessage({source:'WCE_MP_GAME',type:'localShot',payload:{input,optimistic:true}},'*'); }catch(e){}
+              const oldDelay=(modSettings&&Object.prototype.hasOwnProperty.call(modSettings,'fireDelayMs'))?modSettings.fireDelayMs:undefined;
+              try{ if(modSettings) modSettings.fireDelayMs=0; window.__WCE_MP_APPLYING_REMOTE=true; return oldShoot.call(this,false); }
+              finally{ setTimeout(()=>{ if(oldDelay===undefined){ try{ delete modSettings.fireDelayMs; }catch(e){} } else if(modSettings) modSettings.fireDelayMs=oldDelay; window.__WCE_MP_APPLYING_REMOTE=false; },80); }
+            }
+          }
+        }catch(e){ console.warn('v0.7.67 instant host fire failed', e); window.__WCE_MP_0757_LOCAL_FIRE_LOCK=false; }
+        return oldShoot.apply(this, arguments);
+      };
+      shoot.__v0757InstantHost=true;
+    }
+    if(typeof finishTurn==='function' && !finishTurn.__v0757Unlock){
+      const oldFinish=finishTurn;
+      finishTurn=function(){ window.__WCE_MP_0757_LOCAL_FIRE_LOCK=false; return oldFinish.apply(this, arguments); };
+      finishTurn.__v0757Unlock=true;
+    }
+  }catch(e){ console.warn('v0.7.67 fire patch failed', e); }
+  try{ window.WCE_VERSION=VERSION; const vt=document.getElementById('versionText'); if(vt) vt.textContent=VERSION; }catch(e){}
+})();
+</script>
+
+
+<script id="wce-v0759-pack-fire-stability-hotfix">
+(function(){
+  'use strict';
+  if(window.WCE_0759_PACK_FIRE_STABILITY) return;
+  window.WCE_0759_PACK_FIRE_STABILITY = true;
+  const VERSION='v0.7.67';
+  function safe(fn,d){ try{return fn()}catch(e){return d} }
+  function normChoice(v){ v=String(v||'').trim(); return v || 'gold'; }
+  function savedChoice(){ return normChoice(safe(()=>localStorage.getItem('wce.mp.playerPackChoice'), '') || safe(()=>localStorage.getItem('warheads.playerPackChoice'), '') || (typeof settings==='object'&&settings&&(settings.playerPackChoice||settings.packMode)) || 'gold'); }
+  function remember(choice){
+    choice=normChoice(choice);
+    try{ localStorage.setItem('wce.mp.playerPackChoice', choice); localStorage.setItem('warheads.playerPackChoice', choice); }catch(e){}
+    if(typeof settings==='object'&&settings){ settings.playerPackChoice=choice; settings.packMode=choice; }
+    if(typeof ui==='object'&&ui&&ui.menuPlayerPack){ try{ if([...ui.menuPlayerPack.options].some(o=>o.value===choice)) ui.menuPlayerPack.value=choice; }catch(e){} }
+    return choice;
+  }
+  function savedWeapons(){ return safe(()=>typeof savedPlayerWeapons==='function'?savedPlayerWeapons():[], []) || []; }
+  function uniq(list){ return safe(()=>typeof uniqueWeapons==='function'?uniqueWeapons(list):list, list) || []; }
+  function normW(w){ return safe(()=>typeof normWeapon==='function'?normWeapon(w):w, w); }
+  function addMine(list){
+    const out=Array.isArray(list)?list.slice():[];
+    savedWeapons().forEach(w=>{ if(w && !out.some(x=>x&&x.id===w.id)) out.push(w); });
+    return uniq(out).slice(0,240);
+  }
+  function experimentalLoadout(){ return addMine((typeof EXP_WEAPONS!=='undefined'&&Array.isArray(EXP_WEAPONS)?EXP_WEAPONS:[]).map(normW)); }
+  function defaultMyLoadout(){
+    if(typeof makeLoadout==='function') return addMine(makeLoadout(true,false));
+    return addMine([...(typeof defaultWeapons!=='undefined'?defaultWeapons:[]),...(typeof weaponDefs!=='undefined'?weaponDefs:[])]);
+  }
+  function loadoutForChoice(choice){
+    choice=remember(choice);
+    if(choice==='pack:experimental') return experimentalLoadout();
+    if((choice==='pack:defaultMy'||choice==='gold') && typeof makeLoadout==='function') return defaultMyLoadout();
+    if(choice==='saved') return addMine([normW((typeof defaultWeapons!=='undefined'&&defaultWeapons[0])||{}),...savedWeapons()]);
+    if(choice==='generated' && typeof makeLoadout==='function') return addMine(makeLoadout((typeof settings==='object'&&settings&&settings.addSavedPack)!==false,true));
+    if(choice==='all') return addMine([...(typeof defaultWeapons!=='undefined'?defaultWeapons:[]),...(typeof weaponDefs!=='undefined'?weaponDefs:[]),...savedWeapons()]);
+    if(String(choice).startsWith('pack:') && typeof loadoutFromPackId==='function') return addMine(loadoutFromPackId(choice));
+    return defaultMyLoadout();
+  }
+  // Keep Default + My Weapons as a stable virtual pack. Saving a weapon should not silently switch the host to Experimental or generate a new pack.
+  try{
+    if(typeof saveCurrentPack==='function' && !saveCurrentPack.__v0759SafeDefault){
+      const oldSaveCurrentPack=saveCurrentPack;
+      saveCurrentPack=function(){
+        let pid=''; try{ pid=typeof currentEditablePackId==='function'?currentEditablePackId():''; }catch(e){}
+        if(pid==='pack:defaultMy' || pid==='gold' || pid==='pack:experimental'){
+          try{ if(typeof saveWeapons==='function') saveWeapons(); if(typeof renderPackTools==='function') renderPackTools(); if(typeof toast==='function') toast('Weapon saved to Default + My Weapons.',1100); }catch(e){}
+          // Do not alter warheads.playerPackChoice here. The player's selected multiplayer pack remains their choice.
+          return;
+        }
+        return oldSaveCurrentPack.apply(this, arguments);
+      };
+      saveCurrentPack.__v0759SafeDefault=true;
+    }
+    if(typeof addWeaponToCurrentPack==='function' && !addWeaponToCurrentPack.__v0759NoExperimentalMutate){
+      const oldAddWeaponToCurrentPack=addWeaponToCurrentPack;
+      addWeaponToCurrentPack=function(w){
+        let pid=''; try{ pid=typeof currentEditablePackId==='function'?currentEditablePackId():''; }catch(e){}
+        if(pid==='pack:experimental' || pid==='gold' || pid==='pack:defaultMy'){
+          try{ if(w && typeof refreshSavedWeaponsInPacks==='function') refreshSavedWeaponsInPacks(w); if(typeof renderPackTools==='function') renderPackTools(); }catch(e){}
+          return;
+        }
+        return oldAddWeaponToCurrentPack.apply(this, arguments);
+      };
+      addWeaponToCurrentPack.__v0759NoExperimentalMutate=true;
+    }
+    makeSelectedPlayerLoadout=function(){ return loadoutForChoice((typeof settings==='object'&&settings&&(settings.playerPackChoice||settings.packMode)) || savedChoice()); };
+    makeHumanLoadoutForSlot=function(slot=0){
+      let choice=savedChoice();
+      try{
+        const parts=Array.isArray(window.WCE_MP_ROOM_PARTICIPANTS)?window.WCE_MP_ROOM_PARTICIPANTS:[];
+        const mine=(typeof mpMySlot==='number')?mpMySlot:-999;
+        const pl=parts[slot]||null;
+        if(pl && !pl.bot){
+          const isMe=slot===mine;
+          const isHost=!!(window.__WCE_MP_IS_HOST && isMe);
+          choice=isHost ? savedChoice() : (pl.packChoice || savedChoice());
+        }
+      }catch(e){}
+      return loadoutForChoice(choice);
+    };
+  }catch(e){ console.warn('v0.7.67 pack loadout guard failed', e); }
+  function applyMyPackFromRoom(room,mySlot){
+    try{
+      const parts=(room&&Array.isArray(room.participants)&&room.participants.length)?room.participants:((room&&room.players)||window.WCE_MP_ROOM_PARTICIPANTS||[]);
+      const slot=Number.isFinite(+mySlot)?+mySlot:(typeof mpMySlot==='number'?mpMySlot:0);
+      const part=parts[slot]||null;
+      const isHost=!!(room&&part&&room.hostId&&part.clientId===room.hostId);
+      window.__WCE_MP_IS_HOST=isHost;
+      const choice=isHost ? savedChoice() : normChoice((part&&part.packChoice)||savedChoice());
+      remember(choice);
+      if(Array.isArray(playerWeapons) && slot>=0){
+        playerWeapons[slot]=loadoutForChoice(choice);
+        if(slot===(typeof turn==='number'?turn:slot)) selected=Math.max(0, Math.min(selected||0, playerWeapons[slot].length-1));
+        if(typeof renderWeaponSelect==='function') renderWeaponSelect();
+        if(typeof syncUI==='function') syncUI();
+      }
+    }catch(e){ console.warn('v0.7.67 apply MP pack failed', e); }
+  }
+  function installMpPackHooks(){
+    try{
+      if(window.WCE_MP && !window.WCE_MP.__v0759HostPackStable){
+        const oldStart=window.WCE_MP.start;
+        window.WCE_MP.start=function(room,mySlot){ const r=oldStart?oldStart.apply(this, arguments):undefined; setTimeout(()=>applyMyPackFromRoom(room,mySlot),30); setTimeout(()=>applyMyPackFromRoom(room,mySlot),220); return r; };
+        const oldSync=window.WCE_MP.syncRoster;
+        if(oldSync){ window.WCE_MP.syncRoster=function(room,announce){ const r=oldSync.apply(this, arguments); setTimeout(()=>applyMyPackFromRoom(room,(typeof mpMySlot==='number'?mpMySlot:0)),20); return r; }; }
+        const oldSet=window.WCE_MP.setControlLock;
+        if(oldSet){ window.WCE_MP.setControlLock=function(locked,timeLeft){ const r=oldSet.call(this, !!locked || !!window.__WCE_MP_0759_LOCAL_FIRE_LOCK, timeLeft); try{ if(window.__WCE_MP_0759_LOCAL_FIRE_LOCK&&ui&&ui.fire){ ui.fire.disabled=true; ui.fire.textContent='FIRING'; } }catch(e){} return r; }; }
+        const oldClear=window.WCE_MP.clearShotLock;
+        if(oldClear){ window.WCE_MP.clearShotLock=function(){ window.__WCE_MP_0759_LOCAL_FIRE_LOCK=false; return oldClear.apply(this, arguments); }; }
+        window.WCE_MP.__v0759HostPackStable=true;
+      }
+    }catch(e){ console.warn('v0.7.67 MP pack hook install failed', e); }
+  }
+  installMpPackHooks(); setTimeout(installMpPackHooks,50); setTimeout(installMpPackHooks,500);
+  // Near-local firing for the active human. Server remains authoritative, but the local canvas launches immediately and the echo is suppressed by the parent.
+  try{
+    if(typeof shoot==='function' && !shoot.__v0759NearLocalFire){
+      const oldShoot=shoot;
+      shoot=function(auto=false){
+        try{
+          if((typeof matchMode!=='undefined'&&matchMode==='multiplayer') && !auto && window.__WCE_MP_TURN_AUTHORITY && !window.__WCE_MP_APPLYING_REMOTE){
+            if(window.__WCE_MP_0759_LOCAL_FIRE_LOCK || window.__WCE_MP_0757_LOCAL_FIRE_LOCK){ try{ if(typeof toast==='function') toast('Shot already sent.',650); }catch(e){} return; }
+            const active=ships&&ships[turn];
+            if(active && !active.ai && window.WCE_MP && window.WCE_MP.readInput){
+              window.__WCE_MP_0759_LOCAL_FIRE_LOCK=true; window.__WCE_MP_0757_LOCAL_FIRE_LOCK=true;
+              try{ if(ui&&ui.fire){ ui.fire.disabled=true; ui.fire.textContent='FIRING'; } }catch(e){}
+              const input=window.WCE_MP.readInput();
+              try{ window.parent&&window.parent.postMessage({source:'WCE_MP_GAME',type:'localShot',payload:{input,optimistic:true}},'*'); }catch(e){}
+              const oldDelay=(typeof modSettings==='object'&&modSettings&&Object.prototype.hasOwnProperty.call(modSettings,'fireDelayMs'))?modSettings.fireDelayMs:undefined;
+              try{ if(typeof modSettings==='object'&&modSettings) modSettings.fireDelayMs=0; window.__WCE_MP_APPLYING_REMOTE=true; return oldShoot.call(this,false); }
+              finally{ setTimeout(()=>{ if(typeof modSettings==='object'&&modSettings){ if(oldDelay===undefined){ try{ delete modSettings.fireDelayMs; }catch(e){} } else modSettings.fireDelayMs=oldDelay; } window.__WCE_MP_APPLYING_REMOTE=false; },90); }
+            }
+          }
+        }catch(e){ console.warn('v0.7.67 near-local fire failed', e); window.__WCE_MP_0759_LOCAL_FIRE_LOCK=false; window.__WCE_MP_0757_LOCAL_FIRE_LOCK=false; }
+        return oldShoot.apply(this, arguments);
+      };
+      shoot.__v0759NearLocalFire=true;
+    }
+    if(typeof finishTurn==='function' && !finishTurn.__v0759UnlockFire){
+      const oldFinish=finishTurn;
+      finishTurn=function(){ window.__WCE_MP_0759_LOCAL_FIRE_LOCK=false; window.__WCE_MP_0757_LOCAL_FIRE_LOCK=false; return oldFinish.apply(this, arguments); };
+      finishTurn.__v0759UnlockFire=true;
+    }
+  }catch(e){ console.warn('v0.7.67 fire guard install failed', e); }
+  try{ window.WCE_VERSION=VERSION; const vt=document.getElementById('versionText'); if(vt) vt.textContent=VERSION; }catch(e){}
+})();
+</script>
+
+
+
+<style id="wce-v0767-mobile-fit-style">
+/* v0.7.67 mobile viewport/menu fit hotfix
+   CSS/viewport-only style layer: keeps the working menu/game launch path intact. */
+:root{
+  --wceMobileMenuScale:.75;
+  --wceMobileVisualW:100vw;
+  --wceMobileVisualH:100dvh;
+  --wceMobileVisualX:0px;
+  --wceMobileTop:0px;
+}
+/* Let browser pinch zoom work on menus/pages. The game canvas still owns its own pinch camera. */
+html, body{overscroll-behavior:none;}
+#game, canvas#game{touch-action:none!important;}
+.menu, .menuPanel, .lab, .labBody, #optionsPanel, .modalPanel{
+  -webkit-overflow-scrolling:touch;
+}
+@media (hover:none), (pointer:coarse), (max-width:820px){
+  body.wce-v0767-mobile-fit{overflow:hidden!important;touch-action:pan-x pan-y pinch-zoom!important;}
+  body.wce-v0767-mobile-fit #app{width:100vw!important;height:100dvh!important;min-width:0!important;overflow:hidden!important;}
+  body.wce-v0767-mobile-fit .menu:not(.hidden){
+    display:block!important;
+    position:fixed!important;
+    inset:0!important;
+    overflow:auto!important;
+    padding:0!important;
+    place-items:initial!important;
+    align-items:initial!important;
+    justify-items:initial!important;
+    touch-action:pan-x pan-y pinch-zoom!important;
+    background:radial-gradient(circle at 50% 18%,rgba(0,34,13,.92),rgba(1,4,2,.98))!important;
+  }
+  body.wce-v0767-mobile-fit .menu:not(.hidden) .menuPanel{
+    position:relative!important;
+    box-sizing:border-box!important;
+    width:var(--wceMobileMenuW, calc((100vw - 18px) / .75))!important;
+    max-width:none!important;
+    min-width:0!important;
+    max-height:none!important;
+    transform:scale(var(--wceMobileMenuScale,.75))!important;
+    transform-origin:top left!important;
+    margin-top:calc(var(--wceMobileTop,0px) + max(8px, env(safe-area-inset-top)))!important;
+    margin-left:var(--wceMobileMenuLeft, 8px)!important;
+    margin-right:0!important;
+    margin-bottom:32px!important;
+    overflow:visible!important;
+  }
+  body.wce-v0767-mobile-fit .menuActions{
+    grid-template-columns:repeat(2,minmax(220px,1fr))!important;
+    gap:10px!important;
+  }
+  body.wce-v0767-mobile-fit .menuActions button{
+    min-height:58px!important;
+    font-size:18px!important;
+    padding:14px 12px!important;
+  }
+  body.wce-v0767-mobile-fit .menuLogo .logoMain{font-size:34px!important;line-height:1!important;}
+  body.wce-v0767-mobile-fit .menuLogo .logoSub{font-size:13px!important;}
+  body.wce-v0767-mobile-fit .menuGrid,
+  body.wce-v0767-mobile-fit .uiThemeBlock,
+  body.wce-v0767-mobile-fit .localPackBlock,
+  body.wce-v0767-mobile-fit .advancedPage.open{
+    grid-template-columns:repeat(2,minmax(220px,1fr))!important;
+  }
+  body.wce-v0767-mobile-fit .panelWide,
+  body.wce-v0767-mobile-fit .menuNote,
+  body.wce-v0767-mobile-fit .uiNote,
+  body.wce-v0767-mobile-fit .advancedNav,
+  body.wce-v0767-mobile-fit .advancedActions{
+    grid-column:1/-1!important;
+  }
+  body.wce-v0767-mobile-fit .lab.open{
+    touch-action:pan-x pan-y pinch-zoom!important;
+    overflow:auto!important;
+    padding:10px!important;
+  }
+  body.wce-v0767-mobile-fit .labBody{touch-action:pan-x pan-y pinch-zoom!important;}
+  body.wce-v0767-mobile-fit button,
+  body.wce-v0767-mobile-fit select,
+  body.wce-v0767-mobile-fit input{
+    min-height:48px;
+  }
+}
+@media (hover:none) and (max-width:520px), (pointer:coarse) and (max-width:520px){
+  body.wce-v0767-mobile-fit .menu:not(.hidden) .menuPanel{
+    width:var(--wceMobileMenuW, calc((100vw - 12px) / .75))!important;
+    padding:16px 18px!important;
+  }
+  body.wce-v0767-mobile-fit .menuActions,
+  body.wce-v0767-mobile-fit .menuGrid,
+  body.wce-v0767-mobile-fit .uiThemeBlock,
+  body.wce-v0767-mobile-fit .localPackBlock,
+  body.wce-v0767-mobile-fit .advancedPage.open{
+    grid-template-columns:repeat(2,minmax(180px,1fr))!important;
+  }
+}
+</style>
+<script id="wce-v0767-mobile-fit-hotfix">
+(function(){
+  'use strict';
+  if(window.WCE_0767_MOBILE_FIT) return; window.WCE_0767_MOBILE_FIT=true;
+  const V='v0.7.67';
+  function isTouchMobile(){
+    try{return (navigator.maxTouchPoints||0)>0 || matchMedia('(hover:none)').matches || matchMedia('(pointer:coarse)').matches || Math.min(innerWidth||9999,innerHeight||9999)<820;}catch(e){return Math.min(innerWidth||9999,innerHeight||9999)<820;}
+  }
+  function setVersion(){
+    try{window.WCE_VERSION=V;}catch(e){}
+    try{var v=document.getElementById('versionText'); if(v) v.textContent=V;}catch(e){}
+    try{document.querySelectorAll('.gameCredit').forEach(function(n){ if((n.textContent||'').indexOf('WarHeads Classic Enhanced')>=0) n.innerHTML='WarHeads Classic Enhanced '+V+' &nbsp;|&nbsp; Developed By: Elemental Spark &nbsp;|&nbsp; <a href="https://www.elementalspark.com" target="_blank" rel="noopener">www.elementalspark.com</a>'; });}catch(e){}
+  }
+  function visual(){
+    var vv=window.visualViewport;
+    return {w:Math.max(320, vv&&vv.width?vv.width:innerWidth||document.documentElement.clientWidth||480), h:Math.max(420, vv&&vv.height?vv.height:innerHeight||document.documentElement.clientHeight||720), x:vv&&Number.isFinite(vv.offsetLeft)?vv.offsetLeft:0, y:vv&&Number.isFinite(vv.offsetTop)?vv.offsetTop:0};
+  }
+  function fitMenu(){
+    try{
+      document.body.classList.add('wce-v0767-mobile-fit');
+      if(!isTouchMobile()) return;
+      var panel=document.querySelector('#menu:not(.hidden) .menuPanel');
+      var r=visual(), scale=.75;
+      // Use the actually visible viewport, not only CSS 100vw. This fixes Chrome mobile desktop-mode / pinch offsets.
+      var targetW=Math.max(520, Math.min(1120, (r.w-16)/scale));
+      var scaledW=targetW*scale;
+      var left=r.x + Math.max(6,(r.w-scaledW)/2);
+      document.documentElement.style.setProperty('--wceMobileMenuScale', String(scale));
+      document.documentElement.style.setProperty('--wceMobileVisualW', r.w+'px');
+      document.documentElement.style.setProperty('--wceMobileVisualH', r.h+'px');
+      document.documentElement.style.setProperty('--wceMobileVisualX', r.x+'px');
+      document.documentElement.style.setProperty('--wceMobileTop', r.y+'px');
+      document.documentElement.style.setProperty('--wceMobileMenuW', targetW+'px');
+      document.documentElement.style.setProperty('--wceMobileMenuLeft', left+'px');
+      if(panel){
+        panel.style.width=targetW+'px';
+        panel.style.marginLeft=left+'px';
+        panel.style.transform='scale('+scale+')';
+        panel.style.transformOrigin='top left';
+      }
+    }catch(e){console.warn('v0.7.67 mobile fit failed',e);}
+  }
+  function install(){setVersion(); fitMenu();}
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', install); else install();
+  ['resize','orientationchange'].forEach(function(ev){window.addEventListener(ev,function(){setTimeout(fitMenu,60);setTimeout(fitMenu,260);},{passive:true});});
+  if(window.visualViewport){visualViewport.addEventListener('resize',fitMenu,{passive:true});visualViewport.addEventListener('scroll',fitMenu,{passive:true});}
+  document.addEventListener('click',function(){setTimeout(fitMenu,30);setTimeout(fitMenu,180);},true);
+  setTimeout(install,100); setTimeout(fitMenu,600);
+})();
+</script>
+
 </body>
 </html>
 
@@ -2354,3 +3484,208 @@ addEventListener('resize',resize);resize();if(ui.menuPlayerPack){ui.menuPlayerPa
 
 
 
+
+<script>
+
+/* v0.7.67 terrain crater / napalm scale hotfix (mobile rollback build)
+   - Removes persistent dotted/black/orange crater rings from planet rendering.
+   - Keeps real hit masks for gameplay, but draws them as clean terrain cutouts.
+   - Tightens terrain bite scaling so small/medium/large explosions remain distinct.
+   - Makes napalm continue eating into planet surfaces briefly after impact. */
+(function WCE761_terrainCraterNapalmScaleHotfix(){
+  const VERSION='v0.7.67';
+  const C=(v,a,b)=>{ v=+v; return Math.max(a, Math.min(b, Number.isFinite(v)?v:a)); };
+  try{ const vt=document.getElementById('versionText'); if(vt) vt.textContent=VERSION; }catch(e){}
+  try{ window.WCE_VERSION=VERSION; }catch(e){}
+
+  function nowMs(){ try{return performance.now();}catch(e){return Date.now();} }
+  function randf(a,b){ return a+Math.random()*(b-a); }
+  function holeAgeOk(h,t){ return !h.created || (t-(+h.created||t))<360000; }
+  function normalizeHoles(p){
+    try{
+      if(!p || !Array.isArray(p.holes)) return;
+      const t=nowMs();
+      p.holes=p.holes.filter(h=>h && Number.isFinite(+h.x) && Number.isFinite(+h.y) && (+h.r)>1.8 && holeAgeOk(h,t)).slice(-96);
+    }catch(e){}
+  }
+  function addCleanHole(p,x,y,r,heat='burst'){
+    if(!p || p.dead) return false;
+    p.holes=p.holes||[];
+    const a=Math.atan2(y-p.y,x-p.x);
+    let surf=p.r;
+    try{ if(typeof planetRadiusAt==='function') surf=planetRadiusAt(p,a)||p.r; }catch(e){}
+    const d=Math.hypot(x-p.x,y-p.y);
+    r=C(r,2,Math.max(5,(p.r||60)*.42));
+    // Keep masks anchored to the planet surface/interior so they look like real bites, not decals outside the body.
+    if(d>surf+r*.48){ x=p.x+Math.cos(a)*(surf-r*.30); y=p.y+Math.sin(a)*(surf-r*.30); }
+    const fresh={x,y,r,heat,created:nowMs(),clean:true};
+    // Merge nearly identical small impacts so repeated cluster weapons do not paint ugly bead/ring piles.
+    let merged=false;
+    for(const h of p.holes){
+      if(!h) continue;
+      const dist=Math.hypot((h.x||0)-x,(h.y||0)-y);
+      if(dist<Math.max(5,Math.min(h.r||0,r)*.42)){
+        h.x=(h.x+x)*.5; h.y=(h.y+y)*.5; h.r=C(Math.max(h.r||0,r)*1.08,2,Math.max(6,(p.r||60)*.46)); h.heat=heat; h.created=nowMs(); h.clean=true;
+        merged=true; break;
+      }
+    }
+    if(!merged) p.holes.push(fresh);
+    p.holes=p.holes.slice(-96);
+    const integrityLoss=((r*r)/Math.max(1,(p.r||80)*(p.r||80))) * (heat==='napalm'?.42:heat==='tunnel'?.34:.30);
+    p.integrity=C((p.integrity??1)-integrityLoss,.018,1);
+    try{ p.texture=null; }catch(e){}
+    return true;
+  }
+
+  // Final planet renderer: call the current planet renderer with holes hidden, then draw clean cutouts.
+  try{
+    const previousDraw=drawPixelPlanet;
+    if(typeof previousDraw==='function' && !previousDraw.__wce761CleanRenderer){
+      const cleanRenderer=function(p,q,r){
+        if(!p) return previousDraw(p,q,r);
+        normalizeHoles(p);
+        const holes=Array.isArray(p.holes)?p.holes:null;
+        if(holes && holes.length){
+          // Older layers rendered dashed/scorched rings from p.holes. Hide those before calling them.
+          try{ p.holes=[]; previousDraw(p,q,r); } finally { p.holes=holes; }
+        }else previousDraw(p,q,r);
+        if(!holes || !holes.length || typeof ctx==='undefined' || typeof toScreen!=='function' || typeof cam==='undefined') return;
+        ctx.save();
+        ctx.setLineDash([]);
+        ctx.lineCap='round';
+        ctx.lineJoin='round';
+        ctx.globalCompositeOperation='source-over';
+        const bg='#010402';
+        holes.slice(-96).forEach(h=>{
+          if(!h) return;
+          const hq=toScreen({x:h.x,y:h.y});
+          const rr=Math.max(1.8,(+h.r||6)*cam.z);
+          // Actual missing terrain: no dashed ring, no orange outline, no black bead pile.
+          ctx.fillStyle=bg;
+          ctx.beginPath(); ctx.arc(hq.x,hq.y,rr+Math.max(.7,cam.z*.9),0,Math.PI*2); ctx.fill();
+          // Very subtle internal scorch only, intentionally not a full visible ring.
+          if(rr>5){
+            const grad=ctx.createRadialGradient(hq.x,hq.y,Math.max(1,rr*.55),hq.x,hq.y,rr+Math.max(1,cam.z*1.2));
+            const ember=h.heat==='napalm'?'rgba(255,92,28,.12)':h.heat==='tunnel'?'rgba(150,90,255,.08)':'rgba(255,205,120,.055)';
+            grad.addColorStop(0,'rgba(1,4,2,0)');
+            grad.addColorStop(.82,'rgba(1,4,2,0)');
+            grad.addColorStop(1,ember);
+            ctx.fillStyle=grad;
+            ctx.beginPath(); ctx.arc(hq.x,hq.y,rr+Math.max(1,cam.z*1.2),0,Math.PI*2); ctx.fill();
+          }
+          if(h.heat==='napalm' && rr>7){
+            ctx.globalAlpha=.22;
+            ctx.fillStyle='rgba(255,106,34,.35)';
+            const specks=Math.min(3,Math.max(1,Math.round(rr/18)));
+            for(let i=0;i<specks;i++){
+              const a=(i/specks)*Math.PI*2+((h.x+h.y)%17)*.01, d=rr*randf(.12,.48), s=Math.max(1,cam.z*1.8);
+              ctx.fillRect(hq.x+Math.cos(a)*d-s*.5,hq.y+Math.sin(a)*d-s*.5,s,s);
+            }
+            ctx.globalAlpha=1;
+          }
+        });
+        ctx.restore();
+      };
+      cleanRenderer.__wce761CleanRenderer=true;
+      drawPixelPlanet=cleanRenderer;
+    }
+  }catch(e){ console.warn('v0.7.61 clean planet renderer failed',e); }
+
+  try{
+    const previousCarve=carvePlanetHit;
+    carvePlanetHit=function(p,x,y,st,w,orbitSafe=false){
+      try{
+        if(!p || p.dead || !st) return false;
+        if(typeof isPlanetBirthSafe==='function' && !isPlanetBirthSafe(p) && st.action!=='build') return false;
+        const action=st.action||'explode';
+        const a=Math.atan2(y-p.y,x-p.x);
+        const d=Math.hypot(p.x-x,p.y-y);
+        let pr=p.r;
+        try{ pr=planetRadiusAt(p,a)||p.r; }catch(e){}
+        const rad=C(+st.radius||30,4,260), dmg=C(+st.damage||0,0,180);
+        if(d>pr+rad*.98) return false;
+        const scale=C((typeof modSettings==='object' && modSettings?+modSettings.planetDestructionScale:1)||1,.05,8);
+        const napalm=action==='napalm', tunnel=action==='dig'||action==='splitter';
+        // v0.7.61 tighter terrain scaling: small weapons stay small; huge weapons no longer all become planet-sized rings.
+        const actionMul=napalm?.42:(tunnel?.34:.46);
+        const dmgMul=napalm?.060:(tunnel?.045:.050);
+        let bite=C(rad*actionMul*scale + dmg*dmgMul, orbitSafe?2.5:3.5, Math.max(6,p.r*(napalm?.34:tunnel?.30:.32)));
+        if(orbitSafe) bite=Math.min(bite,24);
+        const bites=C(Math.round((rad+dmg*.08)/(napalm?105:125)),1,napalm?4:3);
+        for(let i=0;i<bites;i++){
+          const ja=randf(0,Math.PI*2), jd=randf(0,bite*(napalm?.55:.36));
+          addCleanHole(p,x+Math.cos(ja)*jd,y+Math.sin(ja)*jd,bite*randf(napalm?.44:.48,napalm?.82:.78),napalm?'napalm':tunnel?'tunnel':'burst');
+        }
+        if(napalm){
+          // Eat inward along the surface instead of painting a single surface ring.
+          for(let i=0;i<3;i++){
+            const aa=a+randf(-.34,.34), rr=pr-randf(bite*.15,bite*(1.05+i*.22));
+            addCleanHole(p,p.x+Math.cos(aa)*rr,p.y+Math.sin(aa)*rr,bite*randf(.24,.48),'napalm');
+          }
+        }
+        if(!orbitSafe && typeof spark==='function') spark(x,y,napalm?C(rad*1.15,24,112):C(rad*.82,16,118),w&&w.color||'#ffd15f',napalm?'napalm':'burst');
+        if(!orbitSafe && typeof shockwave==='function') shockwave(x,y,C(rad*(napalm?.58:.48)+dmg*.18,18,150),w&&w.color||'#ffd15f');
+        if(typeof debris!=='undefined' && Array.isArray(debris)){
+          const n=C(Math.round((bite+dmg*.02)/(orbitSafe?12:9)),orbitSafe?1:2,napalm?14:10);
+          for(let i=0;i<n;i++){ const da=a+randf(-.9,.9), sp=randf(.35,napalm?2.1:2.8); debris.push({x,y,vx:Math.cos(da)*sp,vy:Math.sin(da)*sp,life:randf(34,110),r:randf(1.5,7),c:p.color||'#777'}); }
+        }
+        if(!orbitSafe && p.integrity<.055 && p.r>72 && typeof fracturePlanetChunk==='function') fracturePlanetChunk(p,a,Math.max(18,bite*1.25),napalm?'napalm':tunnel?'tunnel':'burst');
+        return true;
+      }catch(err){
+        try{ return previousCarve ? previousCarve(p,x,y,st,w,orbitSafe) : false; }catch(e){ return false; }
+      }
+    };
+  }catch(e){ console.warn('v0.7.61 carve scale patch failed',e); }
+
+  try{
+    const previousBlast=blast;
+    if(typeof previousBlast==='function' && !previousBlast.__wce761Napalm){
+      const patchedBlast=function(x,y,st,w,owner){
+        const action=st&&st.action;
+        const result=previousBlast.call(this,x,y,st,w,owner);
+        if(action==='napalm'){
+          const base={...st,action:'napalm',damage:C((+st.damage||10)*.46,2,54),radius:C((+st.radius||30)*.54,8,70),count:1};
+          // Delayed burn pulses: napalm keeps chewing terrain, but does not keep applying full ship damage.
+          const pulses=C(Math.round(((+st.radius||30)+(+st.damage||0)*.25)/38),3,7);
+          for(let i=1;i<=pulses;i++){
+            setTimeout(()=>{
+              try{
+                if(!Array.isArray(planets)) return;
+                const spread=(+st.radius||30)*(.18+i*.12);
+                planets.forEach(p=>{
+                  if(!p || p.dead) return;
+                  const d=Math.hypot((p.x||0)-x,(p.y||0)-y);
+                  if(d<(p.r||0)+(+st.radius||30)*1.45){
+                    const aa=Math.atan2(y-p.y,x-p.x)+randf(-.28,.28);
+                    const px=x+Math.cos(aa)*randf(0,spread), py=y+Math.sin(aa)*randf(0,spread);
+                    carvePlanetHit(p,px,py,{...base,radius:C(base.radius*(1-i*.055),6,70),damage:C(base.damage*(1-i*.04),1,54)},w||{},true);
+                    // orbitSafe above avoids extra shockwave spam; add a tiny burn sparkle only.
+                    if(typeof spark==='function' && i%2===1) spark(px,py,12,w&&w.color||'#ff7b55','napalm');
+                  }
+                });
+              }catch(e){}
+            },i*135);
+          }
+        }
+        return result;
+      };
+      patchedBlast.__wce761Napalm=true;
+      blast=patchedBlast;
+    }
+  }catch(e){ console.warn('v0.7.61 napalm burn patch failed',e); }
+
+  // Keep cleanup from removing the new clean masks too soon, but also prevent huge mask piles.
+  try{
+    const oldMaintain=maintainPlanets;
+    if(typeof oldMaintain==='function' && !oldMaintain.__wce761HoleCap){
+      const patchedMaintain=function(){
+        const r=oldMaintain.apply(this,arguments);
+        try{ if(Array.isArray(planets)) planets.forEach(p=>{ normalizeHoles(p); if(Array.isArray(p.holes) && p.holes.length>96) p.holes=p.holes.slice(-96); }); }catch(e){}
+        return r;
+      };
+      patchedMaintain.__wce761HoleCap=true;
+      maintainPlanets=patchedMaintain;
+    }
+  }catch(e){ console.warn('v0.7.61 hole cleanup patch failed',e); }
+})();
+</script>
