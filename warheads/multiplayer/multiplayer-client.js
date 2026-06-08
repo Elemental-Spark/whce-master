@@ -218,7 +218,7 @@ function ensureHostGameControls(){
 
 async function api(action, payload={}){
   const body = { action, clientId:state.clientId, lastSeq:state.lastSeq, ...payload };
-  const res = await fetch('api.php?v=0.7.67', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), cache:'no-store' });
+  const res = await fetch('api.php?v=0.7.69', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), cache:'no-store' });
   const raw = await res.text();
   let json = null;
   try { json = raw ? JSON.parse(raw) : null; }
@@ -940,7 +940,7 @@ poll();
   'use strict';
   if(window.WCE_MP_0758_PACK_LOCK) return;
   window.WCE_MP_0758_PACK_LOCK = true;
-  const V='v0.7.67';
+  const V='v0.7.69';
   function safe(fn,d){ try{return fn()}catch(e){return d} }
   function normChoice(v){ v=String(v||'').trim(); return v || 'gold'; }
   function getLocalChoice(){ return normChoice(safe(()=>localStorage.getItem('wce.mp.playerPackChoice'), '') || safe(()=>localStorage.getItem('warheads.playerPackChoice'), '') || 'gold'); }

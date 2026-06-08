@@ -1,6 +1,6 @@
 <?php
 // WarHeads Classic Enhanced - shared-hosting multiplayer API (PHP polling, no npm required)
-// v0.7.67 stable mobile menu rollback + lobby JSON recovery hotfix. Multiplayer only.
+// v0.7.69 turn rollback / stable cleanup hotfix. Multiplayer only.
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
@@ -21,7 +21,7 @@ $MAX_BOTS = 8;
 if (!is_dir($DATA_DIR)) @mkdir($DATA_DIR, 0775, true);
 if (!file_exists($STATE_FILE)) file_put_contents($STATE_FILE, json_encode(default_state(), JSON_PRETTY_PRINT));
 
-function default_state(){ return ['version'=>'0.7.67-php-mp','clients'=>[], 'rooms'=>[], 'lobbyChat'=>[], 'seq'=>1, 'updatedAt'=>time()]; }
+function default_state(){ return ['version'=>'0.7.69-php-mp','clients'=>[], 'rooms'=>[], 'lobbyChat'=>[], 'seq'=>1, 'updatedAt'=>time()]; }
 function normalize_state(&$state){
   // v0.7.67: recover from empty/damaged shared-host state without breaking the lobby.
   $def=default_state();
@@ -32,7 +32,7 @@ function normalize_state(&$state){
   if(!is_array($state['lobbyChat'])) $state['lobbyChat']=[];
   if(!isset($state['seq']) || !is_numeric($state['seq'])) $state['seq']=1;
   if(!isset($state['updatedAt']) || !is_numeric($state['updatedAt'])) $state['updatedAt']=time();
-  $state['version']='0.7.67-php-mp';
+  $state['version']='0.7.69-php-mp';
 }
 function input_json(){ $raw=file_get_contents('php://input'); $j=json_decode($raw,true); return is_array($j)?$j:$_REQUEST; }
 function clean_id($s){ $s=preg_replace('/[^a-zA-Z0-9_\-]/','',strval($s)); return $s ?: ('client-'.bin2hex(random_bytes(5))); }
@@ -277,6 +277,39 @@ function clear_room_clients(&$state,$room){
     if(isset($state['clients'][$id])){ $state['clients'][$id]['roomId']=null; $state['clients'][$id]['spectating']=false; $state['clients'][$id]['lateQueued']=false; }
   }
 }
+function remove_participant_now(&$state,&$room,$target,$reason='left'){
+  $target=clean_id($target);
+  if(!$target) return false;
+  $rid=$room['id']??'';
+  $wasActive=false; $name='Pilot';
+  $parts=room_participants($room);
+  $active=$parts[intval($room['turn']??0)]??null;
+  if($active && ($active['clientId']??'')===$target) $wasActive=true;
+  foreach($parts as $p){ if(($p['clientId']??'')===$target){ $name=$p['name']??$name; break; } }
+  if(isset($state['clients'][$target])){
+    $state['clients'][$target]['roomId']=null;
+    $state['clients'][$target]['spectating']=false;
+    $state['clients'][$target]['lateQueued']=false;
+  }
+  $room['players']=array_values(array_filter($room['players']??[],function($p)use($target){return ($p['clientId']??'')!==$target;}));
+  $room['participants']=array_values(array_filter($room['participants']??[],function($p)use($target){return ($p['clientId']??'')!==$target;}));
+  if(isset($room['spectators'][$target])) unset($room['spectators'][$target]);
+  if(isset($room['lateJoiners'][$target])) unset($room['lateJoiners'][$target]);
+  reindex_players($room);
+  $parts=room_participants($room);
+  if(($room['hostId']??'')===$target && count($room['players']??[])>0) $room['hostId']=$room['players'][0]['clientId'];
+  $room['chat'][]=['system'=>true,'text'=>$name.' '.$reason.'.','at'=>time()];
+  $room['chat']=array_slice($room['chat'],-80);
+  if(count($parts)<=0) return true;
+  if($wasActive){
+    // v0.7.69: clicked-leave/kick removes the slot, but only this validated server path may skip forward.
+    // Random clients and timeout recovery are not allowed to advance turns.
+    normalize_running_turn($state,$room,true,'active player '.$reason);
+  } else {
+    add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]);
+  }
+  return true;
+}
 function leave_room(&$state,$cid,$reason='left'){
   if(empty($state['clients'][$cid]['roomId'])) return;
   $rid=$state['clients'][$cid]['roomId']; $state['clients'][$cid]['roomId']=null;
@@ -293,29 +326,11 @@ function leave_room(&$state,$cid,$reason='left'){
     return;
   }
 
-  // During a running match, leaving players become bots so the room keeps going.
+  // v0.7.69: clicked Leave / Reset / timeout removes the player from the running match.
+  // Do not bot-replace or auto-fire from another client here; that branch caused skipped turns.
   if(($room['state']??'')==='running'){
-    $wasActive=false;
-    $active=room_participants($room)[intval($room['turn']??0)]??null;
-    if($active && empty($active['bot']) && ($active['clientId']??'')===$cid) $wasActive=true;
-    foreach(($room['participants']??[]) as &$p){
-      if(empty($p['bot']) && ($p['clientId']??'')===$cid){
-        $p['originalClientId']=$cid;
-        $p['originalName']=$name;
-        $p['clientId']='bot-replace-'.$rid.'-'.$p['slot'];
-        $p['name']=$name.' Bot';
-        $p['bot']=true;
-        $p['ready']=true;
-      }
-    } unset($p);
-    $room['players']=array_values(array_filter($room['players']??[], function($p) use($cid){ return ($p['clientId']??'')!==$cid; }));
-    reindex_players($room);
-    if($room['hostId']===$cid && count($room['players'])>0) $room['hostId']=$room['players'][0]['clientId'];
-    if(count($room['players'])===0){ unset($state['rooms'][$rid]); return; }
-    $room['chat'][]=['system'=>true,'text'=>$name.' '.$reason.' and was replaced by a bot.','at'=>time()];
-    $room['chat']=array_slice($room['chat'],-80);
-    if($wasActive && ($room['turnPhase']??'idle')==='shot') normalize_running_turn($state,$room,true,'active player left during shot');
-    else add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]);
+    remove_participant_now($state,$room,$cid,$reason);
+    if(count(room_participants($room))===0){ unset($state['rooms'][$rid]); return; }
     return;
   }
 
