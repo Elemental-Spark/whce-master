@@ -1,8 +1,16 @@
 {
-  "version": "0.7.70-php-mp",
-  "clients": {},
   "rooms": {},
+  "clients": {},
   "lobbyChat": [],
-  "seq": 1,
-  "updatedAt": 0
+  "version": "0.7.86-gold",
+  "defaults": {
+    "creditsEnabled": true,
+    "startingCredits": 125000,
+    "weaponMinCost": 1000,
+    "weaponMaxCost": 10000,
+    "defenseMinCost": 5000,
+    "defenseMaxCost": 5000,
+    "eventMinMinutes": 3,
+    "eventMaxMinutes": 10
+  }
 }

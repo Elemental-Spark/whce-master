@@ -1,6 +1,6 @@
 <?php
 // WarHeads Classic Enhanced - shared-hosting multiplayer API (PHP polling, no npm required)
-// v0.7.70 turn rollback / stable cleanup hotfix. Multiplayer only.
+// v0.7.86 GOLD turn rollback / stable cleanup hotfix. Multiplayer only.
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
@@ -21,9 +21,9 @@ $MAX_BOTS = 8;
 if (!is_dir($DATA_DIR)) @mkdir($DATA_DIR, 0775, true);
 if (!file_exists($STATE_FILE)) file_put_contents($STATE_FILE, json_encode(default_state(), JSON_PRETTY_PRINT));
 
-function default_state(){ return ['version'=>'0.7.70-php-mp','clients'=>[], 'rooms'=>[], 'lobbyChat'=>[], 'seq'=>1, 'updatedAt'=>time()]; }
+function default_state(){ return ['version'=>'0.7.86-gold','clients'=>[], 'rooms'=>[], 'lobbyChat'=>[], 'seq'=>1, 'updatedAt'=>time()]; }
 function normalize_state(&$state){
-  // v0.7.67: recover from empty/damaged shared-host state without breaking the lobby.
+  // v0.7.86 GOLD: recover from empty/damaged shared-host state without breaking the lobby.
   $def=default_state();
   if(!is_array($state)) $state=$def;
   foreach($def as $k=>$v){ if(!array_key_exists($k,$state)) $state[$k]=$v; }
@@ -32,7 +32,7 @@ function normalize_state(&$state){
   if(!is_array($state['lobbyChat'])) $state['lobbyChat']=[];
   if(!isset($state['seq']) || !is_numeric($state['seq'])) $state['seq']=1;
   if(!isset($state['updatedAt']) || !is_numeric($state['updatedAt'])) $state['updatedAt']=time();
-  $state['version']='0.7.70-php-mp';
+  $state['version']='0.7.86-gold';
 }
 function input_json(){ $raw=file_get_contents('php://input'); $j=json_decode($raw,true); return is_array($j)?$j:$_REQUEST; }
 function clean_id($s){ $s=preg_replace('/[^a-zA-Z0-9_\-]/','',strval($s)); return $s ?: ('client-'.bin2hex(random_bytes(5))); }
@@ -56,7 +56,7 @@ function norm_scan($s){
 }
 function blocked_terms(){
   global $BLOCK_FILE;
-  $base=['admin','administrator','moderator','system','server','owner','elemental spark','chatgpt','password','address','phone number','hitler','nazi','kkk','terrorist','pedo','pedophile','rape','suicide','fuck','shit','bitch','cunt','dick','pussy','asshole'];
+  $base=['admin','administrator','moderator','system','server','owner','elemental spark','password','address','phone number','hitler','nazi','kkk','terrorist','pedo','pedophile','rape','suicide','fuck','shit','bitch','cunt','dick','pussy','asshole'];
   if (file_exists($BLOCK_FILE)) { $j=json_decode(file_get_contents($BLOCK_FILE),true); if (is_array($j)) $base=array_merge($base,$j); }
   return array_values(array_unique(array_filter(array_map('strval',$base))));
 }
@@ -302,7 +302,7 @@ function remove_participant_now(&$state,&$room,$target,$reason='left'){
   $room['chat']=array_slice($room['chat'],-80);
   if(count($parts)<=0) return true;
   if($wasActive){
-    // v0.7.70: clicked-leave/kick removes the slot, but only this validated server path may skip forward.
+    // v0.7.86 GOLD: clicked-leave/kick removes the slot, but only this validated server path may skip forward.
     // Random clients and timeout recovery are not allowed to advance turns.
     normalize_running_turn($state,$room,true,'active player '.$reason);
   } else {
@@ -326,7 +326,7 @@ function leave_room(&$state,$cid,$reason='left'){
     return;
   }
 
-  // v0.7.70: clicked Leave / Reset / timeout removes the player from the running match.
+  // v0.7.86 GOLD: clicked Leave / Reset / timeout removes the player from the running match.
   // Do not bot-replace or auto-fire from another client here; that branch caused skipped turns.
   if(($room['state']??'')==='running'){
     remove_participant_now($state,$room,$cid,$reason);
@@ -434,7 +434,7 @@ switch($action){
     if(($state['rooms'][$rid]['state']??'')!=='lobby' && empty($state['rooms'][$rid]['allowLateJoin'])) { $message='That game already started.'; break; }
     $room=&$state['rooms'][$rid];
     if(($room['state']??'')==='running'){
-      // v0.7.44: late joiners wait in a poker-style queue. They spectate the current cycle,
+      // v0.7.86 GOLD: late joiners wait in a poker-style queue. They spectate the current cycle,
       // then enter at the next cycle boundary without stealing an existing player slot.
       if(active_human_count($room) + queued_late_count($room) >= intval($room['maxPlayers']??$MAX_HUMANS)) { $message='That game is full.'; break; }
       leave_room($state,$cid,'changed rooms');
@@ -517,7 +517,7 @@ switch($action){
       $allowed=false;
       if($active){ $allowed=(!empty($active['bot']) && $room['hostId']===$cid) || (empty($active['bot']) && ($active['clientId']??'')===$cid); }
       if($room['state']==='running' && $allowed && (($room['turnPhase']??'idle')==='shot' || !empty($active['bot']))){
-        // v0.7.58: turn finish is server-authoritative.  Clients may lag, tab out, or disagree
+        // v0.7.86 GOLD: turn finish is server-authoritative.  Clients may lag, tab out, or disagree
         // about their local next turn, so only the server's current turn/shot token can advance.
         $finishToken = (isset($in['turnToken']) && is_numeric($in['turnToken'])) ? intval($in['turnToken']) : intval($room['turnToken']??0);
         $currentToken = intval($room['turnToken']??0);
@@ -538,7 +538,7 @@ switch($action){
           if($hp>0) break;
           $next=($next+1)%$count;
         }
-        // v0.7.49: late joiners enter on the NEXT available turn update, not the next full cycle.
+        // v0.7.86 GOLD: late joiners enter on the NEXT available turn update, not the next full cycle.
         // They are appended to the roster after the current shot resolves, while $next keeps pointing to
         // the already-scheduled existing player. Because new players are appended after $next is chosen,
         // their first possible turn is skipped and they join the following rotation cleanly.

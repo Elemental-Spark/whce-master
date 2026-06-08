@@ -48,7 +48,7 @@ function clearLocalGameSession(){
   try{ const frame=$('gameFrame'); if(frame) frame.src='about:blank'; }catch(e){}
   state.room=null; state.gameRoomId=''; state.gameLoadingRoomId=''; state.waitingForShot=false; state.bridgeReady=false;
   state.pendingStateSync=null; state.pendingStateSyncAt=0; state.lastBotKey=''; state.lastShotToken=0; state.lastStateToken=0; state.spectating=false; state.mySlot=-1;
-  state.lastSeq=0; state.serverTime=0; state.serverReceivedAt=0;
+  state.lastSeq=0; state.serverTime=0; state.serverReceivedAt=0; try{document.body.classList.remove('mpGameActive')}catch(e){}
 }
 function replaceLocation(url){
   try{ window.location.replace(url); }
@@ -72,7 +72,15 @@ async function explicitLeaveToMenu(){
   try{ sessionStorage.removeItem('wce.mp.roomId'); sessionStorage.removeItem('wce.mp.activeRoomId'); sessionStorage.removeItem('wce.mp.launch'); }catch(e){}
   await returnToWarheadsMenuOrFallback();
 }
-function show(id){ screens.forEach(s => { const el=$(s); if(el) el.classList.toggle('hidden', s !== id); }); }
+function show(id){
+  screens.forEach(s => { const el=$(s); if(el) el.classList.toggle('hidden', s !== id); });
+  document.body.classList.toggle('mpGameActive', id==='gameScreen');
+  if(id==='gameScreen'){
+    const gs=$('gameScreen'), frame=$('gameFrame');
+    if(gs){ gs.classList.remove('hidden'); gs.style.display='block'; gs.style.position='fixed'; gs.style.inset='0'; gs.style.zIndex='2147482000'; }
+    if(frame){ frame.style.display='block'; frame.style.position='absolute'; frame.style.inset='0'; frame.style.width='100%'; frame.style.height='100%'; }
+  }
+}
 function visible(id){ const el=$(id); return el && !el.classList.contains('hidden'); }
 function setErr(text){ if($('nameError')) $('nameError').textContent = text || ''; }
 function escapeHtml(s){ return String(s||'').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch])); }
@@ -139,6 +147,19 @@ function hostAdvancedSettings(){
     maxShotSpeed:num('maxShotSpeed',18),
     softHoming:num('softHoming',0.034),
     homingBoost:num('homingBoost',0.12),
+    creditsEnabled: m.creditsEnabled !== undefined ? !!m.creditsEnabled : true,
+    startingCredits:num('startingCredits',125000),
+    weaponMinCost:num('weaponMinCost',1000),
+    weaponMaxCost:num('weaponMaxCost',10000),
+    defenseMinCost:num('defenseMinCost',5000),
+    defenseMaxCost:num('defenseMaxCost',5000),
+    defenseRechargeCost:num('defenseRechargeCost',5000),
+    creditRewardPer10Damage:num('creditRewardPer10Damage',1000),
+    creditSelfDamagePenaltyPer10:num('creditSelfDamagePenaltyPer10',100),
+    eventMinMinutes:num('eventMinMinutes',3),
+    eventMaxMinutes:num('eventMaxMinutes',10),
+    eventBossChance:num('eventBossChance',0.65),
+    eventBossDurationMs:num('eventBossDurationMs',300000),
     planetStyle:m.planetStyle || localStorage.getItem('warheads.planetStyle') || 'random'
   };
 }
@@ -182,6 +203,9 @@ function serverSummaryHtml(data){
   if(mods.maxLiveShots) adv.push(`Shots ${escapeHtml(mods.maxLiveShots)}`);
   if(mods.maxParticles) adv.push(`Particles ${escapeHtml(mods.maxParticles)}`);
   if(mods.planetCapBase) adv.push(`Planets ${escapeHtml(mods.planetCapBase)}`);
+  adv.push(`Credits ${mods.creditsEnabled===false?'OFF':'ON'}`);
+  if(mods.creditsEnabled!==false) adv.push(`Start ${escapeHtml(mods.startingCredits||125000)} C · Weapons ${escapeHtml(mods.weaponMinCost||1000)}-${escapeHtml(mods.weaponMaxCost||10000)} C`);
+  if(mods.eventMinMinutes) adv.push(`Events ${escapeHtml(mods.eventMinMinutes)}-${escapeHtml(mods.eventMaxMinutes||10)}m`);
   return `<div class="serverSummary"><b>${bits.join(' · ')}</b>${adv.length?`<span>${adv.join(' · ')}</span>`:''}</div>`;
 }
 function safeRoomMods(room){ return room && room.modSummary ? room.modSummary : 'Gold defaults'; }
@@ -192,6 +216,9 @@ function roomDetailsHtml(r){
   if(mods.planetStyle) adv.push(`Planet ${escapeHtml(mods.planetStyle)}`);
   if(mods.cleanupIntervalMs) adv.push(`Cleanup ${escapeHtml(mods.cleanupIntervalMs)}ms`);
   if(mods.cleanupMaxPlanetHoles) adv.push(`Max holes ${escapeHtml(mods.cleanupMaxPlanetHoles)}`);
+  adv.push(`Credits ${mods.creditsEnabled===false?'OFF':'ON'}`);
+  if(mods.creditsEnabled!==false) adv.push(`Start ${escapeHtml(mods.startingCredits||125000)} C, Weapons ${escapeHtml(mods.weaponMinCost||1000)}-${escapeHtml(mods.weaponMaxCost||10000)} C, Defense ${escapeHtml(mods.defenseMinCost||5000)}-${escapeHtml(mods.defenseMaxCost||5000)} C`);
+  if(mods.eventMinMinutes) adv.push(`Events ${escapeHtml(mods.eventMinMinutes)}-${escapeHtml(mods.eventMaxMinutes||10)}m`);
   if(mods.maxLiveShots) adv.push(`Live shots ${escapeHtml(mods.maxLiveShots)}`);
   if(mods.maxParticles) adv.push(`Particles ${escapeHtml(mods.maxParticles)}`);
   if(mods.planetCapBase) adv.push(`Planet cap ${escapeHtml(mods.planetCapBase)}`);
@@ -218,7 +245,7 @@ function ensureHostGameControls(){
 
 async function api(action, payload={}){
   const body = { action, clientId:state.clientId, lastSeq:state.lastSeq, ...payload };
-  const res = await fetch('api.php?v=0.7.70', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), cache:'no-store' });
+  const res = await fetch('api.php?v=0.7.86-gold', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), cache:'no-store' });
   const raw = await res.text();
   let json = null;
   try { json = raw ? JSON.parse(raw) : null; }
@@ -237,18 +264,23 @@ function ensureInGameRoomChat(){
     dock=document.createElement('div'); dock.id='mpGameChatDock'; dock.className='mpGameChatDock closed';
     dock.innerHTML='<button id="mpGameChatToggle" type="button">CHAT</button><div class="mpGameChatPanel"><div class="roomChatSafety"><b>Safety:</b> Never share personal information, addresses, passwords, private accounts, phone numbers, contact details, or real-world plans.</div><div id="mpGameRoomChat" class="chat"></div><div class="chatInput"><input id="mpGameRoomChatInput" maxlength="220" placeholder="Room message"><button id="mpGameSendRoomChat" type="button">SEND</button></div></div>';
     gameScreen.appendChild(dock);
-    $('mpGameChatToggle').onclick=()=>{ dock.classList.toggle('closed'); localStorage.setItem('wce.mp.gameChatClosed', dock.classList.contains('closed')?'1':'0'); };
+    $('mpGameChatToggle').onclick=()=>{ dock.classList.toggle('closed'); if(!dock.classList.contains('closed')) dock.classList.remove('hasNew'); localStorage.setItem('wce.mp.gameChatClosed', dock.classList.contains('closed')?'1':'0'); };
     $('mpGameSendRoomChat').onclick=()=>{ const i=$('mpGameRoomChatInput'); if(!i) return; api('chat',{text:i.value}).catch(alertErr); i.value=''; };
     $('mpGameRoomChatInput').addEventListener('keydown', e=>{ if(e.key==='Enter') $('mpGameSendRoomChat').click(); });
   }
   const enabled=roomChatSlideoutEnabled();
   dock.classList.toggle('hidden', !enabled);
   if(enabled) dock.classList.toggle('closed', localStorage.getItem('wce.mp.gameChatClosed')==='1');
+  try{ if(matchMedia('(max-width:760px),(hover:none),(pointer:coarse)').matches) dock.classList.remove('hidden'); }catch(e){}
   return dock;
 }
 function renderRoomChats(chat=[]){
   renderChat($('roomChat'), chat || []);
-  ensureInGameRoomChat();
+  const dock=ensureInGameRoomChat();
+  const oldCount=+(dock&&dock.dataset.chatCount||0);
+  const newCount=(chat||[]).length;
+  if(dock && newCount>oldCount && dock.classList.contains('closed')) dock.classList.add('hasNew');
+  if(dock) dock.dataset.chatCount=String(newCount);
   renderChat($('mpGameRoomChat'), chat || []);
 }
 
@@ -420,6 +452,7 @@ function serverMenuFieldHtml(){
       <button type="button" data-server-tab="planets">Planets</button>
       <button type="button" data-server-tab="physics">Physics</button>
       <button type="button" data-server-tab="chaos">Cleanup / FX</button>
+      <button type="button" data-server-tab="economy">Economy / Events</button>
     </div>
     <div class="serverMenuPage open" data-server-page="setup">
       <label class="field">Humans<select id="cfgPlayers">${Array.from({length:16},(_,i)=>`<option>${i+1}</option>`).join('')}</select></label>
@@ -459,6 +492,21 @@ function serverMenuFieldHtml(){
       <label class="field">Max Trail Points<input id="cfgMaxTrail" type="number" min="8" max="140" step="2"></label>
       <label class="field">Heavy SFX Cap<input id="cfgHeavySfx" type="number" min="1" max="12" step="1"></label>
       <label class="field">Light SFX Cap<input id="cfgLightSfx" type="number" min="2" max="24" step="1"></label>
+    </div>
+    <div class="serverMenuPage" data-server-page="economy">
+      <label class="field">Credits<select id="cfgCreditsEnabled"><option value="true">On</option><option value="false">Off</option></select></label>
+      <label class="field">Starting Credits<input id="cfgStartingCredits" type="number" min="0" step="1000"></label>
+      <label class="field">Weapon Min Cost<input id="cfgWeaponMinCost" type="number" min="0" step="100"></label>
+      <label class="field">Weapon Max Cost<input id="cfgWeaponMaxCost" type="number" min="1000" step="1000"></label>
+      <label class="field">Defense Min Cost<input id="cfgDefenseMinCost" type="number" min="0" step="100"></label>
+      <label class="field">Defense Max Cost<input id="cfgDefenseMaxCost" type="number" min="0" step="100"></label>
+      <label class="field">Reward / 10 Damage<input id="cfgRewardPer10" type="number" min="0" step="100"></label>
+      <label class="field">Self-Hit Penalty / 10<input id="cfgSelfPenaltyPer10" type="number" min="0" step="10"></label>
+      <label class="field">Event Min Minutes<input id="cfgEventMin" type="number" min="1" max="60" step="1"></label>
+      <label class="field">Event Max Minutes<input id="cfgEventMax" type="number" min="1" max="90" step="1"></label>
+      <label class="field">Boss Chance<input id="cfgBossChance" type="number" min="0" max="1" step="0.05"></label>
+      <label class="field">Boss Duration Seconds<input id="cfgBossDuration" type="number" min="30" max="600" step="30"></label>
+      <div class="serverMenuNote">Credits are per-server. Hosts can turn the economy off, set starting money, and tune weapon/defense prices for their room.</div>
     </div>`;
 }
 function ensureServerMenuModal(){
@@ -506,6 +554,9 @@ function syncHostOptionsFromRoom(room){
   set('cfgMaxShots', mods.maxLiveShots || 128); set('cfgWarheads', mods.warheadsPerTurn || 156); set('cfgParticles', mods.maxParticles || 900); set('cfgMaxBeams', mods.maxBeams || 170); set('cfgMaxTrail', mods.maxTrailPoints || 58); set('cfgHeavySfx', mods.heavySfxCap || 5); set('cfgLightSfx', mods.lightSfxCap || 9);
   set('cfgPlanetCap', mods.planetCapBase || 14); set('cfgPlanetCapPerPlayer', mods.planetCapPerPlayer ?? 5); set('cfgPlanetDestructionScale', mods.planetDestructionScale || 1); set('cfgPlanetBuildScale', mods.planetBuildScale || 1); set('cfgPlanetRepairScale', mods.planetRepairScale || 1); set('cfgWorldWidthBase', mods.worldWidthBase || 2800); set('cfgWorldHeightBase', mods.worldHeightBase || 1800);
   set('cfgGravityStrength', mods.gravityStrength ?? 0.22); set('cfgGravityMaxPull', mods.gravityMaxPull ?? 0.18); set('cfgMaxShotSpeed', mods.maxShotSpeed || 18); set('cfgSoftHoming', mods.softHoming ?? 0.034); set('cfgHomingBoost', mods.homingBoost ?? 0.12);
+  set('cfgCreditsEnabled', mods.creditsEnabled === false ? 'false' : 'true'); set('cfgStartingCredits', mods.startingCredits || 125000); set('cfgWeaponMinCost', mods.weaponMinCost || 1000); set('cfgWeaponMaxCost', mods.weaponMaxCost || 10000);
+  set('cfgDefenseMinCost', mods.defenseMinCost || 5000); set('cfgDefenseMaxCost', mods.defenseMaxCost || 5000); set('cfgRewardPer10', mods.creditRewardPer10Damage || 1000); set('cfgSelfPenaltyPer10', mods.creditSelfDamagePenaltyPer10 || 100);
+  set('cfgEventMin', mods.eventMinMinutes || 3); set('cfgEventMax', mods.eventMaxMinutes || 10); set('cfgBossChance', mods.eventBossChance ?? 0.65); set('cfgBossDuration', Math.round((mods.eventBossDurationMs || 300000)/1000));
   if($('serverSummaryBox')) $('serverSummaryBox').innerHTML=serverSummaryHtml(data);
   setServerStatus(room ? 'Server settings loaded.' : 'Host defaults loaded.');
 }
@@ -536,6 +587,19 @@ function readHostOptionsPayload(){
   mods.maxShotSpeed = num('cfgMaxShotSpeed', mods.maxShotSpeed || 18);
   mods.softHoming = num('cfgSoftHoming', mods.softHoming ?? 0.034);
   mods.homingBoost = num('cfgHomingBoost', mods.homingBoost ?? 0.12);
+  mods.creditsEnabled = ($('cfgCreditsEnabled')?.value || 'true') === 'true';
+  mods.startingCredits = num('cfgStartingCredits', mods.startingCredits || 125000);
+  mods.weaponMinCost = num('cfgWeaponMinCost', mods.weaponMinCost || 1000);
+  mods.weaponMaxCost = Math.max(mods.weaponMinCost, num('cfgWeaponMaxCost', mods.weaponMaxCost || 10000));
+  mods.defenseMinCost = num('cfgDefenseMinCost', mods.defenseMinCost || 5000);
+  mods.defenseMaxCost = Math.max(mods.defenseMinCost, num('cfgDefenseMaxCost', mods.defenseMaxCost || 5000));
+  mods.defenseRechargeCost = mods.defenseMaxCost;
+  mods.creditRewardPer10Damage = num('cfgRewardPer10', mods.creditRewardPer10Damage || 1000);
+  mods.creditSelfDamagePenaltyPer10 = num('cfgSelfPenaltyPer10', mods.creditSelfDamagePenaltyPer10 || 100);
+  mods.eventMinMinutes = num('cfgEventMin', mods.eventMinMinutes || 3);
+  mods.eventMaxMinutes = Math.max(mods.eventMinMinutes, num('cfgEventMax', mods.eventMaxMinutes || 10));
+  mods.eventBossChance = num('cfgBossChance', mods.eventBossChance ?? 0.65);
+  mods.eventBossDurationMs = num('cfgBossDuration', Math.round((mods.eventBossDurationMs || 300000)/1000)) * 1000;
   delete mods.oatDelayMs; delete mods.oatPayloadStage;
   return {
     maxPlayers:+($('cfgPlayers')?.value || source.maxPlayers || 2),
@@ -676,12 +740,12 @@ function startGame(room){
   const startSlot = startParts.findIndex(p => p && p.clientId === state.clientId);
   if(startSlot >= 0) state.mySlot = startSlot;
   show('gameScreen');
+  try{document.body.classList.add('mpGameActive'); ensureInGameRoomChat();}catch(e){}
   const iframe = $('gameFrame');
   const sameRoom = state.gameRoomId === room.id || state.gameLoadingRoomId === room.id;
   if(sameRoom && iframe && iframe.src && iframe.src !== 'about:blank'){
     ensureHostGameControls();
-    updateTurnOverlay();
-    return;
+    updateTurnOverlay(); try{ensureInGameRoomChat();}catch(e){} return;
   }
   state.bridgeReady = false;
   state.waitingForShot = false;
@@ -739,7 +803,7 @@ function handleApi(json){
   if(json.serverTime){ state.serverTime = +json.serverTime; state.serverReceivedAt = Date.now(); }
   if(json.client && json.client.name){ state.name = json.client.name; localStorage.setItem('wce.mp.name', state.name); }
   if(json.client && !json.client.roomId && state.room && (visible('gameScreen') || visible('roomScreen'))){
-    // v0.7.66: mobile browsers can briefly lose/refresh their PHP client session during play.
+    // v0.7.86 GOLD: mobile browsers can briefly lose/refresh their PHP client session during play.
     // Do not dump them to the main menu automatically; try to reclaim/rejoin the running room first.
     if(!state.explicitExitInProgress) recoverRoomSession('client missing room after poll');
     return;
@@ -747,7 +811,7 @@ function handleApi(json){
   if(json.lobby) renderLobby(json.lobby);
   if(json.room) {
     renderRoom(json.room, json.chat || []);
-    // v0.7.49 focus-resume guard: if the authoritative server says the turn is idle,
+    // v0.7.86 GOLD focus-resume guard: if the authoritative server says the turn is idle,
     // never leave this browser stuck in SHOT SENT / disabled controls after tabbing away.
     if((json.room.turnPhase || 'idle') === 'idle') state.waitingForShot = false;
     state.currentTurn = json.room.turn || 0;
@@ -782,7 +846,7 @@ function drainPendingStateSync(force=false){
   if(!ev || !ev.state) return;
   const b = bridge();
   const waited = Date.now() - (state.pendingStateSyncAt || Date.now());
-  // v0.7.66: happy-medium sync. Give slow clients a brief moment to finish the local
+  // v0.7.86 GOLD: happy-medium sync. Give slow clients a brief moment to finish the local
   // explosion, but do not let one busy canvas hold everyone in WAIT forever.
   if(!force && b && b.isBusy && b.isBusy() && waited < WCE_MP_BUSY_SYNC_GRACE_MS){
     setTimeout(() => drainPendingStateSync(false), 120);
@@ -873,6 +937,15 @@ window.addEventListener('message', ev => {
   if(frame && frame.contentWindow && ev.source !== frame.contentWindow) return;
   const m = ev.data || {}; if(m.source !== 'WCE_MP_GAME') return;
   if(m.type === 'bridgeReady') { state.bridgeReady = true; state.gameLoadingRoomId=''; const b = bridge(); if(b && state.room) b.start(state.room, state.mySlot); if(b && b.importState && state.pendingStateSync && state.pendingStateSync.state){ b.importState(state.pendingStateSync.state); if(b.syncRoster && state.room) b.syncRoster(state.room); state.pendingStateSync=null; } else if(b && b.syncRoster && state.room){ b.syncRoster(state.room); } updateTurnOverlay(); }
+  if(m.type === 'toggleChat') {
+    const dock=ensureInGameRoomChat();
+    if(dock){
+      dock.classList.toggle('closed');
+      if(!dock.classList.contains('closed')) dock.classList.remove('hasNew');
+      localStorage.setItem('wce.mp.gameChatClosed', dock.classList.contains('closed')?'1':'0');
+    }
+    return;
+  }
   if(m.type === 'ready') updateTurnOverlay();
   if(m.type === 'localShot') {
     const active = activeParticipant();
@@ -935,12 +1008,12 @@ setInterval(() => { if(state.room && state.room.state==='running') poll(); }, 30
 show('nameScreen');
 poll();
 
-/* v0.7.66 host pack lock / pack selector hardening */
+/* v0.7.86 GOLD host pack lock / pack selector hardening */
 (function(){
   'use strict';
   if(window.WCE_MP_0758_PACK_LOCK) return;
   window.WCE_MP_0758_PACK_LOCK = true;
-  const V='v0.7.70';
+  const V='v0.7.86 GOLD';
   function safe(fn,d){ try{return fn()}catch(e){return d} }
   function normChoice(v){ v=String(v||'').trim(); return v || 'gold'; }
   function getLocalChoice(){ return normChoice(safe(()=>localStorage.getItem('wce.mp.playerPackChoice'), '') || safe(()=>localStorage.getItem('warheads.playerPackChoice'), '') || 'gold'); }
@@ -1028,7 +1101,7 @@ poll();
   setTimeout(()=>{ try{ if(typeof populateMpPlayerPrefs==='function') populateMpPlayerPrefs(); if(state.room) syncRoomPersonalPackControl(state.room); }catch(e){} }, 30);
 })();
 
-/* v0.7.70 pack dedupe + lobby sideboard + player mute safety */
+/* v0.7.86 GOLD pack dedupe + lobby sideboard + player mute safety */
 (function(){
   'use strict';
   if(window.__WCE_MP_0770_CLEANUP__) return;
@@ -1082,5 +1155,21 @@ poll();
   if(oldRenderLobby){renderLobby=function(lobby){oldRenderLobby.apply(this,arguments);renderLobbySideboard(lobby);bindMuteButtons(document);};}
   const oldRenderRoom=typeof renderRoom==='function'?renderRoom:null;
   if(oldRenderRoom){renderRoom=function(room,chat){oldRenderRoom.apply(this,arguments);try{const list=$('players'); if(list){list.querySelectorAll('.row').forEach(row=>{const name=(row.querySelector('b')||{}).textContent||''; const p=[...((room&&room.players)||[]),...((room&&room.participants)||[])].find(x=>x&&x.name===name); if(p&&p.clientId!==state.clientId&&!row.querySelector('[data-mute-name]')){let wrap=document.createElement('span');wrap.className='playerActions';wrap.innerHTML=muteButtonHtml(p);row.appendChild(wrap);}});bindMuteButtons(list);}}catch(e){};};}
-  setTimeout(()=>{try{cleanLocalPacks();if(typeof populateMpPlayerPrefs==='function')populateMpPlayerPrefs();if(state.lobby)renderLobby(state.lobby);if(state.room)renderRoom(state.room,state.chat||[]);}catch(e){console.warn('v0.7.70 mp cleanup refresh failed',e)}},80);
+  setTimeout(()=>{try{cleanLocalPacks();if(typeof populateMpPlayerPrefs==='function')populateMpPlayerPrefs();if(state.lobby)renderLobby(state.lobby);if(state.room)renderRoom(state.room,state.chat||[]);}catch(e){console.warn('v0.7.86 GOLD mp cleanup refresh failed',e)}},80);
 })();
+
+
+// v0.7.86 GOLD server economy defaults helper.
+// This keeps older lobby code safe while exposing economy defaults for rooms that read localStorage.
+window.WCE_EXP_SERVER_ECON_DEFAULTS = function(){
+  return {
+    creditsEnabled: localStorage.getItem('warheads.exp.creditsEnabled') !== 'off',
+    startingCredits: +(localStorage.getItem('warheads.exp.startingCredits') || 125000),
+    weaponMinCost: +(localStorage.getItem('warheads.exp.weaponMinCost') || 1000),
+    weaponMaxCost: +(localStorage.getItem('warheads.exp.weaponMaxCost') || 10000),
+    defenseMinCost: +(localStorage.getItem('warheads.exp.defenseMinCost') || 5000),
+    defenseMaxCost: +(localStorage.getItem('warheads.exp.defenseMaxCost') || 5000),
+    eventMinMinutes: +(localStorage.getItem('warheads.exp.eventMinMinutes') || 3),
+    eventMaxMinutes: +(localStorage.getItem('warheads.exp.eventMaxMinutes') || 10)
+  };
+};

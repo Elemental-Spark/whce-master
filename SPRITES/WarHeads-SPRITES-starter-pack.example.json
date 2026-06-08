@@ -1,0 +1,48 @@
+{
+  "id": "starter-sprite-pack",
+  "name": "Starter Sprite Pack",
+  "sprites": {
+    "ship-player": {
+      "id": "ship-player",
+      "item": "ship-player",
+      "name": "Starter Player Ship",
+      "size": 16,
+      "w": 16,
+      "h": 16,
+      "cells": [
+        {
+          "x": 7,
+          "y": 1,
+          "c": "#ffffff"
+        },
+        {
+          "x": 8,
+          "y": 1,
+          "c": "#ffffff"
+        },
+        {
+          "x": 6,
+          "y": 3,
+          "c": "#66d9ff"
+        },
+        {
+          "x": 7,
+          "y": 3,
+          "c": "#66d9ff"
+        },
+        {
+          "x": 8,
+          "y": 3,
+          "c": "#66d9ff"
+        },
+        {
+          "x": 9,
+          "y": 3,
+          "c": "#66d9ff"
+        }
+      ],
+      "userMade": true,
+      "custom": true
+    }
+  }
+}
