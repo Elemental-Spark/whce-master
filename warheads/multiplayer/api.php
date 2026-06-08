@@ -1,6 +1,6 @@
 <?php
 // WarHeads Classic Enhanced - shared-hosting multiplayer API (PHP polling, no npm required)
-// v0.7.69 turn rollback / stable cleanup hotfix. Multiplayer only.
+// v0.7.70 turn rollback / stable cleanup hotfix. Multiplayer only.
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
@@ -21,7 +21,7 @@ $MAX_BOTS = 8;
 if (!is_dir($DATA_DIR)) @mkdir($DATA_DIR, 0775, true);
 if (!file_exists($STATE_FILE)) file_put_contents($STATE_FILE, json_encode(default_state(), JSON_PRETTY_PRINT));
 
-function default_state(){ return ['version'=>'0.7.69-php-mp','clients'=>[], 'rooms'=>[], 'lobbyChat'=>[], 'seq'=>1, 'updatedAt'=>time()]; }
+function default_state(){ return ['version'=>'0.7.70-php-mp','clients'=>[], 'rooms'=>[], 'lobbyChat'=>[], 'seq'=>1, 'updatedAt'=>time()]; }
 function normalize_state(&$state){
   // v0.7.67: recover from empty/damaged shared-host state without breaking the lobby.
   $def=default_state();
@@ -32,7 +32,7 @@ function normalize_state(&$state){
   if(!is_array($state['lobbyChat'])) $state['lobbyChat']=[];
   if(!isset($state['seq']) || !is_numeric($state['seq'])) $state['seq']=1;
   if(!isset($state['updatedAt']) || !is_numeric($state['updatedAt'])) $state['updatedAt']=time();
-  $state['version']='0.7.69-php-mp';
+  $state['version']='0.7.70-php-mp';
 }
 function input_json(){ $raw=file_get_contents('php://input'); $j=json_decode($raw,true); return is_array($j)?$j:$_REQUEST; }
 function clean_id($s){ $s=preg_replace('/[^a-zA-Z0-9_\-]/','',strval($s)); return $s ?: ('client-'.bin2hex(random_bytes(5))); }
@@ -302,7 +302,7 @@ function remove_participant_now(&$state,&$room,$target,$reason='left'){
   $room['chat']=array_slice($room['chat'],-80);
   if(count($parts)<=0) return true;
   if($wasActive){
-    // v0.7.69: clicked-leave/kick removes the slot, but only this validated server path may skip forward.
+    // v0.7.70: clicked-leave/kick removes the slot, but only this validated server path may skip forward.
     // Random clients and timeout recovery are not allowed to advance turns.
     normalize_running_turn($state,$room,true,'active player '.$reason);
   } else {
@@ -326,7 +326,7 @@ function leave_room(&$state,$cid,$reason='left'){
     return;
   }
 
-  // v0.7.69: clicked Leave / Reset / timeout removes the player from the running match.
+  // v0.7.70: clicked Leave / Reset / timeout removes the player from the running match.
   // Do not bot-replace or auto-fire from another client here; that branch caused skipped turns.
   if(($room['state']??'')==='running'){
     remove_participant_now($state,$room,$cid,$reason);
@@ -617,7 +617,7 @@ switch($action){
     $rid=clean_id($in['roomId'] ?? ''); if(empty($client['name'])) { $message='Set a name first.'; break; } if(empty($state['rooms'][$rid])) { $message='Room not found.'; break; } $room=&$state['rooms'][$rid]; if(empty($room['allowSpectators'])){ $message='Spectating is disabled for this room.'; break; } leave_room($state,$cid,'changed rooms'); $client['roomId']=$rid; $client['spectating']=true; $room['spectators']=$room['spectators']??[]; $room['spectators'][$cid]=['id'=>$cid,'name'=>$client['name'],'at'=>time()]; $room['chat'][]=['system'=>true,'text'=>$client['name'].' is spectating.','at'=>time()]; add_event($state,$room,'room',['room'=>public_room($room),'chat'=>$room['chat']]);
     break;
   case 'chat':
-    $text=clean_chat($in['text']??''); if($text!==''){ $rid=$client['roomId']??''; if($rid && !empty($state['rooms'][$rid])){ $room=&$state['rooms'][$rid]; $room['chat'][]=['name'=>$client['name']?:'Pilot','text'=>$text,'at'=>time()]; $room['chat']=array_slice($room['chat'],-$MAX_ROOM_CHAT); add_event($state,$room,'chat',['scope'=>'room','chat'=>$room['chat']]); } else { $state['lobbyChat'][]=['name'=>$client['name']?:'Pilot','text'=>$text,'at'=>time()]; $state['lobbyChat']=array_slice($state['lobbyChat'],-$MAX_LOBBY_CHAT); } }
+    $text=clean_chat($in['text']??''); if($text!==''){ $rid=$client['roomId']??''; if($rid && !empty($state['rooms'][$rid])){ $room=&$state['rooms'][$rid]; $room['chat'][]=['clientId'=>$cid,'name'=>$client['name']?:'Pilot','text'=>$text,'at'=>time()]; $room['chat']=array_slice($room['chat'],-$MAX_ROOM_CHAT); add_event($state,$room,'chat',['scope'=>'room','chat'=>$room['chat']]); } else { $state['lobbyChat'][]=['clientId'=>$cid,'name'=>$client['name']?:'Pilot','text'=>$text,'at'=>time()]; $state['lobbyChat']=array_slice($state['lobbyChat'],-$MAX_LOBBY_CHAT); } }
     break;
 }
 $syncBaseline=false; $serverSeq=intval($state['seq']??0);

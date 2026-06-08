@@ -402,3 +402,15 @@ html,body{touch-action:pan-x pan-y pinch-zoom;}
   #gameScreen.game{position:fixed!important;inset:0!important;overflow:hidden!important;}
   #gameScreen.game iframe{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;}
 }
+
+/* v0.7.70 multiplayer lobby sideboard + mute controls */
+#lobbyPlayerSideboard{margin-top:12px;display:grid;gap:8px;}
+#lobbyPlayerSideboard .sideRoom{border:1px solid rgba(102,217,255,.22);border-radius:12px;background:rgba(0,18,28,.54);padding:9px;display:grid;gap:4px;}
+#lobbyPlayerSideboard .sideNames{display:flex;gap:5px;flex-wrap:wrap;}
+#lobbyPlayerSideboard .sideNames span{border:1px solid rgba(255,231,106,.28);border-radius:999px;background:rgba(255,231,106,.08);padding:3px 7px;font-size:12px;color:#fff4b8;}
+.muteBtn,.unmuteBtn{min-height:26px!important;padding:4px 8px!important;font-size:10px!important;border-radius:10px!important;opacity:.88;background:rgba(255,130,40,.18)!important;border-color:rgba(255,180,80,.52)!important;color:#ffd9a3!important;}
+.mutedNotice{color:#ffbd7a!important;font-size:11px!important;font-weight:900!important;text-transform:uppercase;letter-spacing:.05em;}
+.chat .msg{position:relative;padding-right:58px;}
+.chat .msg .muteBtn{position:absolute;right:4px;top:2px;}
+#players .playerActions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+@media(max-width:760px){#lobbyPlayerSideboard{font-size:13px}.chat .msg{padding-right:0}.chat .msg .muteBtn{position:static;margin-left:6px}}

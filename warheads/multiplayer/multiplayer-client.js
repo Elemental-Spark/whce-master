@@ -218,7 +218,7 @@ function ensureHostGameControls(){
 
 async function api(action, payload={}){
   const body = { action, clientId:state.clientId, lastSeq:state.lastSeq, ...payload };
-  const res = await fetch('api.php?v=0.7.69', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), cache:'no-store' });
+  const res = await fetch('api.php?v=0.7.70', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), cache:'no-store' });
   const raw = await res.text();
   let json = null;
   try { json = raw ? JSON.parse(raw) : null; }
@@ -940,7 +940,7 @@ poll();
   'use strict';
   if(window.WCE_MP_0758_PACK_LOCK) return;
   window.WCE_MP_0758_PACK_LOCK = true;
-  const V='v0.7.69';
+  const V='v0.7.70';
   function safe(fn,d){ try{return fn()}catch(e){return d} }
   function normChoice(v){ v=String(v||'').trim(); return v || 'gold'; }
   function getLocalChoice(){ return normChoice(safe(()=>localStorage.getItem('wce.mp.playerPackChoice'), '') || safe(()=>localStorage.getItem('warheads.playerPackChoice'), '') || 'gold'); }
@@ -1026,4 +1026,61 @@ poll();
   }
   // Repaint selectors after the old startup pass.
   setTimeout(()=>{ try{ if(typeof populateMpPlayerPrefs==='function') populateMpPlayerPrefs(); if(state.room) syncRoomPersonalPackControl(state.room); }catch(e){} }, 30);
+})();
+
+/* v0.7.70 pack dedupe + lobby sideboard + player mute safety */
+(function(){
+  'use strict';
+  if(window.__WCE_MP_0770_CLEANUP__) return;
+  window.__WCE_MP_0770_CLEANUP__=true;
+  function safe(fn,d){try{return fn()}catch(e){return d}}
+  function norm(v){return String(v||'').trim()}
+  function lower(v){return norm(v).toLowerCase()}
+  function defaultish(p){const id=lower(p&&p.id), name=lower(p&&p.name);return id==='gold'||id==='pack:defaultmy'||name==='default + my weapons'||name==='default+my weapons'}
+  function botish(p){const id=lower(p&&p.id), name=lower(p&&p.name);return id.includes('bot')||name.includes('bot pack')||name.startsWith('bot ')}
+  function cleanLocalPacks(){
+    let raw=safe(()=>JSON.parse(localStorage.getItem('warheads.weaponPacks')||'[]'),[])||[];
+    if(raw && !Array.isArray(raw) && Array.isArray(raw.packs)) raw=raw.packs;
+    if(!Array.isArray(raw)) raw=[];
+    const out=[], ids=new Set(), names=new Set();
+    raw.forEach(p=>{ if(!p||typeof p!=='object')return; const id=norm(p.id||p.key||''); const name=norm(p.name||p.title||id); if(!id.startsWith('pack:')||defaultish({id,name})||botish({id,name}))return; const nk=lower(name); if(ids.has(id)||names.has(nk))return; ids.add(id); names.add(nk); out.push({id,name:name.slice(0,40),defaultWeaponId:norm(p.defaultWeaponId||''),weaponIds:Array.isArray(p.weaponIds)?[...new Set(p.weaponIds.map(norm).filter(Boolean))]:[]}); });
+    safe(()=>localStorage.setItem('warheads.weaponPacks',JSON.stringify(out)),null);
+    return out;
+  }
+  const oldRead=typeof readLocalWeaponPacksForMp==='function'?readLocalWeaponPacksForMp:null;
+  readLocalWeaponPacksForMp=function(){
+    const out=[{id:'gold',name:'Default + My Weapons'},{id:'saved',name:'My Weapons Only'},{id:'generated',name:'Generated Chaos + My Weapons'},{id:'all',name:'ALL Weapons'},{id:'pack:experimental',name:'Experimental'}];
+    const seen=new Set(out.map(p=>p.id)), seenNames=new Set(out.map(p=>lower(p.name)));
+    cleanLocalPacks().forEach(p=>{const nk=lower(p.name); if(!seen.has(p.id)&&!seenNames.has(nk)){seen.add(p.id);seenNames.add(nk);out.push({id:p.id,name:p.name});}});
+    return out;
+  };
+  function mutedList(){return safe(()=>JSON.parse(localStorage.getItem('wce.mp.mutedPlayers')||'[]'),[])||[]}
+  function setMutedList(list){safe(()=>localStorage.setItem('wce.mp.mutedPlayers',JSON.stringify([...new Set(list)].filter(Boolean).slice(0,80))),null)}
+  function muteKeysFor(obj){let keys=[]; if(obj&&obj.clientId)keys.push('id:'+obj.clientId); if(obj&&obj.name)keys.push('name:'+lower(obj.name)); return keys;}
+  function isMutedMsg(m){if(!m||m.system)return false;const mute=mutedList();return muteKeysFor(m).some(k=>mute.includes(k));}
+  function mutePlayer(obj){let list=mutedList();muteKeysFor(obj).forEach(k=>{if(!list.includes(k))list.push(k)});setMutedList(list);renderRoomChats(state.chat||[]);if(state.lobby)renderLobby(state.lobby);if(state.room)renderRoom(state.room,state.chat||[]);}
+  function unmutePlayer(obj){let rm=new Set(muteKeysFor(obj));setMutedList(mutedList().filter(k=>!rm.has(k)));renderRoomChats(state.chat||[]);if(state.lobby)renderLobby(state.lobby);if(state.room)renderRoom(state.room,state.chat||[]);}
+  function muteButtonHtml(obj){if(!obj||obj.system||obj.clientId===state.clientId)return '';const on=muteKeysFor(obj).some(k=>mutedList().includes(k));return `<button type="button" class="${on?'unmuteBtn':'muteBtn'}" data-mute-id="${escapeHtml(obj.clientId||'')}" data-mute-name="${escapeHtml(obj.name||'Pilot')}">${on?'UNMUTE':'MUTE'}</button>`}
+  function bindMuteButtons(root=document){root.querySelectorAll('[data-mute-id],[data-mute-name]').forEach(b=>{b.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();const obj={clientId:b.dataset.muteId||'',name:b.dataset.muteName||''};if(b.classList.contains('unmuteBtn'))unmutePlayer(obj);else mutePlayer(obj);};});}
+  renderChat=function(el, chat=[]){
+    if(!el) return;
+    const visible=(chat||[]).filter(m=>!isMutedMsg(m));
+    el.innerHTML=visible.map(m=>m.system?`<div class="msg system">${escapeHtml(m.text)}</div>`:`<div class="msg"><b>${escapeHtml(m.name||'Pilot')}:</b> ${escapeHtml(m.text)} ${muteButtonHtml(m)}</div>`).join('');
+    bindMuteButtons(el); el.scrollTop=el.scrollHeight;
+  };
+  function ensureLobbySideboard(){
+    const openGames=$('rooms')&&$('rooms').closest('.card'); if(!openGames||$('lobbyPlayerSideboard'))return;
+    const box=document.createElement('div'); box.id='lobbyPlayerSideboard'; box.className='sideboard'; openGames.appendChild(box);
+  }
+  function renderLobbySideboard(lobby){
+    ensureLobbySideboard(); const box=$('lobbyPlayerSideboard'); if(!box)return; const rooms=(lobby&&lobby.rooms)||[];
+    const count=rooms.reduce((n,r)=>n+((r.players||[]).length),0);
+    if(!rooms.length){box.innerHTML='<h2>Players Online</h2><div class="sub">No active rooms yet.</div>';return;}
+    box.innerHTML=`<h2>Players Online (${count})</h2>`+rooms.map(r=>{const names=(r.players||[]).map(p=>`<span>${escapeHtml(p.name||'Pilot')}</span>`).join('')||'<span>Waiting</span>';return `<div class="sideRoom"><b>${escapeHtml(r.name||'Room')}</b><div class="sub">${(r.players||[]).length}/${r.maxPlayers} players · ${r.state}</div><div class="sideNames">${names}</div></div>`}).join('');
+  }
+  const oldRenderLobby=typeof renderLobby==='function'?renderLobby:null;
+  if(oldRenderLobby){renderLobby=function(lobby){oldRenderLobby.apply(this,arguments);renderLobbySideboard(lobby);bindMuteButtons(document);};}
+  const oldRenderRoom=typeof renderRoom==='function'?renderRoom:null;
+  if(oldRenderRoom){renderRoom=function(room,chat){oldRenderRoom.apply(this,arguments);try{const list=$('players'); if(list){list.querySelectorAll('.row').forEach(row=>{const name=(row.querySelector('b')||{}).textContent||''; const p=[...((room&&room.players)||[]),...((room&&room.participants)||[])].find(x=>x&&x.name===name); if(p&&p.clientId!==state.clientId&&!row.querySelector('[data-mute-name]')){let wrap=document.createElement('span');wrap.className='playerActions';wrap.innerHTML=muteButtonHtml(p);row.appendChild(wrap);}});bindMuteButtons(list);}}catch(e){};};}
+  setTimeout(()=>{try{cleanLocalPacks();if(typeof populateMpPlayerPrefs==='function')populateMpPlayerPrefs();if(state.lobby)renderLobby(state.lobby);if(state.room)renderRoom(state.room,state.chat||[]);}catch(e){console.warn('v0.7.70 mp cleanup refresh failed',e)}},80);
 })();
